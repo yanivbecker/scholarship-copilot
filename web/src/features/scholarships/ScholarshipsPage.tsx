@@ -1,15 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link } from 'react-router'
 
 import {
-  confirmCriterion,
   listDuplicates,
   listEligibility,
-  listScholarships,
   mergeScholarships,
-  type CriterionResult,
-  type Eligibility,
-  type Scholarship,
 } from '@/api/scholarships'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,61 +15,151 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { toneClass, type Tone } from '@/features/sources/status'
-import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 
-const keys = {
-  eligibility: ['eligibility'] as const,
-  scholarships: ['scholarships'] as const,
-  duplicates: ['scholarships', 'duplicates'] as const,
-}
+import { VerdictPill } from './components'
+import { scholarshipKeys } from './keys'
+import {
+  DEFAULT_DIRECTION,
+  DEFAULT_FILTERS,
+  filterRows,
+  sortRows,
+  type Filters,
+  type SortDirection,
+  type SortKey,
+} from './tableModel'
 
-const VERDICTS: Record<string, { text: string; tone: Tone }> = {
-  eligible: { text: 'You meet every listed requirement', tone: 'good' },
-  needs_info: { text: 'Needs info', tone: 'warning' },
-  ineligible: { text: 'Not eligible', tone: 'bad' },
-}
+const STATUS_OPTIONS = [
+  ['discovered', 'Discovered'],
+  ['eligibility_confirmed', 'Eligibility confirmed'],
+  ['ready_to_apply', 'Ready to apply'],
+  ['in_progress', 'In progress'],
+  ['awaiting_approval', 'Awaiting approval'],
+  ['submitted', 'Submitted'],
+  ['won', 'Won'],
+  ['rejected', 'Rejected'],
+] as const
 
-const OUTCOMES: Record<string, { text: string; tone: Tone }> = {
-  met: { text: 'Met', tone: 'good' },
-  not_met: { text: 'Not met', tone: 'bad' },
-  unknown: { text: 'Unknown', tone: 'warning' },
-}
+const COLUMNS: { key: SortKey; label: string; numeric?: boolean }[] = [
+  { key: 'name', label: 'Scholarship' },
+  { key: 'eligibility', label: 'Eligibility' },
+  { key: 'status', label: 'Status' },
+  { key: 'deadline', label: 'Deadline' },
+  { key: 'amount', label: 'Amount', numeric: true },
+  { key: 'priority', label: 'Priority', numeric: true },
+  { key: 'effort', label: 'Open questions', numeric: true },
+]
 
-/** Scholarships found so far, ranked, with evidence for every verdict. */
+const todayIso = () => new Date().toISOString().slice(0, 10)
+
+/** The scholarship table (FR-UI2): sort by any column, filter, open details. */
 export function ScholarshipsPage() {
-  const eligibility = useQuery({
-    queryKey: keys.eligibility,
+  const rows = useQuery({
+    queryKey: scholarshipKeys.eligibility,
     queryFn: listEligibility,
   })
-  const scholarships = useQuery({
-    queryKey: keys.scholarships,
-    queryFn: listScholarships,
-  })
+  const [sortKey, setSortKey] = useState<SortKey>('priority')
+  const [direction, setDirection] = useState<SortDirection>('desc')
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
+  const update = (patch: Partial<Filters>) =>
+    setFilters((f) => ({ ...f, ...patch }))
 
-  if (eligibility.isPending || scholarships.isPending) {
-    return <p role="status">Loading scholarships…</p>
+  function sortBy(key: SortKey) {
+    if (key === sortKey) {
+      setDirection((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setDirection(DEFAULT_DIRECTION[key])
+    }
   }
-  if (eligibility.isError || scholarships.isError) {
+
+  if (rows.isPending) return <p role="status">Loading scholarships…</p>
+  if (rows.isError) {
     return (
       <p role="alert" className="text-destructive">
         Couldn't load scholarships. Is the API running?
       </p>
     )
   }
-  const byId = new Map(scholarships.data.map((s) => [s.id, s]))
+
+  const visible = sortRows(
+    filterRows(rows.data, filters, todayIso()),
+    sortKey,
+    direction,
+  )
 
   return (
     <div className="space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Scholarships</h1>
         <p className="text-muted-foreground">
-          Ranked by priority. Every requirement shows the exact words it came
-          from; verdicts are worked out from your profile, never guessed.
+          Every verdict is worked out from your profile and the listing's own
+          words. Open one to see the evidence.
         </p>
       </div>
       <Duplicates />
-      {eligibility.data.length === 0 ? (
+
+      <section aria-label="Filters" className="grid gap-3 sm:grid-cols-4">
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="filter-search">Search</Label>
+          <Input
+            id="filter-search"
+            type="search"
+            placeholder="Name or sponsor"
+            value={filters.search}
+            onChange={(e) => update({ search: e.target.value })}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="filter-verdict">Eligibility</Label>
+          <NativeSelect
+            id="filter-verdict"
+            className="w-full"
+            value={filters.verdict}
+            onChange={(e) =>
+              update({ verdict: e.target.value as Filters['verdict'] })
+            }
+          >
+            <NativeSelectOption value="">Any</NativeSelectOption>
+            <NativeSelectOption value="eligible">Eligible</NativeSelectOption>
+            <NativeSelectOption value="needs_info">
+              Needs info
+            </NativeSelectOption>
+            <NativeSelectOption value="ineligible">
+              Not eligible
+            </NativeSelectOption>
+          </NativeSelect>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="filter-status">Status</Label>
+          <NativeSelect
+            id="filter-status"
+            className="w-full"
+            value={filters.status}
+            onChange={(e) => update({ status: e.target.value })}
+          >
+            <NativeSelectOption value="">Any</NativeSelectOption>
+            {STATUS_OPTIONS.map(([value, label]) => (
+              <NativeSelectOption key={value} value={value}>
+                {label}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </div>
+        <label className="flex items-center gap-2 text-sm sm:col-span-4">
+          <input
+            type="checkbox"
+            className="size-4 accent-primary"
+            checked={filters.hideClosed}
+            onChange={(e) => update({ hideClosed: e.target.checked })}
+          />
+          Hide scholarships whose deadline has passed
+        </label>
+      </section>
+
+      {rows.data.length === 0 ? (
         <p className="text-muted-foreground">
           No scholarships yet. Add pages on the{' '}
           <Link to="/sources" className="underline underline-offset-4">
@@ -82,258 +168,104 @@ export function ScholarshipsPage() {
           page and check them.
         </p>
       ) : (
-        <ul className="space-y-4">
-          {eligibility.data.map((item) => (
-            <li key={item.scholarship_id}>
-              <ScholarshipCard
-                item={item}
-                details={byId.get(item.scholarship_id)}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-function Pill({ text, tone }: { text: string; tone: Tone }) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium',
-        toneClass[tone],
-      )}
-    >
-      {text}
-    </span>
-  )
-}
-
-function ScholarshipCard({
-  item,
-  details,
-}: {
-  item: Eligibility
-  details: Scholarship | undefined
-}) {
-  const verdict = VERDICTS[item.verdict] ?? {
-    text: item.verdict,
-    tone: 'neutral',
-  }
-  const cycle = details?.cycles.find((c) => c.id === item.cycle_id)
-  const headingId = `scholarship-${item.scholarship_id}`
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle id={headingId} role="heading" aria-level={2}>
-          {item.name}
-        </CardTitle>
-        <CardDescription>
-          {[
-            details?.sponsor,
-            cycle?.amount_text,
-            item.deadline && `Due ${item.deadline}`,
-          ]
-            .filter(Boolean)
-            .join(' · ') || 'Amount and deadline not published'}
-        </CardDescription>
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <Pill {...verdict} />
-          <span className="text-sm" title={item.score.note}>
-            Priority {item.score.total}/100
-          </span>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {details && details.scam_flags.length > 0 && (
-          <div
-            role="alert"
-            className={cn('rounded-md border p-3 text-sm', toneClass.bad)}
-          >
-            <p className="font-medium">Warning signs on this listing</p>
-            <ul className="mt-1 list-disc pl-5">
-              {details.scam_flags.map((flag) => (
-                <li key={flag.signal}>
-                  <q>{flag.evidence}</q>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-1">
-              Real scholarships don't charge fees or ask for bank details. Check
-              carefully before applying.
-            </p>
+        <>
+          <p role="status" className="text-sm text-muted-foreground">
+            Showing {visible.length} of {rows.data.length}
+          </p>
+          {/* Wide tables scroll inside this box, never the whole page. */}
+          <div className="overflow-x-auto rounded-lg border">
+            <table className="w-full min-w-[44rem] text-sm">
+              <caption className="sr-only">
+                Scholarships, sorted by {sortKey} ({direction}ending)
+              </caption>
+              <thead className="bg-muted/50 text-left">
+                <tr>
+                  {COLUMNS.map((col) => {
+                    const active = col.key === sortKey
+                    return (
+                      <th
+                        key={col.key}
+                        scope="col"
+                        aria-sort={
+                          active
+                            ? direction === 'asc'
+                              ? 'ascending'
+                              : 'descending'
+                            : 'none'
+                        }
+                        className={col.numeric ? 'text-right' : undefined}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => sortBy(col.key)}
+                          className="w-full px-3 py-2 font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+                          style={{ textAlign: col.numeric ? 'right' : 'left' }}
+                        >
+                          {col.label}
+                          <span
+                            aria-hidden
+                            className="ml-1 text-muted-foreground"
+                          >
+                            {active ? (direction === 'asc' ? '▲' : '▼') : ''}
+                          </span>
+                        </button>
+                      </th>
+                    )
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((row) => (
+                  <tr key={row.scholarship_id} className="border-t">
+                    <th scope="row" className="px-3 py-2 text-left font-medium">
+                      <Link
+                        to={`/scholarships/${row.scholarship_id}`}
+                        className="underline-offset-4 hover:underline"
+                      >
+                        {row.name}
+                      </Link>
+                      {row.sponsor && (
+                        <span className="block text-xs font-normal text-muted-foreground">
+                          {row.sponsor}
+                        </span>
+                      )}
+                    </th>
+                    <td className="px-3 py-2">
+                      <VerdictPill verdict={row.verdict} />
+                    </td>
+                    <td className="px-3 py-2">{row.status_label}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      {row.deadline ?? '—'}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {row.amount_text ?? '—'}
+                    </td>
+                    <td className="px-3 py-2 text-right" title={row.score.note}>
+                      {row.score.total}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {row.open_questions}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-        {details?.needs_review && (
-          <p className={cn('rounded-md border p-3 text-sm', toneClass.warning)}>
-            Needs your review: {details.review_reason}
-          </p>
-        )}
-        <p className="text-sm">{item.summary}</p>
-        {item.questions.length > 0 && <Questions item={item} />}
-        <details>
-          <summary className="cursor-pointer text-sm text-muted-foreground">
-            Requirements and evidence ({item.criteria.length})
-          </summary>
-          <ul className="mt-3 space-y-3" aria-labelledby={headingId}>
-            {item.criteria.map((c) => (
-              <CriterionRow
-                key={c.criterion_id}
-                scholarshipId={item.scholarship_id}
-                criterion={c}
-              />
-            ))}
-          </ul>
-        </details>
-        <details>
-          <summary className="cursor-pointer text-sm text-muted-foreground">
-            How the priority is worked out
-          </summary>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {item.score.note}
-          </p>
-          <ul className="mt-2 space-y-1 text-sm">
-            {item.score.parts.map((p) => (
-              <li key={p.name}>
-                <span className="font-medium capitalize">{p.name}</span>:{' '}
-                {p.detail}{' '}
-                <span className="text-xs text-muted-foreground">
-                  ({p.basis === 'listing' ? 'from the listing' : 'our estimate'}
-                  )
-                </span>
-              </li>
-            ))}
-          </ul>
-        </details>
-      </CardContent>
-    </Card>
-  )
-}
-
-/** What's still open: profile facts to add, and yes/no requirements below. */
-function Questions({ item }: { item: Eligibility }) {
-  const profileQuestions = item.questions.filter((q) => q.fact_key)
-  const toConfirm = item.criteria.filter(
-    (c) => c.confirmable && c.outcome === 'unknown',
-  ).length
-  if (profileQuestions.length === 0 && toConfirm === 0) return null
-  return (
-    <div className="space-y-2 rounded-md border p-3 text-sm">
-      {profileQuestions.length > 0 && (
-        <div>
-          <p className="font-medium">
-            To check your eligibility, add to your profile:
-          </p>
-          <ul className="mt-1 list-disc pl-5">
-            {profileQuestions.map((q) => (
-              <li key={q.fact_key}>
-                {q.text}
-                {q.optional && (
-                  <span className="text-muted-foreground"> (optional)</span>
-                )}
-              </li>
-            ))}
-          </ul>
-          <Link
-            to="/profile"
-            className="mt-2 inline-block underline underline-offset-4"
-          >
-            Go to your profile
-          </Link>
-        </div>
-      )}
-      {toConfirm > 0 && (
-        <p>
-          {toConfirm === 1
-            ? '1 requirement needs your yes or no'
-            : `${toConfirm} requirements need your yes or no`}{' '}
-          under "Requirements and evidence".
-        </p>
+          {visible.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No scholarships match these filters.
+            </p>
+          )}
+        </>
       )}
     </div>
-  )
-}
-
-function CriterionRow({
-  scholarshipId,
-  criterion: c,
-}: {
-  scholarshipId: number
-  criterion: CriterionResult
-}) {
-  const queryClient = useQueryClient()
-  const outcome = OUTCOMES[c.outcome] ?? { text: c.outcome, tone: 'neutral' }
-  const confirm = useMutation({
-    mutationFn: (answer: boolean | null) =>
-      confirmCriterion(scholarshipId, c.criterion_id, answer),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: keys.eligibility }),
-  })
-
-  return (
-    <li className="space-y-1.5 rounded-md border p-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <Pill {...outcome} />
-        <span className="text-sm">{c.reason}</span>
-      </div>
-      <blockquote className="border-l-2 pl-3 text-sm italic">
-        {c.quote}
-      </blockquote>
-      <a
-        href={c.source_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-xs text-muted-foreground underline underline-offset-4"
-      >
-        Source
-      </a>
-      {c.confirmable && (
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <span className="text-sm">Do you meet this?</span>
-          <Button
-            size="sm"
-            variant={c.outcome === 'met' ? 'default' : 'outline'}
-            aria-pressed={c.outcome === 'met'}
-            onClick={() => confirm.mutate(true)}
-            disabled={confirm.isPending}
-          >
-            Yes
-          </Button>
-          <Button
-            size="sm"
-            variant={c.outcome === 'not_met' ? 'default' : 'outline'}
-            aria-pressed={c.outcome === 'not_met'}
-            onClick={() => confirm.mutate(false)}
-            disabled={confirm.isPending}
-          >
-            No
-          </Button>
-          {c.outcome !== 'unknown' && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => confirm.mutate(null)}
-            >
-              Clear
-            </Button>
-          )}
-        </div>
-      )}
-      {confirm.isError && (
-        <p role="alert" className="text-sm text-destructive">
-          {confirm.error.message}
-        </p>
-      )}
-    </li>
   )
 }
 
 function Duplicates() {
   const queryClient = useQueryClient()
   const duplicates = useQuery({
-    queryKey: keys.duplicates,
+    queryKey: scholarshipKeys.duplicates,
     queryFn: listDuplicates,
   })
   const merge = useMutation({
@@ -341,8 +273,12 @@ function Duplicates() {
       mergeScholarships(keep, other),
     onSuccess: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: keys.scholarships }),
-        queryClient.invalidateQueries({ queryKey: keys.eligibility }),
+        queryClient.invalidateQueries({
+          queryKey: scholarshipKeys.scholarships,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: scholarshipKeys.eligibility,
+        }),
       ]),
   })
 

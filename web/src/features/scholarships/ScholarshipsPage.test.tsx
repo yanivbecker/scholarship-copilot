@@ -1,13 +1,34 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 
-import { eligibilityItem, scholarshipRecord } from '@/test/fixtures'
+import { eligibilityItem as row, scholarshipRecord } from '@/test/fixtures'
 import { mockApi } from '@/test/mockApi'
 import { renderWithQueryClient } from '@/test/render'
 
 import { ScholarshipsPage } from './ScholarshipsPage'
+
+const score = (total: number) => ({ ...row().score, total })
+const rows = [
+  row({
+    scholarship_id: 7,
+    name: 'Alpha Award',
+    score: score(40),
+    deadline: '2099-04-01',
+    amount: 1000,
+    amount_text: '$1,000',
+  }),
+  row({
+    scholarship_id: 8,
+    name: 'Beta Award',
+    score: score(80),
+    deadline: '2099-02-01',
+    amount: 5000,
+    amount_text: '$5,000',
+    verdict: 'eligible',
+  }),
+]
 
 const render = () =>
   renderWithQueryClient(
@@ -17,110 +38,60 @@ const render = () =>
   )
 
 const base = {
-  'GET /api/v1/eligibility': [eligibilityItem()],
-  'GET /api/v1/scholarships': [scholarshipRecord()],
+  'GET /api/v1/eligibility': rows,
   'GET /api/v1/scholarships/duplicates': [],
 }
 
-describe('ScholarshipsPage', () => {
-  it('shows the verdict, priority, amount and deadline', async () => {
+const bodyNames = () =>
+  within(screen.getAllByRole('rowgroup')[1])
+    .getAllByRole('rowheader')
+    .map((cell) => within(cell).getByRole('link').textContent)
+
+describe('ScholarshipsPage (table)', () => {
+  it('lists scholarships by priority, linking to details', async () => {
     mockApi(base)
     render()
 
-    expect(
-      await screen.findByRole('heading', {
-        name: 'Test Foundation STEM Award',
-      }),
-    ).toBeInTheDocument()
-    expect(screen.getByText('Needs info')).toBeInTheDocument()
-    expect(screen.getByText('Priority 62/100')).toBeInTheDocument()
-    expect(
-      screen.getByText('Test Foundation · $2,500 · Due 2027-03-01'),
-    ).toBeInTheDocument()
-  })
-
-  it('shows the evidence quote for every requirement', async () => {
-    mockApi(base)
-    const user = userEvent.setup()
-    render()
-
-    await user.click(await screen.findByText('Requirements and evidence (2)'))
-
-    expect(
-      screen.getByText(
-        'Applicants must have a cumulative GPA of 3.0 or higher.',
-      ),
-    ).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: 'Source' })[0]).toHaveAttribute(
+    await screen.findByRole('table')
+    expect(bodyNames()).toEqual(['Beta Award', 'Alpha Award'])
+    expect(screen.getByRole('link', { name: 'Beta Award' })).toHaveAttribute(
       'href',
-      'https://example.org/awards',
+      '/scholarships/8',
     )
-  })
-
-  it('points profile questions to the profile page', async () => {
-    mockApi(base)
-    render()
-
-    expect(await screen.findByText('What is your gpa?')).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: 'Go to your profile' }),
-    ).toHaveAttribute('href', '/profile')
+      screen.getByRole('columnheader', { name: /Priority/ }),
+    ).toHaveAttribute('aria-sort', 'descending')
   })
 
-  it('says which requirements need a yes or no', async () => {
-    mockApi(base)
-    render()
-
-    expect(
-      await screen.findByText(/1 requirement needs your yes or no/),
-    ).toBeInTheDocument()
-  })
-
-  it('lets the student confirm a free-text requirement (FR-E3)', async () => {
-    const calls = mockApi({
-      ...base,
-      'PUT /api/v1/scholarships/7/criteria/702/confirmation': eligibilityItem({
-        verdict: 'eligible',
-      }),
-    })
-    const user = userEvent.setup()
-    render()
-
-    await user.click(await screen.findByText('Requirements and evidence (2)'))
-    await user.click(screen.getByRole('button', { name: 'Yes' }))
-
-    const put = calls.find((c) => c.method === 'PUT')
-    expect(put?.body).toEqual({ answer: true })
-  })
-
-  it('warns about scam signals with their evidence (FR-D9)', async () => {
-    mockApi({
-      ...base,
-      'GET /api/v1/scholarships': [
-        scholarshipRecord({
-          scam_flags: [
-            { signal: 'fee', evidence: 'A $30 processing fee is required.' },
-          ],
-        }),
-      ],
-    })
-    render()
-
-    const warning = await screen.findByRole('alert')
-    expect(warning).toHaveTextContent('Warning signs on this listing')
-    expect(warning).toHaveTextContent('A $30 processing fee is required.')
-  })
-
-  it('labels the priority as a ranking, not odds (FR-E6)', async () => {
+  it('sorts by a column when its header is clicked, and reverses on a second click', async () => {
     mockApi(base)
     const user = userEvent.setup()
     render()
+    await screen.findByRole('table')
 
-    await user.click(await screen.findByText('How the priority is worked out'))
+    await user.click(screen.getByRole('button', { name: /Deadline/ }))
+    expect(bodyNames()).toEqual(['Beta Award', 'Alpha Award']) // Feb before Apr
+    expect(
+      screen.getByRole('columnheader', { name: /Deadline/ }),
+    ).toHaveAttribute('aria-sort', 'ascending')
 
-    expect(screen.getByText(/not your chances of winning/)).toBeInTheDocument()
-    expect(screen.getByText('(our estimate)')).toBeInTheDocument()
-    expect(screen.getByText('(from the listing)')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Deadline/ }))
+    expect(bodyNames()).toEqual(['Alpha Award', 'Beta Award'])
+  })
+
+  it('filters by eligibility and search', async () => {
+    mockApi(base)
+    const user = userEvent.setup()
+    render()
+    await screen.findByRole('table')
+
+    await user.selectOptions(screen.getByLabelText('Eligibility'), 'eligible')
+    expect(bodyNames()).toEqual(['Beta Award'])
+    expect(screen.getByText('Showing 1 of 2')).toBeInTheDocument()
+
+    await user.selectOptions(screen.getByLabelText('Eligibility'), '')
+    await user.type(screen.getByLabelText('Search'), 'alpha')
+    expect(bodyNames()).toEqual(['Alpha Award'])
   })
 
   it('offers to merge possible duplicates (FR-D6)', async () => {
@@ -129,9 +100,9 @@ describe('ScholarshipsPage', () => {
       'GET /api/v1/scholarships/duplicates': [
         {
           first_id: 7,
-          first_name: 'Test Award',
+          first_name: 'Alpha Award',
           second_id: 8,
-          second_name: 'Test Memorial Award',
+          second_name: 'Beta Award',
           score: 80,
         },
       ],
@@ -141,7 +112,7 @@ describe('ScholarshipsPage', () => {
     render()
 
     await user.click(
-      await screen.findByRole('button', { name: 'Merge into “Test Award”' }),
+      await screen.findByRole('button', { name: 'Merge into “Alpha Award”' }),
     )
 
     expect(calls.find((c) => c.method === 'POST')?.body).toEqual({
@@ -150,11 +121,7 @@ describe('ScholarshipsPage', () => {
   })
 
   it('explains what to do when there are no scholarships yet', async () => {
-    mockApi({
-      ...base,
-      'GET /api/v1/eligibility': [],
-      'GET /api/v1/scholarships': [],
-    })
+    mockApi({ ...base, 'GET /api/v1/eligibility': [] })
     render()
 
     expect(

@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-**Phase 6: Dashboard** in progress (started 2026-11-27, overnight run). Phase 5 approved 2026-11-27. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
+**Phase 7: Application packets** in progress (started 2026-11-27, overnight run). Phase 6 complete 2026-11-27. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
@@ -9,6 +9,7 @@
 - 2026-11-26: Phase 3 (project setup) complete. Checkpoint 3 approved.
 - 2026-11-26: Phase 4 (profile) milestones 4.1-4.5 complete. Phase 4 approved; Phase 5 approved, starting with NFR-12.
 - 2026-11-27: Phase 5 (discovery + eligibility) milestones 5.0-5.6 complete. Phase 5 approved; Phases 6 and 7 approved for an overnight run.
+- 2026-11-27: Phase 6 (dashboard) milestones 6.0-6.3 complete (overnight).
 
 ## Phase 3 checklist
 - [x] Local git repository + planning docs
@@ -43,7 +44,7 @@
 - [x] 6.0 pyright in CI and pre-commit (owner-approved), pinned 1.1.414.
 - [x] 6.1 Status tracking (FR-UI4, FR-A7): `tracking/` module. Fixed path Discovered -> Eligibility confirmed -> Ready to apply -> In progress -> Awaiting approval -> Submitted -> Won / Rejected; forward one step at a time, back one step to undo; anything else refused. System checks: "eligibility confirmed" only with an Eligible verdict; "submitted" only with an explicit `confirmed: true` (the student submits outside the app). Every change in `audit_events` (keeps the scholarship name; history moves with a merge). `GET/POST /scholarships/{id}/status` with next steps (and why one is blocked) and history. **Tested:** 431 pytest (6 new); deliberate breaks (eligibility guard, submission confirmation, step skipping, history on merge) each failed tests.
 - [x] 6.2 Dashboard API (FR-UI1, FR-UI2): `GET /dashboard/today` with actions (missing facts ranked by how many scholarships each would decide, yes/no requirements, eligibility ready to confirm, listings needing review, deadlines within 14 days for applications in progress, login-walled sources to paste), open deadlines in the next 60 days (excluding ineligible, finished and closed), matches found in the last 7 days, verdict counts and the last discovery run. `/eligibility` rows gain sponsor, status, amount, amount text and open-question count for the table. **Tested:** 439 pytest (8 new, with a pinned clock); deliberate breaks (finished/ineligible kept, facts not ranked) each failed tests.
-- [ ] 6.3 Frontend: Today screen, sortable/filterable table (plain React), detail page (FR-UI1-UI4)
+- [x] 6.3 Frontend (FR-UI1-UI4, NFR-11): **Today** screen (replaces Home): counts, things to do (linked to where each is done), upcoming deadlines, new matches, last source check, setup banner. **Scholarship table** (plain React, no new dependency): sortable columns with `aria-sort` (priority, deadline, amount, eligibility, status, effort, name; missing values always last), filters (search, eligibility, status, hide closed), horizontal scroll inside the table box only; possible-duplicate merge. **Detail page** `/scholarships/:id`: all listing fields (amount, deadline with its quote, year, sponsor, description), "last read from the source", official page link (labeled "Listed on" when only the listing page is known), status card with next steps, blocked reasons, a required "I submitted this myself" checkbox and history, missing facts answerable inline (saved to the profile, origin manual), every requirement with quote/source/yes-no, score breakdown, other years. Sort/filter logic as pure functions (`tableModel.ts`). **Tested:** 89 Vitest (16 new); deliberate breaks (missing values sorted first, closed deadlines shown, submit without confirmation, quick answer sent as text) each failed tests. Browser run on a seeded scratch DB: Today -> action -> detail -> status change; quick answer updated the verdict; zero horizontal overflow on all 8 pages at 390 px. Found and fixed: the listing page was labeled "Official page".
 
 ## Known issues
 - Resolved 2026-11-27: pyright 1.1.414 now runs in CI (backend job) and pre-commit (owner-approved), after a pyright-only error from 5.2 reached main.

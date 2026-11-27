@@ -3,7 +3,7 @@ import { NavLink, Outlet } from 'react-router'
 import { cn } from '@/lib/utils'
 
 const NAV = [
-  { to: '/', label: 'Home', end: true },
+  { to: '/', label: 'Today', end: true },
   { to: '/profile', label: 'Profile', end: false },
   { to: '/scholarships', label: 'Scholarships', end: false },
   { to: '/sources', label: 'Sources', end: false },

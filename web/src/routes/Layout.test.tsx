@@ -35,7 +35,7 @@ describe('navigation', () => {
     renderAt('/')
 
     const nav = screen.getByRole('navigation', { name: 'Main' })
-    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Today' })).toHaveAttribute(
       'aria-current',
       'page',
     )

@@ -45,7 +45,7 @@ Each phase ends with a demo, test results, and an explicit approval before the n
 | 3 | Project setup: repo, tooling, backend/frontend skeletons, DB + migrations, tests, CI, secret scanning, docs | ✅ Done 2026-11-26 |
 | 4 | Profile: onboarding wizard, profile facts, story bank, resume import | ✅ Done 2026-11-26 |
 | 5 | Discovery + eligibility: sources, polite fetcher, extraction, AI provider switch, criteria engine, dedup | ✅ Done 2026-11-27 |
-| 6 | Dashboard: Today screen, scholarship table, detail with evidence, status tracking | Week 5 → **end-of-year milestone** |
+| 6 | Dashboard: Today screen, scholarship table, detail with evidence, status tracking | ✅ Done 2026-11-27 (**end-of-year milestone reached**) |
 | 7 | Application packets: rules check, checklist, coaching, allowed drafting, provenance check, approvals | January 2027 |
 | 8 | Daily monitoring + notifications (launchd job with on/off switch, change detection, weekly search) | February 2027 |
 | 9 | Browser-extension autofill from approved packets | Spring 2027 |
