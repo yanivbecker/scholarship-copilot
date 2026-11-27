@@ -122,6 +122,11 @@ def _labels(values: list[str]) -> str:
 # --- One rule per kind ----------------------------------------------------
 
 
+def _gpa(value: float) -> str:
+    """3 -> "3.0", 3.75 -> "3.75": GPAs read best with a decimal."""
+    return f"{value:.1f}" if round(value, 1) == value else f"{value:g}"
+
+
 def _gpa_min(c: CriterionInput, facts: Facts, _as_of: date) -> CriterionResult:
     gpa = facts.get("gpa")
     if not isinstance(gpa, int | float) or isinstance(gpa, bool):
@@ -143,7 +148,9 @@ def _gpa_min(c: CriterionInput, facts: Facts, _as_of: date) -> CriterionResult:
         # Above 4.0 is probably weighted or a 5-point scale: ask first.
         return _missing(c, "gpa_scale")
     return _result(
-        c, float(gpa) >= minimum, f"Your GPA is {gpa:g}; the minimum is {minimum:g}."
+        c,
+        float(gpa) >= minimum,
+        f"Your GPA is {_gpa(gpa)}; the minimum is {_gpa(minimum)}.",
     )
 
 

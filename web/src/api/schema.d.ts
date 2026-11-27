@@ -1048,6 +1048,10 @@ export interface components {
             changed: boolean;
             /** Content Type */
             content_type: string | null;
+            /** Extraction Message */
+            extraction_message: string | null;
+            /** Extraction Status */
+            extraction_status: string | null;
             /**
              * Fetched At
              * Format: date-time
@@ -1079,6 +1083,10 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Extraction Message */
+            extraction_message?: string | null;
+            /** Extraction Status */
+            extraction_status?: string | null;
             /** Id */
             id: number;
             /** Label */

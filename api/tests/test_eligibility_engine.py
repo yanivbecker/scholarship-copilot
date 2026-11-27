@@ -355,3 +355,16 @@ def test_bigger_awards_rank_higher_all_else_equal() -> None:
     large = priority_score(result, amount=10000, deadline=deadline, today=TODAY)
 
     assert large.total > small.total
+
+
+def test_warning_signs_push_a_listing_down_but_keep_it() -> None:
+    result = evaluate([crit("gpa_min", min=3.0)], {"gpa": 3.5}, AS_OF)
+    deadline = date(2027, 2, 20)
+
+    clean = priority_score(result, amount=5000, deadline=deadline, today=TODAY)
+    flagged = priority_score(
+        result, amount=5000, deadline=deadline, today=TODAY, warning_signs=2
+    )
+
+    assert 0 < flagged.total < clean.total / 2  # shown, but not recommended first
+    assert "warning signs" in flagged.note

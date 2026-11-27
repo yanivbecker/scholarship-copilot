@@ -1,19 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useId, useState } from 'react'
+import { useState } from 'react'
 
-import {
-  addSource,
-  deleteSource,
-  submitStep,
-  type Onboarding,
-} from '@/api/onboarding'
+import { submitStep, type Onboarding } from '@/api/onboarding'
+import { deleteSource } from '@/api/sources'
 import { updateProfile, type OperatingMode, type Profile } from '@/api/profile'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { MODES } from '@/features/profile/modes'
 import { ResumeImport } from '@/features/resume/ResumeImport'
+import { AddSourceForm } from '@/features/sources/AddSourceForm'
 import { queryKeys } from '@/features/profile/queries'
 
 import { onboardingKeys, useSources } from './queries'
@@ -126,32 +122,12 @@ export function PreferencesStep({
 
 /** First scholarship sources (FR-D1). Checked by the backend's URL rules. */
 export function SourcesStep({ onDone }: StepProps) {
-  const id = useId()
   const queryClient = useQueryClient()
   const sources = useSources()
-  const [url, setUrl] = useState('')
-  const [label, setLabel] = useState('')
-  const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
 
   const refresh = () =>
     queryClient.invalidateQueries({ queryKey: onboardingKeys.sources })
-
-  async function add(event: React.SubmitEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(undefined)
-    setBusy(true)
-    try {
-      await addSource({ url, label: label || null })
-      setUrl('')
-      setLabel('')
-      await refresh()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Not added.')
-    } finally {
-      setBusy(false)
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -161,43 +137,7 @@ export function SourcesStep({ onDone }: StepProps) {
         sites (like Fastweb or Bold.org) aren't used; add the sponsor's own page
         instead. This step is optional.
       </p>
-      <form onSubmit={add} noValidate className="space-y-3">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor={`${id}-url`}>Web address</Label>
-            <Input
-              id={`${id}-url`}
-              type="url"
-              inputMode="url"
-              placeholder="https://"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={error ? `${id}-error` : undefined}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor={`${id}-label`}>Name (optional)</Label>
-            <Input
-              id={`${id}-label`}
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-            />
-          </div>
-        </div>
-        {error && (
-          <p
-            id={`${id}-error`}
-            role="alert"
-            className="text-sm text-destructive"
-          >
-            {error}
-          </p>
-        )}
-        <Button type="submit" variant="outline" disabled={busy || !url.trim()}>
-          Add source
-        </Button>
-      </form>
+      <AddSourceForm onAdded={refresh} />
       {sources.isSuccess && sources.data.length > 0 && (
         <ul aria-label="Your sources" className="divide-y rounded-lg border">
           {sources.data.map((source) => (

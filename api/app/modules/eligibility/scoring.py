@@ -19,6 +19,10 @@ from app.modules.eligibility.engine import EligibilityResult, Outcome, Verdict
 LISTING = "listing"
 ESTIMATE = "estimate"
 
+# Warning signs (FR-D9) don't hide a listing, but it shouldn't be recommended
+# first either: its score is cut to a fraction.
+SCAM_FACTOR = 0.25
+
 WEIGHTS = {
     "eligibility": 0.35,
     "amount": 0.20,
@@ -53,6 +57,7 @@ def priority_score(
     amount: int | None,
     deadline: date | None,
     today: date,
+    warning_signs: int = 0,
 ) -> PriorityScore:
     parts = (
         _eligibility(result),
@@ -66,6 +71,13 @@ def priority_score(
     if result.verdict is Verdict.INELIGIBLE:
         return PriorityScore(0, parts, "You don't meet a listed requirement.")
     total = round(100 * sum(WEIGHTS[p.name] * p.value for p in parts))
+    if warning_signs:
+        return PriorityScore(
+            round(total * SCAM_FACTOR),
+            parts,
+            "Lowered: this listing shows warning signs of a scam. Check it "
+            "carefully before spending time on it.",
+        )
     return PriorityScore(total, parts)
 
 

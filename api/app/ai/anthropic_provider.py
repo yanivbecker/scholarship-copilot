@@ -36,7 +36,7 @@ class AnthropicProvider:
         client: anthropic.Anthropic | None = None,
     ) -> None:
         self.model = model
-        self.effort = effort
+        self.effort: Effort = effort
         # api_key=None lets the SDK use ANTHROPIC_API_KEY or an `ant` profile.
         self.client = client or anthropic.Anthropic(
             api_key=api_key, timeout=TIMEOUT_SECONDS, max_retries=2

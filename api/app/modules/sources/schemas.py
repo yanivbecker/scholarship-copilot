@@ -28,6 +28,9 @@ class SourceOut(BaseModel):
     last_result: str | None
     last_message: str | None
     last_changed_at: datetime | None
+    # From the latest snapshot: did finding scholarships in it work? (5.3)
+    extraction_status: str | None = None
+    extraction_message: str | None = None
 
 
 class CheckOut(BaseModel):
@@ -55,3 +58,5 @@ class SnapshotOut(BaseModel):
     text: str
     changed: bool
     fetched_at: datetime
+    extraction_status: str | None
+    extraction_message: str | None

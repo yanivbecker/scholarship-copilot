@@ -384,6 +384,9 @@ def test_api_extract_and_list(client: TestClient) -> None:
     report = client.post(f"/api/v1/sources/{source['id']}/extract").json()
 
     assert report["status"] == "done" and report["criteria_rejected"] == 1
+    [listed] = client.get("/api/v1/sources").json()
+    assert listed["extraction_status"] == "done"
+    assert listed["extraction_message"].startswith("1 scholarship found")
     [scholarship] = client.get("/api/v1/scholarships").json()
     criteria = scholarship["cycles"][0]["criteria"]
     assert criteria[0]["quote"].startswith("Applicants must have a cumulative GPA")

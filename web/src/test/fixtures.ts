@@ -1,5 +1,7 @@
 /** Fictional test data (NFR-10). Shaped like real API responses. */
 import type { Catalog, Fact, Profile, Story } from '@/api/profile'
+import type { Eligibility, Scholarship } from '@/api/scholarships'
+import type { Source } from '@/api/sources'
 
 const def = (
   overrides: Partial<Catalog['sections'][number]['facts'][number]>,
@@ -106,5 +108,109 @@ export const story = (overrides: Partial<Story> = {}): Story => ({
   themes: ['teamwork'],
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
+  ...overrides,
+})
+
+// --- Sources and scholarships (fictional) ---
+
+export const source = (overrides: Partial<Source> = {}): Source => ({
+  id: 1,
+  url: 'https://example.org/awards',
+  label: 'Test Foundation',
+  status: 'approved',
+  created_at: '2026-01-01T00:00:00Z',
+  last_checked_at: '2026-01-02T00:00:00Z',
+  last_result: 'ok',
+  last_message: null,
+  last_changed_at: '2026-01-02T00:00:00Z',
+  extraction_status: null,
+  extraction_message: null,
+  ...overrides,
+})
+
+export const eligibilityItem = (
+  overrides: Partial<Eligibility> = {},
+): Eligibility => ({
+  scholarship_id: 7,
+  name: 'Test Foundation STEM Award',
+  cycle_id: 70,
+  year: 2027,
+  deadline: '2027-03-01',
+  verdict: 'needs_info',
+  summary: '2 questions to answer.',
+  as_of: '2027-03-01',
+  criteria: [
+    {
+      criterion_id: 701,
+      kind: 'gpa_min',
+      quote: 'Applicants must have a cumulative GPA of 3.0 or higher.',
+      source_url: 'https://example.org/awards',
+      outcome: 'unknown',
+      reason: "Your profile doesn't have your gpa yet.",
+      question: { text: 'What is your gpa?', fact_key: 'gpa', optional: false },
+      confirmable: false,
+    },
+    {
+      criterion_id: 702,
+      kind: 'free_text',
+      quote: 'Applicants must demonstrate leadership in their community.',
+      source_url: 'https://example.org/awards',
+      outcome: 'unknown',
+      reason: 'This requirement needs your judgment.',
+      question: {
+        text: 'Do you meet this requirement?',
+        fact_key: null,
+        optional: false,
+      },
+      confirmable: true,
+    },
+  ],
+  questions: [
+    { text: 'What is your gpa?', fact_key: 'gpa', optional: false },
+    { text: 'Do you meet this requirement?', fact_key: null, optional: false },
+  ],
+  score: {
+    total: 62,
+    note: 'Our ranking for where to spend effort, not your chances of winning.',
+    parts: [
+      {
+        name: 'amount',
+        value: 0.8,
+        basis: 'listing',
+        detail: '$2,500 published by the sponsor.',
+      },
+      { name: 'fit', value: 0, basis: 'estimate', detail: '0 of 2 confirmed.' },
+    ],
+  },
+  ...overrides,
+})
+
+export const scholarshipRecord = (
+  overrides: Partial<Scholarship> = {},
+): Scholarship => ({
+  id: 7,
+  name: 'Test Foundation STEM Award',
+  sponsor: 'Test Foundation',
+  official_url: null,
+  description: null,
+  status: 'discovered',
+  scam_flags: [],
+  needs_review: false,
+  review_reason: null,
+  cycles: [
+    {
+      id: 70,
+      year: 2027,
+      amount_text: '$2,500',
+      amount_min: 2500,
+      amount_max: 2500,
+      deadline: '2027-03-01',
+      deadline_quote: 'Applications are due March 1, 2027.',
+      source_url: 'https://example.org/awards',
+      extracted_by: 'test-model',
+      extracted_at: '2026-01-02T00:00:00Z',
+      criteria: [],
+    },
+  ],
   ...overrides,
 })

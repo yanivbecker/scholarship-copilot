@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Response, status
 from app.api.deps import CurrentUser, SessionDep
 from app.modules.fetcher.fetcher import PoliteFetcher
 from app.modules.sources import service
+from app.modules.sources.models import Source
 from app.modules.sources.schemas import (
     CheckOut,
     PasteIn,
@@ -32,9 +33,18 @@ def get_fetcher() -> Iterator[PoliteFetcher]:
 FetcherDep = Annotated[PoliteFetcher, Depends(get_fetcher)]
 
 
-def _check_out(outcome: service.CheckOutcome) -> CheckOut:
+def _source_out(session: SessionDep, source: Source) -> SourceOut:
+    out = SourceOut.model_validate(source)
+    snapshot = service.latest_snapshot(session, source.id)
+    if snapshot is not None:
+        out.extraction_status = snapshot.extraction_status
+        out.extraction_message = snapshot.extraction_message
+    return out
+
+
+def _check_out(session: SessionDep, outcome: service.CheckOutcome) -> CheckOut:
     return CheckOut(
-        source=SourceOut.model_validate(outcome.source),
+        source=_source_out(session, outcome.source),
         skipped=outcome.skipped,
         changed=outcome.changed,
     )
@@ -42,7 +52,7 @@ def _check_out(outcome: service.CheckOutcome) -> CheckOut:
 
 @router.get("")
 def list_sources(session: SessionDep, user: CurrentUser) -> list[SourceOut]:
-    return [SourceOut.model_validate(s) for s in service.list_sources(session, user.id)]
+    return [_source_out(session, s) for s in service.list_sources(session, user.id)]
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -59,7 +69,7 @@ def check_source(
     """Check now. A person asked, so known dead ends are retried too."""
     outcome = service.check_source(session, fetcher, user.id, source_id, force=True)
     session.commit()
-    return _check_out(outcome)
+    return _check_out(session, outcome)
 
 
 @router.post("/{source_id}/paste")
@@ -68,7 +78,7 @@ def paste_source_text(
 ) -> CheckOut:
     outcome = service.paste_source_text(session, user.id, source_id, body.text)
     session.commit()
-    return _check_out(outcome)
+    return _check_out(session, outcome)
 
 
 @router.get("/{source_id}/snapshot")

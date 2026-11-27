@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { getMissingFacts, getOnboarding, listSources } from '@/api/onboarding'
+import { getMissingFacts, getOnboarding } from '@/api/onboarding'
+import { listSources } from '@/api/sources'
 
 export const onboardingKeys = {
   onboarding: ['onboarding'] as const,

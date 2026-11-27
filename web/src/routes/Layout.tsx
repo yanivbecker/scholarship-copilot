@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils'
 const NAV = [
   { to: '/', label: 'Home', end: true },
   { to: '/profile', label: 'Profile', end: false },
+  { to: '/scholarships', label: 'Scholarships', end: false },
+  { to: '/sources', label: 'Sources', end: false },
   { to: '/stories', label: 'Story bank', end: false },
 ]
 
@@ -23,7 +25,7 @@ export function Layout() {
         <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
           <span className="font-semibold">Scholarship Copilot</span>
           <nav aria-label="Main">
-            <ul className="flex gap-1">
+            <ul className="flex flex-wrap gap-1">
               {NAV.map((item) => (
                 <li key={item.to}>
                   {/* NavLink sets aria-current="page" on the active link. */}
@@ -32,7 +34,7 @@ export function Layout() {
                     end={item.end}
                     className={({ isActive }) =>
                       cn(
-                        'rounded-md px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        'rounded-md px-3 py-1.5 text-sm whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-ring',
                         isActive
                           ? 'bg-muted font-medium'
                           : 'text-muted-foreground hover:text-foreground',

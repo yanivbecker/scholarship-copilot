@@ -1343,6 +1343,28 @@
             ],
             "title": "Content Type"
           },
+          "extraction_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Message"
+          },
+          "extraction_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Status"
+          },
           "fetched_at": {
             "format": "date-time",
             "title": "Fetched At",
@@ -1366,7 +1388,9 @@
           "content_type",
           "text",
           "changed",
-          "fetched_at"
+          "fetched_at",
+          "extraction_status",
+          "extraction_message"
         ],
         "title": "SnapshotOut",
         "type": "object"
@@ -1403,6 +1427,28 @@
             "format": "date-time",
             "title": "Created At",
             "type": "string"
+          },
+          "extraction_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Message"
+          },
+          "extraction_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Status"
           },
           "id": {
             "title": "Id",

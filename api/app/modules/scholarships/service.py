@@ -238,9 +238,8 @@ def _summary(report: ExtractionReport) -> str:
     found = report.created + report.updated
     parts = [f"{found} scholarship{'s' if found != 1 else ''} found"]
     if report.criteria_rejected:
-        parts.append(
-            f"{report.criteria_rejected} criteria rejected (quote not on page)"
-        )
+        noun = "criterion" if report.criteria_rejected == 1 else "criteria"
+        parts.append(f"{report.criteria_rejected} {noun} rejected (quote not on page)")
     if report.scholarships_rejected:
         parts.append(f"{report.scholarships_rejected} rejected (name not on page)")
     return "; ".join(parts) + "."

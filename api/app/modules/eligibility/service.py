@@ -92,7 +92,11 @@ def evaluate_scholarship(
     result = evaluate(inputs, facts, as_of)
     amount = (cycle.amount_max or cycle.amount_min) if cycle else None
     score = priority_score(
-        result, amount=amount, deadline=cycle.deadline if cycle else None, today=today
+        result,
+        amount=amount,
+        deadline=cycle.deadline if cycle else None,
+        today=today,
+        warning_signs=len(scholarship.scam_flags),
     )
     return ScholarshipEligibility(scholarship, cycle, result, score, as_of)
 
