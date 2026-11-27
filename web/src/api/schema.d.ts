@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/v1/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Eligibility
+         * @description Every scholarship, highest priority first.
+         */
+        get: operations["list_eligibility"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facts": {
         parameters: {
             query?: never;
@@ -227,6 +247,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scholarships/{scholarship_id}/criteria/{criterion_id}/confirmation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Confirm Criterion
+         * @description FR-E3: answer a free-text requirement; returns the updated verdict.
+         */
+        put: operations["confirm_criterion"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scholarships/{scholarship_id}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Eligibility */
+        get: operations["get_eligibility"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources": {
         parameters: {
             query?: never;
@@ -428,6 +485,14 @@ export interface components {
             value: string;
         };
         /**
+         * ConfirmationIn
+         * @description Do you meet this free-text requirement? null clears the answer.
+         */
+        ConfirmationIn: {
+            /** Answer */
+            answer: boolean | null;
+        };
+        /**
          * CriterionKind
          * @description What a criterion checks. Parameters are documented per kind below.
          * @enum {string}
@@ -447,6 +512,27 @@ export interface components {
             };
             /** Quote */
             quote: string;
+            /** Source Url */
+            source_url: string;
+        };
+        /**
+         * CriterionResultOut
+         * @description One requirement, its evidence, and how it compares with the profile.
+         */
+        CriterionResultOut: {
+            /** Confirmable */
+            confirmable: boolean;
+            /** Criterion Id */
+            criterion_id: number;
+            /** Kind */
+            kind: string;
+            /** Outcome */
+            outcome: string;
+            question: components["schemas"]["QuestionOut"] | null;
+            /** Quote */
+            quote: string;
+            /** Reason */
+            reason: string;
             /** Source Url */
             source_url: string;
         };
@@ -480,6 +566,36 @@ export interface components {
             source_url: string;
             /** Year */
             year: number;
+        };
+        /**
+         * EligibilityOut
+         * @description The verdict for a scholarship's current cycle (FR-E2).
+         */
+        EligibilityOut: {
+            /**
+             * As Of
+             * Format: date
+             */
+            as_of: string;
+            /** Criteria */
+            criteria: components["schemas"]["CriterionResultOut"][];
+            /** Cycle Id */
+            cycle_id: number | null;
+            /** Deadline */
+            deadline: string | null;
+            /** Name */
+            name: string;
+            /** Questions */
+            questions: components["schemas"]["QuestionOut"][];
+            /** Scholarship Id */
+            scholarship_id: number;
+            score: components["schemas"]["ScoreOut"];
+            /** Summary */
+            summary: string;
+            /** Verdict */
+            verdict: string;
+            /** Year */
+            year: number | null;
         };
         /**
          * ExtractionReportOut
@@ -683,6 +799,18 @@ export interface components {
             operating_mode?: components["schemas"]["OperatingMode"] | null;
         };
         /**
+         * QuestionOut
+         * @description Answer this to resolve an unknown. `fact_key`: answer in the profile.
+         */
+        QuestionOut: {
+            /** Fact Key */
+            fact_key: string | null;
+            /** Optional */
+            optional: boolean;
+            /** Text */
+            text: string;
+        };
+        /**
          * ResumeConfirmIn
          * @description The suggestions the student accepted, with any edits they made.
          */
@@ -739,6 +867,32 @@ export interface components {
             sponsor: string | null;
             /** Status */
             status: string;
+        };
+        /**
+         * ScoreOut
+         * @description 0-100 priority. Our ranking, not the chance of winning (FR-E6).
+         */
+        ScoreOut: {
+            /** Note */
+            note: string;
+            /** Parts */
+            parts: components["schemas"]["ScorePartOut"][];
+            /** Total */
+            total: number;
+        };
+        /**
+         * ScorePartOut
+         * @description One ingredient of the priority score and what it's based on.
+         */
+        ScorePartOut: {
+            /** Basis */
+            basis: string;
+            /** Detail */
+            detail: string;
+            /** Name */
+            name: string;
+            /** Value */
+            value: number;
         };
         /**
          * SectionOut
@@ -904,6 +1058,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_eligibility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EligibilityOut"][];
+                };
+            };
+        };
+    };
     list_facts: {
         parameters: {
             query?: never;
@@ -1302,6 +1476,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScholarshipOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_criterion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scholarship_id: number;
+                criterion_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EligibilityOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_eligibility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scholarship_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EligibilityOut"];
                 };
             };
             /** @description Validation Error */

@@ -74,6 +74,27 @@
         "title": "ChoiceOut",
         "type": "object"
       },
+      "ConfirmationIn": {
+        "description": "Do you meet this free-text requirement? null clears the answer.",
+        "properties": {
+          "answer": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          }
+        },
+        "required": [
+          "answer"
+        ],
+        "title": "ConfirmationIn",
+        "type": "object"
+      },
       "CriterionKind": {
         "description": "What a criterion checks. Parameters are documented per kind below.",
         "enum": [
@@ -130,6 +151,61 @@
           "source_url"
         ],
         "title": "CriterionOut",
+        "type": "object"
+      },
+      "CriterionResultOut": {
+        "description": "One requirement, its evidence, and how it compares with the profile.",
+        "properties": {
+          "confirmable": {
+            "title": "Confirmable",
+            "type": "boolean"
+          },
+          "criterion_id": {
+            "title": "Criterion Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "question": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuestionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quote": {
+            "title": "Quote",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "criterion_id",
+          "kind",
+          "quote",
+          "source_url",
+          "outcome",
+          "reason",
+          "question",
+          "confirmable"
+        ],
+        "title": "CriterionResultOut",
         "type": "object"
       },
       "CycleOut": {
@@ -234,6 +310,98 @@
           "criteria"
         ],
         "title": "CycleOut",
+        "type": "object"
+      },
+      "EligibilityOut": {
+        "description": "The verdict for a scholarship's current cycle (FR-E2).",
+        "properties": {
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionResultOut"
+            },
+            "title": "Criteria",
+            "type": "array"
+          },
+          "cycle_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Id"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionOut"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "scholarship_id": {
+            "title": "Scholarship Id",
+            "type": "integer"
+          },
+          "score": {
+            "$ref": "#/components/schemas/ScoreOut"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "verdict": {
+            "title": "Verdict",
+            "type": "string"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "required": [
+          "scholarship_id",
+          "name",
+          "cycle_id",
+          "year",
+          "deadline",
+          "verdict",
+          "summary",
+          "as_of",
+          "criteria",
+          "questions",
+          "score"
+        ],
+        "title": "EligibilityOut",
         "type": "object"
       },
       "ExtractionReportOut": {
@@ -760,6 +928,37 @@
         "title": "ProfileUpdate",
         "type": "object"
       },
+      "QuestionOut": {
+        "description": "Answer this to resolve an unknown. `fact_key`: answer in the profile.",
+        "properties": {
+          "fact_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fact Key"
+          },
+          "optional": {
+            "title": "Optional",
+            "type": "boolean"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "fact_key",
+          "optional"
+        ],
+        "title": "QuestionOut",
+        "type": "object"
+      },
       "ResumeConfirmIn": {
         "description": "The suggestions the student accepted, with any edits they made.",
         "properties": {
@@ -914,6 +1113,62 @@
           "cycles"
         ],
         "title": "ScholarshipOut",
+        "type": "object"
+      },
+      "ScoreOut": {
+        "description": "0-100 priority. Our ranking, not the chance of winning (FR-E6).",
+        "properties": {
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/ScorePartOut"
+            },
+            "title": "Parts",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "note",
+          "parts"
+        ],
+        "title": "ScoreOut",
+        "type": "object"
+      },
+      "ScorePartOut": {
+        "description": "One ingredient of the priority score and what it's based on.",
+        "properties": {
+          "basis": {
+            "title": "Basis",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "value",
+          "basis",
+          "detail"
+        ],
+        "title": "ScorePartOut",
         "type": "object"
       },
       "SectionOut": {
@@ -1303,6 +1558,32 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/eligibility": {
+      "get": {
+        "description": "Every scholarship, highest priority first.",
+        "operationId": "list_eligibility",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EligibilityOut"
+                  },
+                  "title": "Response List Eligibility",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Eligibility",
+        "tags": [
+          "eligibility"
+        ]
+      }
+    },
     "/api/v1/facts": {
       "get": {
         "operationId": "list_facts",
@@ -1830,6 +2111,110 @@
         "summary": "Get Scholarship",
         "tags": [
           "scholarships"
+        ]
+      }
+    },
+    "/api/v1/scholarships/{scholarship_id}/criteria/{criterion_id}/confirmation": {
+      "put": {
+        "description": "FR-E3: answer a free-text requirement; returns the updated verdict.",
+        "operationId": "confirm_criterion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scholarship_id",
+            "required": true,
+            "schema": {
+              "title": "Scholarship Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "criterion_id",
+            "required": true,
+            "schema": {
+              "title": "Criterion Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EligibilityOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Criterion",
+        "tags": [
+          "eligibility"
+        ]
+      }
+    },
+    "/api/v1/scholarships/{scholarship_id}/eligibility": {
+      "get": {
+        "operationId": "get_eligibility",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scholarship_id",
+            "required": true,
+            "schema": {
+              "title": "Scholarship Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EligibilityOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Eligibility",
+        "tags": [
+          "eligibility"
         ]
       }
     },

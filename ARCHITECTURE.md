@@ -112,3 +112,6 @@ scholarship-copilot/
 | 2026-11-26 | Extraction: AI proposes, code verifies | Names, quotes, amounts and deadlines are checked against the page text before saving; unverifiable parts are dropped and counted, not trusted (FR-D5). |
 | 2026-11-26 | Unfit criteria become free text | A requirement that doesn't match a kind exactly is kept with its quote as free_text (unknown until the student confirms, FR-E3) instead of being forced into a kind that could produce a wrong verdict. |
 | 2026-11-26 | pylint: unsubscriptable-object off, similarity >= 8 lines | pylint misreads SQLAlchemy 2 generics (mypy --strict covers subscripts); short shared field lists between layers aren't duplication. |
+| 2026-11-26 | Eligibility computed on read, not stored | Pure, fast, deterministic; always reflects the current profile and criteria (FR-E4). A stored copy may be added for sorting at scale later. |
+| 2026-11-26 | When in doubt: unknown, never not met | A wrong "not met" hides a winnable scholarship; a question costs a moment. Applied to scales, places, majors and unreadable data. |
+| 2026-11-26 | FastAPI dependencies take no request-bindable config | Any dependency parameter becomes request input; server configuration only comes from the environment (security review finding). |

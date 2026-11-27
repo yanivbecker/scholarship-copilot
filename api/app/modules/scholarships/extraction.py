@@ -253,7 +253,25 @@ def _verify_criteria(
         if key not in seen:
             seen.add(key)
             kept.append(VerifiedCriterion(kind, params, quote))
-    return kept, rejected
+    return _drop_redundant_free_text(kept), rejected
+
+
+def _drop_redundant_free_text(
+    criteria: list[VerifiedCriterion],
+) -> list[VerifiedCriterion]:
+    """A free-text fallback for a sentence that a structured criterion already
+    checks would only ask the student to confirm the same thing by hand."""
+    structured = {
+        normalize_for_matching(c.quote)
+        for c in criteria
+        if c.kind is not CriterionKind.FREE_TEXT
+    }
+    return [
+        c
+        for c in criteria
+        if c.kind is not CriterionKind.FREE_TEXT
+        or normalize_for_matching(c.quote) not in structured
+    ]
 
 
 def _verify_amount(

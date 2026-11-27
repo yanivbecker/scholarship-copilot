@@ -9,6 +9,7 @@ from collections.abc import Awaitable, Callable
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from app.modules.eligibility.service import CriterionNotFoundError, NotConfirmableError
 from app.modules.profile.catalog import FactValidationError, FieldErrorsError
 from app.modules.profile.service import NotFoundError, StoryValidationError
 from app.modules.resume.files import ResumeFileError
@@ -45,12 +46,14 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     StoryValidationError: 422,
     UnsafeURLError: 422,
     PasteError: 422,
+    NotConfirmableError: 422,
     ResumeFileError: 422,
     DuplicateSourceError: 409,
     NotFoundError: 404,
     SourceNotFoundError: 404,
     ResumeNotFoundError: 404,
     ScholarshipNotFoundError: 404,
+    CriterionNotFoundError: 404,
 }
 
 
