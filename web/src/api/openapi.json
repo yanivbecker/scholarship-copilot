@@ -947,89 +947,6 @@
         "title": "SectionOut",
         "type": "object"
       },
-      "Settings": {
-        "description": "Typed view of the SCHOLARSHIP_* environment variables.",
-        "properties": {
-          "ANTHROPIC_API_KEY": {
-            "anyOf": [
-              {
-                "format": "password",
-                "type": "string",
-                "writeOnly": true
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Anthropic Api Key"
-          },
-          "ai_provider": {
-            "default": "none",
-            "enum": [
-              "none",
-              "ollama",
-              "anthropic"
-            ],
-            "title": "Ai Provider",
-            "type": "string"
-          },
-          "anthropic_effort": {
-            "default": "medium",
-            "enum": [
-              "low",
-              "medium",
-              "high"
-            ],
-            "title": "Anthropic Effort",
-            "type": "string"
-          },
-          "anthropic_model": {
-            "default": "claude-opus-5-5",
-            "title": "Anthropic Model",
-            "type": "string"
-          },
-          "data_dir": {
-            "anyOf": [
-              {
-                "format": "path",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data Dir"
-          },
-          "database_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Database Url"
-          },
-          "ollama_model": {
-            "default": "llama3.1:8b",
-            "title": "Ollama Model",
-            "type": "string"
-          },
-          "ollama_url": {
-            "default": "http://127.0.0.1:11434",
-            "title": "Ollama Url",
-            "type": "string"
-          },
-          "port": {
-            "default": 8000,
-            "title": "Port",
-            "type": "integer"
-          }
-        },
-        "title": "Settings",
-        "type": "object"
-      },
       "SnapshotOrigin": {
         "description": "How a snapshot's text was obtained.",
         "enum": [
@@ -2073,23 +1990,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/Settings"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Settings"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "content": {

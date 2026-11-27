@@ -21,7 +21,7 @@ from app.ai.base import (
     AIUnavailableError,
     NoAIProvider,
 )
-from app.ai.factory import get_ai_provider
+from app.ai.factory import build_ai_provider
 from app.ai.ollama_provider import OllamaProvider
 from app.ai.prompting import UNTRUSTED_TAG, wrap_untrusted
 from app.ai.structured import ask_structured
@@ -103,17 +103,17 @@ def test_no_ai_provider_explains_how_to_proceed() -> None:
 
 
 def test_factory_defaults_to_none() -> None:
-    assert get_ai_provider(Settings()).name == "none"
+    assert build_ai_provider(Settings()).name == "none"
 
 
 def test_factory_builds_configured_providers() -> None:
     # The key is read under its environment name, ANTHROPIC_API_KEY.
-    claude = get_ai_provider(
+    claude = build_ai_provider(
         Settings.model_validate(
             {"ai_provider": "anthropic", "ANTHROPIC_API_KEY": "test-key"}
         )
     )
-    local = get_ai_provider(Settings(ai_provider="ollama"))
+    local = build_ai_provider(Settings(ai_provider="ollama"))
 
     assert isinstance(claude, AnthropicProvider) and claude.model == "claude-opus-5-5"
     assert isinstance(local, OllamaProvider)

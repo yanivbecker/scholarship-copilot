@@ -754,50 +754,6 @@ export interface components {
             sensitive: boolean;
         };
         /**
-         * Settings
-         * @description Typed view of the SCHOLARSHIP_* environment variables.
-         */
-        Settings: {
-            /** Anthropic Api Key */
-            ANTHROPIC_API_KEY?: string | null;
-            /**
-             * Ai Provider
-             * @default none
-             * @enum {string}
-             */
-            ai_provider: "none" | "ollama" | "anthropic";
-            /**
-             * Anthropic Effort
-             * @default medium
-             * @enum {string}
-             */
-            anthropic_effort: "low" | "medium" | "high";
-            /**
-             * Anthropic Model
-             * @default claude-opus-5-5
-             */
-            anthropic_model: string;
-            /** Data Dir */
-            data_dir?: string | null;
-            /** Database Url */
-            database_url?: string | null;
-            /**
-             * Ollama Model
-             * @default llama3.1:8b
-             */
-            ollama_model: string;
-            /**
-             * Ollama Url
-             * @default http://127.0.0.1:11434
-             */
-            ollama_url: string;
-            /**
-             * Port
-             * @default 8000
-             */
-            port: number;
-        };
-        /**
          * SnapshotOrigin
          * @description How a snapshot's text was obtained.
          * @enum {string}
@@ -1481,11 +1437,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["Settings"] | null;
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
