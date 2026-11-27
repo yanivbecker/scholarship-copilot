@@ -23,7 +23,7 @@
 
 ## Phase 4 checklist
 - [x] 4.1 Fact catalog + data model (FR-P3, FR-P4, FR-P5, FR-P6, FR-P7, NFR-8, NFR-12): `app/modules/profile/catalog.py` (26 typed facts in 7 sections; citizenship/financial/demographic flagged sensitive; strict validation, no coercion), tables `profiles` (operating mode, onboarding progress), `profile_facts` (JSON value + origin + origin detail, unique per user+key; custom scholarship answers as `custom.<slug>`), `stories` (body stored verbatim, normalized themes); migration `f25a6cf931f4`; repository + service layers; single local owner user. **Tested:** 76 pytest tests pass (62 new); deliberately breaking user scoping and verbatim story storage each failed the matching test; mypy, pylint, ruff, pyright clean.
-- [ ] 4.2 Profile API: facts, story bank, operating mode; regenerated frontend types (FR-P5, FR-P6, FR-P7)
+- [x] 4.2 Profile API (FR-P3-P7): `GET/PATCH /profile`, `GET /facts/catalog`, `GET /facts`, `PUT/DELETE /facts/{key}`, `GET /facts/missing`, `GET/POST /stories`, `PUT/DELETE /stories/{id}`, `GET /stories/themes`. Strict request types (no coercion); API can only set `manual`/`questionnaire` origins; service errors mapped to readable 422/404 in `app/api/errors.py`; `get_current_user` dependency (single owner; the only thing that changes with real auth); short OpenAPI operation ids. Frontend types regenerated. **Tested:** 93 pytest tests pass (17 new API tests); mypy, pylint, ruff, pyright, frontend typecheck + Vitest clean.
 - [ ] 4.3 Frontend shell + profile pages: React Router, navigation, profile editor, story bank (react-hook-form + zod; NFR-11)
 - [ ] 4.4 Onboarding wizard, resumable (FR-P1)
 - [ ] 4.5 Resume import: PDF/DOCX, rule-based extraction, confirm each fact (FR-P2)

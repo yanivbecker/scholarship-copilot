@@ -7,10 +7,12 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
+from fastapi.testclient import TestClient
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
-from app.core.db import make_engine
+from app.core.db import get_session, make_engine
+from app.main import create_app
 from app.modules.users.models import User
 from app.modules.users.service import get_or_create_owner
 
@@ -49,3 +51,17 @@ def fixture_owner(session: Session) -> User:
     user = get_or_create_owner(session)
     session.commit()
     return user
+
+
+@pytest.fixture(name="client")
+def fixture_client(engine: Engine) -> Iterator[TestClient]:
+    """An API client whose requests use this test's throwaway database."""
+
+    def test_session() -> Iterator[Session]:
+        with Session(engine) as session:
+            yield session
+
+    app = create_app()
+    app.dependency_overrides[get_session] = test_session
+    with TestClient(app) as client:
+        yield client

@@ -1,6 +1,262 @@
 {
   "components": {
     "schemas": {
+      "CatalogOut": {
+        "description": "The whole fact catalog, grouped by section.",
+        "properties": {
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/SectionOut"
+            },
+            "title": "Sections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sections"
+        ],
+        "title": "CatalogOut",
+        "type": "object"
+      },
+      "FactDefinitionOut": {
+        "description": "One fact the app knows about, with the rules its value must follow.",
+        "properties": {
+          "choices": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Choices",
+            "type": "array"
+          },
+          "help": {
+            "title": "Help",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "max_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Value"
+          },
+          "min_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Value"
+          },
+          "section": {
+            "$ref": "#/components/schemas/FactSection"
+          },
+          "sensitive": {
+            "title": "Sensitive",
+            "type": "boolean"
+          },
+          "type": {
+            "$ref": "#/components/schemas/FactType"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type",
+          "section",
+          "sensitive",
+          "help",
+          "choices",
+          "min_value",
+          "max_value"
+        ],
+        "title": "FactDefinitionOut",
+        "type": "object"
+      },
+      "FactIn": {
+        "description": "A new value for a catalog fact.\n\nOnly the origins a person can produce in the app's forms are accepted here.\nResume and scholarship-answer origins are set by their own flows.",
+        "properties": {
+          "origin": {
+            "default": "manual",
+            "enum": [
+              "questionnaire",
+              "manual"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/FactValueIn"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "title": "FactIn",
+        "type": "object"
+      },
+      "FactOrigin": {
+        "description": "Where a fact's current value came from (FR-P3).",
+        "enum": [
+          "questionnaire",
+          "resume",
+          "scholarship_answer",
+          "manual"
+        ],
+        "title": "FactOrigin",
+        "type": "string"
+      },
+      "FactOut": {
+        "description": "A stored fact. `label` is set for custom (scholarship-specific) facts.",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/FactOrigin"
+          },
+          "origin_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Detail"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/FactValueOut"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "value",
+          "origin",
+          "origin_detail",
+          "updated_at"
+        ],
+        "title": "FactOut",
+        "type": "object"
+      },
+      "FactSection": {
+        "description": "Groups facts for display (profile editor, onboarding steps).",
+        "enum": [
+          "basics",
+          "education",
+          "location",
+          "citizenship",
+          "financial",
+          "demographic",
+          "activities"
+        ],
+        "title": "FactSection",
+        "type": "string"
+      },
+      "FactType": {
+        "description": "How a fact's value is shaped and validated.",
+        "enum": [
+          "text",
+          "integer",
+          "number",
+          "boolean",
+          "date",
+          "choice",
+          "multi_choice"
+        ],
+        "title": "FactType",
+        "type": "string"
+      },
+      "FactValueIn": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "FactValueOut": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
       "HealthResponse": {
         "description": "Response body for GET /api/v1/health.",
         "properties": {
@@ -19,6 +275,265 @@
         ],
         "title": "HealthResponse",
         "type": "object"
+      },
+      "MissingFactsOut": {
+        "description": "Which of the requested fact keys are not on file yet (FR-P4).",
+        "properties": {
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing",
+            "type": "array"
+          }
+        },
+        "required": [
+          "missing"
+        ],
+        "title": "MissingFactsOut",
+        "type": "object"
+      },
+      "OperatingMode": {
+        "description": "FR-P7. Hybrid is the flagship mode.",
+        "enum": [
+          "discovery",
+          "hybrid",
+          "automation"
+        ],
+        "title": "OperatingMode",
+        "type": "string"
+      },
+      "ProfileOut": {
+        "description": "The student's settings and onboarding progress.",
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "onboarding_completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onboarding Completed At"
+          },
+          "onboarding_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onboarding Step"
+          },
+          "operating_mode": {
+            "$ref": "#/components/schemas/OperatingMode"
+          }
+        },
+        "required": [
+          "display_name",
+          "operating_mode",
+          "onboarding_step",
+          "onboarding_completed_at"
+        ],
+        "title": "ProfileOut",
+        "type": "object"
+      },
+      "ProfileUpdate": {
+        "description": "Fields to change. Omitted fields stay as they are.",
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "operating_mode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OperatingMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "ProfileUpdate",
+        "type": "object"
+      },
+      "SectionOut": {
+        "description": "A group of facts, in display order.",
+        "properties": {
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/FactDefinitionOut"
+            },
+            "title": "Facts",
+            "type": "array"
+          },
+          "key": {
+            "$ref": "#/components/schemas/FactSection"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "sensitive": {
+            "title": "Sensitive",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "sensitive",
+          "facts"
+        ],
+        "title": "SectionOut",
+        "type": "object"
+      },
+      "StoryIn": {
+        "description": "A story to create or replace. Detailed rules are checked by the service.",
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "themes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Themes",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "body"
+        ],
+        "title": "StoryIn",
+        "type": "object"
+      },
+      "StoryOut": {
+        "description": "A story from the story bank, exactly as written.",
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "themes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Themes",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "themes",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "StoryOut",
+        "type": "object"
+      },
+      "ThemesOut": {
+        "description": "Suggested themes for tagging stories.",
+        "properties": {
+          "suggested": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Suggested",
+            "type": "array"
+          }
+        },
+        "required": [
+          "suggested"
+        ],
+        "title": "ThemesOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
       }
     }
   },
@@ -28,9 +543,186 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/facts": {
+      "get": {
+        "operationId": "list_facts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FactOut"
+                  },
+                  "title": "Response List Facts",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Facts",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/v1/facts/catalog": {
+      "get": {
+        "operationId": "get_fact_catalog",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Fact Catalog",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/v1/facts/missing": {
+      "get": {
+        "operationId": "get_missing_facts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "keys",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 100,
+              "title": "Keys",
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MissingFactsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Missing Facts",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/v1/facts/{key}": {
+      "delete": {
+        "operationId": "delete_fact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Fact",
+        "tags": [
+          "profile"
+        ]
+      },
+      "put": {
+        "operationId": "set_fact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FactIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FactOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Fact",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
-        "operationId": "health_api_v1_health_get",
+        "operationId": "health",
         "responses": {
           "200": {
             "content": {
@@ -46,6 +738,264 @@
         "summary": "Health",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/api/v1/profile": {
+      "get": {
+        "operationId": "get_profile",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Profile",
+        "tags": [
+          "profile"
+        ]
+      },
+      "patch": {
+        "operationId": "update_profile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Profile",
+        "tags": [
+          "profile"
+        ]
+      }
+    },
+    "/api/v1/stories": {
+      "get": {
+        "operationId": "list_stories",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "theme",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Theme"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StoryOut"
+                  },
+                  "title": "Response List Stories",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Stories",
+        "tags": [
+          "stories"
+        ]
+      },
+      "post": {
+        "operationId": "create_story",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StoryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Story",
+        "tags": [
+          "stories"
+        ]
+      }
+    },
+    "/api/v1/stories/themes": {
+      "get": {
+        "operationId": "get_story_themes",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThemesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Story Themes",
+        "tags": [
+          "stories"
+        ]
+      }
+    },
+    "/api/v1/stories/{story_id}": {
+      "delete": {
+        "operationId": "delete_story",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "story_id",
+            "required": true,
+            "schema": {
+              "title": "Story Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Story",
+        "tags": [
+          "stories"
+        ]
+      },
+      "put": {
+        "operationId": "update_story",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "story_id",
+            "required": true,
+            "schema": {
+              "title": "Story Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StoryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Story",
+        "tags": [
+          "stories"
         ]
       }
     }

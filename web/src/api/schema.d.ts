@@ -4,6 +4,75 @@
  */
 
 export interface paths {
+    "/api/v1/facts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Facts */
+        get: operations["list_facts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facts/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Fact Catalog */
+        get: operations["get_fact_catalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facts/missing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Missing Facts */
+        get: operations["get_missing_facts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facts/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Fact */
+        put: operations["set_fact"];
+        post?: never;
+        /** Delete Fact */
+        delete: operations["delete_fact"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -12,10 +81,81 @@ export interface paths {
             cookie?: never;
         };
         /** Health */
-        get: operations["health_api_v1_health_get"];
+        get: operations["health"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Profile */
+        get: operations["get_profile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Profile */
+        patch: operations["update_profile"];
+        trace?: never;
+    };
+    "/api/v1/stories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Stories */
+        get: operations["list_stories"];
+        put?: never;
+        /** Create Story */
+        post: operations["create_story"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stories/themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Story Themes */
+        get: operations["get_story_themes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stories/{story_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Story */
+        put: operations["update_story"];
+        post?: never;
+        /** Delete Story */
+        delete: operations["delete_story"];
         options?: never;
         head?: never;
         patch?: never;
@@ -26,6 +166,96 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * CatalogOut
+         * @description The whole fact catalog, grouped by section.
+         */
+        CatalogOut: {
+            /** Sections */
+            sections: components["schemas"]["SectionOut"][];
+        };
+        /**
+         * FactDefinitionOut
+         * @description One fact the app knows about, with the rules its value must follow.
+         */
+        FactDefinitionOut: {
+            /** Choices */
+            choices: string[];
+            /** Help */
+            help: string;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Max Value */
+            max_value: number | null;
+            /** Min Value */
+            min_value: number | null;
+            section: components["schemas"]["FactSection"];
+            /** Sensitive */
+            sensitive: boolean;
+            type: components["schemas"]["FactType"];
+        };
+        /**
+         * FactIn
+         * @description A new value for a catalog fact.
+         *
+         *     Only the origins a person can produce in the app's forms are accepted here.
+         *     Resume and scholarship-answer origins are set by their own flows.
+         */
+        FactIn: {
+            /**
+             * Origin
+             * @default manual
+             * @enum {string}
+             */
+            origin: "questionnaire" | "manual";
+            value: components["schemas"]["FactValueIn"];
+        };
+        /**
+         * FactOrigin
+         * @description Where a fact's current value came from (FR-P3).
+         * @enum {string}
+         */
+        FactOrigin: "questionnaire" | "resume" | "scholarship_answer" | "manual";
+        /**
+         * FactOut
+         * @description A stored fact. `label` is set for custom (scholarship-specific) facts.
+         */
+        FactOut: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string | null;
+            origin: components["schemas"]["FactOrigin"];
+            /** Origin Detail */
+            origin_detail: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            value: components["schemas"]["FactValueOut"];
+        };
+        /**
+         * FactSection
+         * @description Groups facts for display (profile editor, onboarding steps).
+         * @enum {string}
+         */
+        FactSection: "basics" | "education" | "location" | "citizenship" | "financial" | "demographic" | "activities";
+        /**
+         * FactType
+         * @description How a fact's value is shaped and validated.
+         * @enum {string}
+         */
+        FactType: "text" | "integer" | "number" | "boolean" | "date" | "choice" | "multi_choice";
+        FactValueIn: string | number | boolean | string[];
+        FactValueOut: string | number | boolean | string[];
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
          * HealthResponse
          * @description Response body for GET /api/v1/health.
          */
@@ -34,6 +264,115 @@ export interface components {
             status: string;
             /** Version */
             version: string;
+        };
+        /**
+         * MissingFactsOut
+         * @description Which of the requested fact keys are not on file yet (FR-P4).
+         */
+        MissingFactsOut: {
+            /** Missing */
+            missing: string[];
+        };
+        /**
+         * OperatingMode
+         * @description FR-P7. Hybrid is the flagship mode.
+         * @enum {string}
+         */
+        OperatingMode: "discovery" | "hybrid" | "automation";
+        /**
+         * ProfileOut
+         * @description The student's settings and onboarding progress.
+         */
+        ProfileOut: {
+            /** Display Name */
+            display_name: string;
+            /** Onboarding Completed At */
+            onboarding_completed_at: string | null;
+            /** Onboarding Step */
+            onboarding_step: string | null;
+            operating_mode: components["schemas"]["OperatingMode"];
+        };
+        /**
+         * ProfileUpdate
+         * @description Fields to change. Omitted fields stay as they are.
+         */
+        ProfileUpdate: {
+            /** Display Name */
+            display_name?: string | null;
+            operating_mode?: components["schemas"]["OperatingMode"] | null;
+        };
+        /**
+         * SectionOut
+         * @description A group of facts, in display order.
+         */
+        SectionOut: {
+            /** Facts */
+            facts: components["schemas"]["FactDefinitionOut"][];
+            key: components["schemas"]["FactSection"];
+            /** Label */
+            label: string;
+            /** Sensitive */
+            sensitive: boolean;
+        };
+        /**
+         * StoryIn
+         * @description A story to create or replace. Detailed rules are checked by the service.
+         */
+        StoryIn: {
+            /** Body */
+            body: string;
+            /**
+             * Themes
+             * @default []
+             */
+            themes: string[];
+            /** Title */
+            title: string;
+        };
+        /**
+         * StoryOut
+         * @description A story from the story bank, exactly as written.
+         */
+        StoryOut: {
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Themes */
+            themes: string[];
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * ThemesOut
+         * @description Suggested themes for tagging stories.
+         */
+        ThemesOut: {
+            /** Suggested */
+            suggested: string[];
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Context */
+            ctx?: Record<string, never>;
+            /** Input */
+            input?: unknown;
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
         };
     };
     responses: never;
@@ -44,7 +383,142 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    health_api_v1_health_get: {
+    list_facts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FactOut"][];
+                };
+            };
+        };
+    };
+    get_fact_catalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogOut"];
+                };
+            };
+        };
+    };
+    get_missing_facts: {
+        parameters: {
+            query: {
+                keys: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissingFactsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_fact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FactIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FactOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_fact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    health: {
         parameters: {
             query?: never;
             header?: never;
@@ -60,6 +534,207 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    get_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+        };
+    };
+    update_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_stories: {
+        parameters: {
+            query?: {
+                theme?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_story: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_story_themes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ThemesOut"];
+                };
+            };
+        };
+    };
+    update_story: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                story_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_story: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                story_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

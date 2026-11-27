@@ -48,6 +48,17 @@ class FactSection(StrEnum):
     ACTIVITIES = "activities"
 
 
+# Display order and labels for the profile editor and the wizard.
+SECTION_LABELS: dict[FactSection, str] = {
+    FactSection.BASICS: "Basics",
+    FactSection.EDUCATION: "Education",
+    FactSection.LOCATION: "Location",
+    FactSection.CITIZENSHIP: "Citizenship",
+    FactSection.FINANCIAL: "Financial",
+    FactSection.DEMOGRAPHIC: "Demographic",
+    FactSection.ACTIVITIES: "Activities",
+}
+
 SENSITIVE_SECTIONS = frozenset(
     {FactSection.CITIZENSHIP, FactSection.FINANCIAL, FactSection.DEMOGRAPHIC}
 )
