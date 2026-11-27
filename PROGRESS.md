@@ -1,11 +1,12 @@
 # Progress
 
 ## Current status
-**Phase 3: Project setup** complete (2026-11-26). Awaiting **Checkpoint 3** approval before Phase 4 starts.
+**Phase 4: Profile** in progress (started 2026-11-26). Phase 3 complete; Checkpoint 3 approved 2026-11-26.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
 - 2026-11-26: Repository created. PROJECT_PLAN, REQUIREMENTS, ARCHITECTURE, PROGRESS, README, CLAUDE.md written.
+- 2026-11-26: Phase 3 (project setup) complete. Checkpoint 3 approved.
 
 ## Phase 3 checklist
 - [x] Local git repository + planning docs
@@ -20,6 +21,13 @@
 - [x] CI: `.github/workflows/ci.yml`, 4 parallel jobs on push to main + PRs: backend (ruff, pylint, mypy, pytest, `alembic upgrade` + `alembic check`), frontend (Prettier, oxlint, tsc, Vitest, build), api-contract (regenerated types must match committed ones), secrets (gitleaks over full history). Read-only `contents` permission. **Tested locally** on a fresh copy of the 68 to-be-tracked files installed from lockfiles: every step passes; a deliberately stale API type made the contract check fail. First GitHub run was rejected: `runner.temp` isn't allowed in job-level `env` (fixed; actionlint pre-commit hook added so GitHub-invalid workflows are caught locally). Actions pinned to full commit SHAs. **Green on GitHub** (all 4 jobs).
 - [x] Public GitHub repo: https://github.com/yanivbecker/scholarship-copilot. Commits use the GitHub noreply email (repo-local git config). All 68 files scanned for personal emails before the first commit; gitleaks hook passed on commit.
 
+## Phase 4 checklist
+- [x] 4.1 Fact catalog + data model (FR-P3, FR-P4, FR-P5, FR-P6, FR-P7, NFR-8, NFR-12): `app/modules/profile/catalog.py` (26 typed facts in 7 sections; citizenship/financial/demographic flagged sensitive; strict validation, no coercion), tables `profiles` (operating mode, onboarding progress), `profile_facts` (JSON value + origin + origin detail, unique per user+key; custom scholarship answers as `custom.<slug>`), `stories` (body stored verbatim, normalized themes); migration `f25a6cf931f4`; repository + service layers; single local owner user. **Tested:** 76 pytest tests pass (62 new); deliberately breaking user scoping and verbatim story storage each failed the matching test; mypy, pylint, ruff, pyright clean.
+- [ ] 4.2 Profile API: facts, story bank, operating mode; regenerated frontend types (FR-P5, FR-P6, FR-P7)
+- [ ] 4.3 Frontend shell + profile pages: React Router, navigation, profile editor, story bank (react-hook-form + zod; NFR-11)
+- [ ] 4.4 Onboarding wizard, resumable (FR-P1)
+- [ ] 4.5 Resume import: PDF/DOCX, rule-based extraction, confirm each fact (FR-P2)
+
 ## Known issues
 None open.
 - Resolved 2026-11-26: linter decision. Owner chose oxlint over ESLint (see ARCHITECTURE.md decision log).
@@ -27,5 +35,5 @@ None open.
 
 ## Next steps
 - Owner: run `uv run alembic upgrade head` in `api/` to create the real database (not done by Claude: it writes to the personal data dir).
-- Checkpoint 3 review, then Phase 4 (Profile) on approval.
+- Phase 4 milestones 4.1–4.5, then the end-of-Phase-4 review and approval before Phase 5.
 - Later hardening (Phase 10): Dependabot for actions and dependencies.

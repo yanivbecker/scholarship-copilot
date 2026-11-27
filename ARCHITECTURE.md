@@ -36,10 +36,10 @@ flowchart TB
 |---|---|
 | Backend | Python 3.13 (uv), FastAPI, Pydantic, SQLAlchemy 2, Alembic |
 | Database | SQLite (local) → PostgreSQL (cloud) |
-| Frontend | React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query, React Router |
+| Frontend | React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query, React Router, react-hook-form + zod |
 | API contract | FastAPI OpenAPI schema → `openapi-typescript` generated types |
 | Scraping | httpx, trafilatura, Playwright (JS-only pages), urllib.robotparser |
-| Parsing | pypdf / pdfplumber, python-docx |
+| Parsing | pypdf / pdfplumber, python-docx; python-multipart for uploads |
 | Matching | rapidfuzz |
 | AI | Provider interface: `none` · `ollama` · `anthropic` |
 | Tests | pytest, Vitest + Testing Library, Playwright e2e |
@@ -93,3 +93,7 @@ scholarship-copilot/
 | 2026-11-26 | TypeScript pinned to 5.9 (not 7) | `openapi-typescript` needs TS 5.x. Revisit when it supports TS 7. |
 | 2026-11-26 | oxlint instead of ESLint | Ships with the Vite template, very fast, covers React hooks + TS rules. Fewer plugins than ESLint; revisit if a needed rule is missing. |
 | 2026-11-26 | Test HTTP client: `httpx2` | Starlette's TestClient deprecated `httpx`. Same maintainer (pydantic/httpx2). |
+| 2026-11-26 | Profile facts come from a typed catalog defined in code | Eligibility (Phase 5) compares typed values deterministically; "never ask twice" (FR-P4) is a lookup by key. Scholarship-specific answers are stored as custom text facts. |
+| 2026-11-26 | Forms: react-hook-form + zod | Owner-approved. Schema-based validation and types for ~6 forms, instead of hand-rolled state. |
+| 2026-11-26 | Phase 4 resume import is rule-based | Owner-approved. AI extraction joins the same confirm-each-fact flow in Phase 5. Works with AI provider = none (NFR-6). |
+| 2026-11-26 | python-multipart added for uploads | Owner-approved. FastAPI's documented dependency for file uploads (resume import). |

@@ -42,7 +42,7 @@ Each phase ends with a demo, test results, and an explicit approval before the n
 | Phase | Scope | Target |
 |---|---|---|
 | 1–2 | Requirements, architecture | ✅ Done 2026-11-26 |
-| 3 | Project setup: repo, tooling, backend/frontend skeletons, DB + migrations, tests, CI, secret scanning, docs | Week 1 |
+| 3 | Project setup: repo, tooling, backend/frontend skeletons, DB + migrations, tests, CI, secret scanning, docs | ✅ Done 2026-11-26 |
 | 4 | Profile: onboarding wizard, profile facts, story bank, resume import | Week 2 |
 | 5 | Discovery + eligibility: sources, polite fetcher, extraction, AI provider switch, criteria engine, dedup | Weeks 3–4 |
 | 6 | Dashboard: Today screen, scholarship table, detail with evidence, status tracking | Week 5 → **end-of-year milestone** |
@@ -58,5 +58,5 @@ dashboard polish moves to January.
 
 1. Discovery complete: ✅ approved
 2. Architecture approved: ✅ approved 2026-11-26
-3. After each major phase (3–10): pending
+3. After each major phase (3–10): Phase 3 ✅ approved 2026-11-26; Phases 4–10 pending
 4. Before any deployment: pending
