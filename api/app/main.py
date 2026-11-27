@@ -9,6 +9,7 @@ from app.api.discovery import router as discovery_router
 from app.api.eligibility import router as eligibility_router
 from app.api.errors import register_error_handlers
 from app.api.health import router as health_router
+from app.api.packets import router as packets_router
 from app.api.onboarding import router as onboarding_router
 from app.api.profile import router as profile_router
 from app.api.resume import router as resume_router
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
         discovery_router,
         tracking_router,
         dashboard_router,
+        packets_router,
         sources_router,
     ):
         application.include_router(router, prefix=API_PREFIX)

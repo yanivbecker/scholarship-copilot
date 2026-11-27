@@ -955,6 +955,188 @@
         "title": "HealthResponse",
         "type": "object"
       },
+      "ItemIn": {
+        "description": "Create or edit an item. `done` ticks off documents and form fields.",
+        "properties": {
+          "done": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Done"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ItemKind"
+          },
+          "limit_unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LimitUnit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limit Value"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "required": {
+            "default": true,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "title"
+        ],
+        "title": "ItemIn",
+        "type": "object"
+      },
+      "ItemKind": {
+        "description": "What kind of thing the item is.",
+        "enum": [
+          "essay",
+          "short_answer",
+          "document",
+          "form_field"
+        ],
+        "title": "ItemKind",
+        "type": "string"
+      },
+      "ItemOut": {
+        "description": "One thing the application needs, and the student's work on it.",
+        "properties": {
+          "approved_version_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved Version Id"
+          },
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "finished": {
+            "title": "Finished",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ItemKind"
+          },
+          "limit_unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LimitUnit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limit Value"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "prompt_source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Source Url"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/VersionOut"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "prompt",
+          "prompt_source_url",
+          "limit_value",
+          "limit_unit",
+          "required",
+          "done",
+          "finished",
+          "approved_version_id",
+          "versions"
+        ],
+        "title": "ItemOut",
+        "type": "object"
+      },
       "JobRunOut": {
         "description": "One discovery run and what it did.",
         "properties": {
@@ -1020,6 +1202,62 @@
         ],
         "title": "JobRunOut",
         "type": "object"
+      },
+      "LibraryEntryOut": {
+        "description": "An approved response kept for reuse (FR-A8).",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "scholarship_name": {
+            "title": "Scholarship Name",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "prompt",
+          "text",
+          "scholarship_name",
+          "created_at"
+        ],
+        "title": "LibraryEntryOut",
+        "type": "object"
+      },
+      "LimitUnit": {
+        "description": "How a length limit is counted.",
+        "enum": [
+          "chars",
+          "words"
+        ],
+        "title": "LimitUnit",
+        "type": "string"
       },
       "MergeIn": {
         "description": "Merge `other_id` into the scholarship in the URL.",
@@ -1219,6 +1457,101 @@
         "title": "OperatingMode",
         "type": "string"
       },
+      "PacketOut": {
+        "description": "The whole packet for one scholarship cycle.",
+        "properties": {
+          "ai_writing_allowed": {
+            "title": "Ai Writing Allowed",
+            "type": "boolean"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "cycle_id": {
+            "title": "Cycle Id",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/ProgressOut"
+          },
+          "rules_confirmed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rules Confirmed At"
+          },
+          "rules_quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rules Quote"
+          },
+          "rules_source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rules Source Url"
+          },
+          "rules_status": {
+            "$ref": "#/components/schemas/RulesStatus"
+          },
+          "scholarship_id": {
+            "title": "Scholarship Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "scholarship_id",
+          "cycle_id",
+          "rules_status",
+          "rules_quote",
+          "rules_source_url",
+          "rules_confirmed_at",
+          "ai_writing_allowed",
+          "approved_at",
+          "progress",
+          "items"
+        ],
+        "title": "PacketOut",
+        "type": "object"
+      },
       "PasteIn": {
         "description": "Listing text copied from a page that needs a login (FR-D4).",
         "properties": {
@@ -1322,6 +1655,38 @@
         "title": "ProfileUpdate",
         "type": "object"
       },
+      "ProgressOut": {
+        "description": "Required items finished so far, and the titles still missing.",
+        "properties": {
+          "complete": {
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "finished": {
+            "title": "Finished",
+            "type": "integer"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing",
+            "type": "array"
+          },
+          "required": {
+            "title": "Required",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "finished",
+          "required",
+          "missing",
+          "complete"
+        ],
+        "title": "ProgressOut",
+        "type": "object"
+      },
       "QuestionOut": {
         "description": "Answer this to resolve an unknown. `fact_key`: answer in the profile.",
         "properties": {
@@ -1396,6 +1761,17 @@
         ],
         "title": "ResumeUploadOut",
         "type": "object"
+      },
+      "RulesStatus": {
+        "description": "The scholarship's policy on AI help (FR-A1). Unclear counts as no.",
+        "enum": [
+          "unchecked",
+          "allowed",
+          "prohibited",
+          "unclear"
+        ],
+        "title": "RulesStatus",
+        "type": "string"
       },
       "ScamFlagOut": {
         "description": "A warning sign and the text that triggered it (FR-D9).",
@@ -2066,6 +2442,20 @@
         "title": "TodayOut",
         "type": "object"
       },
+      "UseLibraryIn": {
+        "description": "Start an item's response from a library entry.",
+        "properties": {
+          "entry_id": {
+            "title": "Entry Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "entry_id"
+        ],
+        "title": "UseLibraryIn",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -2104,6 +2494,109 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "VersionIn": {
+        "description": "A new version of a response, written by the student.",
+        "properties": {
+          "text": {
+            "maxLength": 50000,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "VersionIn",
+        "type": "object"
+      },
+      "VersionOrigin": {
+        "description": "Who produced a version's text.",
+        "enum": [
+          "student",
+          "ai_draft",
+          "library"
+        ],
+        "title": "VersionOrigin",
+        "type": "string"
+      },
+      "VersionOut": {
+        "description": "One saved version, with its length against the item's limit.",
+        "properties": {
+          "approved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "chars": {
+            "title": "Chars",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/VersionOrigin"
+          },
+          "over_limit": {
+            "title": "Over Limit",
+            "type": "boolean"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provenance"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "words": {
+            "title": "Words",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "text",
+          "origin",
+          "provenance",
+          "created_at",
+          "approved_at",
+          "chars",
+          "words",
+          "over_limit"
+        ],
+        "title": "VersionOut",
         "type": "object"
       }
     }
@@ -2410,6 +2903,31 @@
         ]
       }
     },
+    "/api/v1/library": {
+      "get": {
+        "operationId": "list_library",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LibraryEntryOut"
+                  },
+                  "title": "Response List Library",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Library",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
     "/api/v1/onboarding": {
       "get": {
         "operationId": "get_onboarding",
@@ -2480,6 +2998,387 @@
         "summary": "Submit Onboarding Step",
         "tags": [
           "onboarding"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}": {
+      "delete": {
+        "operationId": "delete_item",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Item",
+        "tags": [
+          "packets"
+        ]
+      },
+      "put": {
+        "operationId": "update_item",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Item",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}/use-library": {
+      "post": {
+        "operationId": "use_library",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UseLibraryIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Use Library",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}/versions": {
+      "post": {
+        "operationId": "save_version",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Version",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}/versions/{version_id}/approve": {
+      "post": {
+        "operationId": "approve_version",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve Version",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
+    "/api/v1/packets/{packet_id}/approve": {
+      "delete": {
+        "operationId": "withdraw_approval",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "title": "Packet Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Withdraw Approval",
+        "tags": [
+          "packets"
+        ]
+      },
+      "post": {
+        "operationId": "approve_packet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "title": "Packet Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve Packet",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
+    "/api/v1/packets/{packet_id}/items": {
+      "post": {
+        "operationId": "add_item",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "title": "Packet Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Item",
+        "tags": [
+          "packets"
         ]
       }
     },
@@ -2921,6 +3820,48 @@
         "summary": "Merge Scholarship",
         "tags": [
           "scholarships"
+        ]
+      }
+    },
+    "/api/v1/scholarships/{scholarship_id}/packet": {
+      "get": {
+        "operationId": "get_packet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scholarship_id",
+            "required": true,
+            "schema": {
+              "title": "Scholarship Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Packet",
+        "tags": [
+          "packets"
         ]
       }
     },

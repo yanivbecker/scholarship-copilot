@@ -10,6 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.modules.eligibility.service import CriterionNotFoundError, NotConfirmableError
+from app.modules.packets.service import PacketError, PacketNotFoundError
 from app.modules.profile.catalog import FactValidationError, FieldErrorsError
 from app.modules.profile.service import NotFoundError, StoryValidationError
 from app.modules.resume.files import ResumeFileError
@@ -51,6 +52,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     NotConfirmableError: 422,
     MergeError: 422,
     StatusChangeError: 422,
+    PacketError: 422,
     ResumeFileError: 422,
     DuplicateSourceError: 409,
     NotFoundError: 404,
@@ -58,6 +60,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     ResumeNotFoundError: 404,
     ScholarshipNotFoundError: 404,
     CriterionNotFoundError: 404,
+    PacketNotFoundError: 404,
 }
 
 

@@ -165,6 +165,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/library": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Library */
+        get: operations["list_library"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/onboarding": {
         parameters: {
             query?: never;
@@ -193,6 +210,110 @@ export interface paths {
         put?: never;
         /** Submit Onboarding Step */
         post: operations["submit_onboarding_step"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Item */
+        put: operations["update_item"];
+        post?: never;
+        /** Delete Item */
+        delete: operations["delete_item"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}/use-library": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Use Library */
+        post: operations["use_library"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save Version */
+        post: operations["save_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}/versions/{version_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Version */
+        post: operations["approve_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packets/{packet_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Packet */
+        post: operations["approve_packet"];
+        /** Withdraw Approval */
+        delete: operations["withdraw_approval"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packets/{packet_id}/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Item */
+        post: operations["add_item"];
         delete?: never;
         options?: never;
         head?: never;
@@ -370,6 +491,23 @@ export interface paths {
         put?: never;
         /** Merge Scholarship */
         post: operations["merge_scholarship"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scholarships/{scholarship_id}/packet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Packet */
+        get: operations["get_packet"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -912,6 +1050,61 @@ export interface components {
             version: string;
         };
         /**
+         * ItemIn
+         * @description Create or edit an item. `done` ticks off documents and form fields.
+         */
+        ItemIn: {
+            /** Done */
+            done?: boolean | null;
+            kind: components["schemas"]["ItemKind"];
+            limit_unit?: components["schemas"]["LimitUnit"] | null;
+            /** Limit Value */
+            limit_value?: number | null;
+            /** Prompt */
+            prompt?: string | null;
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+            /** Title */
+            title: string;
+        };
+        /**
+         * ItemKind
+         * @description What kind of thing the item is.
+         * @enum {string}
+         */
+        ItemKind: "essay" | "short_answer" | "document" | "form_field";
+        /**
+         * ItemOut
+         * @description One thing the application needs, and the student's work on it.
+         */
+        ItemOut: {
+            /** Approved Version Id */
+            approved_version_id: number | null;
+            /** Done */
+            done: boolean;
+            /** Finished */
+            finished: boolean;
+            /** Id */
+            id: number;
+            kind: components["schemas"]["ItemKind"];
+            limit_unit: components["schemas"]["LimitUnit"] | null;
+            /** Limit Value */
+            limit_value: number | null;
+            /** Prompt */
+            prompt: string | null;
+            /** Prompt Source Url */
+            prompt_source_url: string | null;
+            /** Required */
+            required: boolean;
+            /** Title */
+            title: string;
+            /** Versions */
+            versions: components["schemas"]["VersionOut"][];
+        };
+        /**
          * JobRunOut
          * @description One discovery run and what it did.
          */
@@ -938,6 +1131,33 @@ export interface components {
             /** Trigger */
             trigger: string;
         };
+        /**
+         * LibraryEntryOut
+         * @description An approved response kept for reuse (FR-A8).
+         */
+        LibraryEntryOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Prompt */
+            prompt: string | null;
+            /** Scholarship Name */
+            scholarship_name: string;
+            /** Text */
+            text: string;
+            /** Title */
+            title: string;
+        };
+        /**
+         * LimitUnit
+         * @description How a length limit is counted.
+         * @enum {string}
+         */
+        LimitUnit: "chars" | "words";
         /**
          * MergeIn
          * @description Merge `other_id` into the scholarship in the URL.
@@ -1032,6 +1252,32 @@ export interface components {
          */
         OperatingMode: "discovery" | "hybrid" | "automation";
         /**
+         * PacketOut
+         * @description The whole packet for one scholarship cycle.
+         */
+        PacketOut: {
+            /** Ai Writing Allowed */
+            ai_writing_allowed: boolean;
+            /** Approved At */
+            approved_at: string | null;
+            /** Cycle Id */
+            cycle_id: number;
+            /** Id */
+            id: number;
+            /** Items */
+            items: components["schemas"]["ItemOut"][];
+            progress: components["schemas"]["ProgressOut"];
+            /** Rules Confirmed At */
+            rules_confirmed_at: string | null;
+            /** Rules Quote */
+            rules_quote: string | null;
+            /** Rules Source Url */
+            rules_source_url: string | null;
+            rules_status: components["schemas"]["RulesStatus"];
+            /** Scholarship Id */
+            scholarship_id: number;
+        };
+        /**
          * PasteIn
          * @description Listing text copied from a page that needs a login (FR-D4).
          */
@@ -1064,6 +1310,20 @@ export interface components {
             /** Notifications Enabled */
             notifications_enabled?: boolean | null;
             operating_mode?: components["schemas"]["OperatingMode"] | null;
+        };
+        /**
+         * ProgressOut
+         * @description Required items finished so far, and the titles still missing.
+         */
+        ProgressOut: {
+            /** Complete */
+            complete: boolean;
+            /** Finished */
+            finished: number;
+            /** Missing */
+            missing: string[];
+            /** Required */
+            required: number;
         };
         /**
          * QuestionOut
@@ -1099,6 +1359,12 @@ export interface components {
             /** Suggestions */
             suggestions: components["schemas"]["SuggestionOut"][];
         };
+        /**
+         * RulesStatus
+         * @description The scholarship's policy on AI help (FR-A1). Unclear counts as no.
+         * @enum {string}
+         */
+        RulesStatus: "unchecked" | "allowed" | "prohibited" | "unclear";
         /**
          * ScamFlagOut
          * @description A warning sign and the text that triggered it (FR-D9).
@@ -1355,6 +1621,14 @@ export interface components {
             /** New Matches */
             new_matches: components["schemas"]["NewMatchOut"][];
         };
+        /**
+         * UseLibraryIn
+         * @description Start an item's response from a library entry.
+         */
+        UseLibraryIn: {
+            /** Entry Id */
+            entry_id: number;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -1367,6 +1641,50 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /**
+         * VersionIn
+         * @description A new version of a response, written by the student.
+         */
+        VersionIn: {
+            /** Text */
+            text: string;
+        };
+        /**
+         * VersionOrigin
+         * @description Who produced a version's text.
+         * @enum {string}
+         */
+        VersionOrigin: "student" | "ai_draft" | "library";
+        /**
+         * VersionOut
+         * @description One saved version, with its length against the item's limit.
+         */
+        VersionOut: {
+            /** Approved At */
+            approved_at: string | null;
+            /** Chars */
+            chars: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Number */
+            number: number;
+            origin: components["schemas"]["VersionOrigin"];
+            /** Over Limit */
+            over_limit: boolean;
+            /** Provenance */
+            provenance: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Text */
+            text: string;
+            /** Words */
+            words: number;
         };
     };
     responses: never;
@@ -1612,6 +1930,26 @@ export interface operations {
             };
         };
     };
+    list_library: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LibraryEntryOut"][];
+                };
+            };
+        };
+    };
     get_onboarding: {
         parameters: {
             query?: never;
@@ -1654,6 +1992,271 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OnboardingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_item: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_item: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    use_library: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UseLibraryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VersionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_packet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    withdraw_approval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_item: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
                 };
             };
             /** @description Validation Error */
@@ -1977,6 +2580,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScholarshipOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_packet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scholarship_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
                 };
             };
             /** @description Validation Error */
