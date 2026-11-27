@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from app.core.config import DEFAULT_DATA_DIR, REPO_ROOT, resolve_data_dir
+from app.core.config import DEFAULT_DATA_DIR, REPO_ROOT, Settings, resolve_data_dir
 
 
 def test_missing_setting_falls_back_to_default() -> None:
@@ -42,3 +42,15 @@ def test_symlink_into_repo_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="outside the repository"):
         resolve_data_dir(link)
+
+
+@pytest.mark.parametrize("name", ["TAVILY_API_KEY", "ANTHROPIC_API_KEY"])
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_a_blank_key_means_no_key(
+    monkeypatch: pytest.MonkeyPatch, name: str, blank: str
+) -> None:
+    monkeypatch.setenv(name, blank)
+
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+
+    assert settings.tavily_api_key is None and settings.anthropic_api_key is None

@@ -3,6 +3,7 @@ import { useId, useState } from 'react'
 
 import {
   getAppSettings,
+  listApprovedPackets,
   getBackground,
   setBackground,
   setNotificationKinds,
@@ -67,6 +68,7 @@ export function SettingsPage() {
           <SearchSettings settings={settings.data} />
         </>
       )}
+      <ExtensionCard />
     </div>
   )
 }
@@ -381,6 +383,61 @@ function SearchSettings({ settings }: { settings: AppSettings }) {
             {save.error.message}
           </p>
         )}
+      </CardContent>
+    </Card>
+  )
+}
+
+/** FR-X1/X2: what the browser extension does, and how to install it. */
+function ExtensionCard() {
+  const packets = useQuery({
+    queryKey: ['autofill', 'packets'],
+    queryFn: listApprovedPackets,
+  })
+  const count = packets.data?.length ?? 0
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle role="heading" aria-level={2}>
+          Browser extension
+        </CardTitle>
+        <CardDescription>
+          Fills an application form in Chrome from an approved packet when you
+          ask. It never submits, never touches CAPTCHAs and never reads or fills
+          passwords. You check the form and submit it yourself.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <p>
+          {packets.isSuccess
+            ? count === 0
+              ? 'No approved packets yet: approve one on its packet page first.'
+              : `${count} approved packet(s) ready to fill.`
+            : packets.isError
+              ? "Couldn't check approved packets. Is the API running?"
+              : 'Checking approved packets…'}
+        </p>
+        <ol className="list-decimal space-y-1 pl-5">
+          <li>
+            Build it once:{' '}
+            <code>cd extension &amp;&amp; npm ci &amp;&amp; npm run build</code>
+          </li>
+          <li>
+            In Chrome, open <code>chrome://extensions</code>, switch on
+            Developer mode, choose <strong>Load unpacked</strong> and pick the{' '}
+            <code>extension/dist</code> folder.
+          </li>
+          <li>
+            Open the application form, click the extension, then{' '}
+            <strong>Preview</strong> and <strong>Fill</strong>. Fields it
+            couldn't match are outlined in amber for you.
+          </li>
+        </ol>
+        <p className="text-xs text-muted-foreground">
+          It can only reach this app on your computer, and only the tab you
+          click it on. Each fill is recorded in the scholarship's history (how
+          many fields, and the site's name).
+        </p>
       </CardContent>
     </Card>
   )

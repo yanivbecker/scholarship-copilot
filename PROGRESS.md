@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-**Phase 9: Browser-extension autofill** in progress (approved 2026-11-27). Phase 8 complete. Phase 7 complete and reviewed: overnight decisions approved, coaching relaxed to on-by-default (also when rules are unclear); drafting still needs confirmed "allowed" rules. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
+**Phase 9 complete** (2026-11-27); waiting for the owner's review. Phase 10 (security review, hardening, optional cloud) is not started. Phase 7 complete and reviewed: overnight decisions approved, coaching relaxed to on-by-default (also when rules are unclear); drafting still needs confirmed "allowed" rules. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
@@ -12,6 +12,7 @@
 - 2026-11-27: Phase 6 (dashboard) milestones 6.0-6.3 complete (overnight).
 - 2026-11-27: Phase 7 (application packets) milestones 7.1-7.5 complete (overnight).
 - 2026-11-27: Phase 8 (daily monitoring + notifications) milestones 8.1-8.5 complete.
+- 2026-11-27: Phase 9 (browser-extension autofill) milestones 9.1-9.4 complete.
 
 ## Phase 3 checklist
 - [x] Local git repository + planning docs
@@ -66,11 +67,14 @@
 - [x] 9.1 Fill sheet backend (FR-X1, FR-A7): form-field items now hold answers that are versioned and approved like essays (they can't just be ticked off); "Add common form fields from my profile" copies name, email, phone, birth date, city, state, school, major, GPA and graduation year as *unapproved* values (never sensitive facts); a read-only `/autofill` API that only returns an approved packet's approved text; each fill is audited with counts and the site's host only. 6 tests, deliberate breaks caught. Packet page updated (form fields get the editor; no AI writing help for them).
 - [x] 9.2 Extension core (FR-X1, FR-X2), `extension/src`: finds fields with the label a person sees; never offers password, hidden, disabled, read-only, file or CAPTCHA fields; deterministic matching (exact, a small synonym table, word overlap; essays only into text areas; ties and weak matches left for the student and highlighted); fills like a person typing (`input`/`change` only), never overwrites typed text, never cuts an answer short to fit `maxlength`, and re-checks that each field is still the one previewed. 23 tests in jsdom, including a never-submits check of the source itself and a trap proving a password's value is never read; deliberate breaks caught. Tooling reuses web/'s exact versions, no new packages.
 - [x] 9.3 Extension shell: Manifest V3 with only `activeTab`, `scripting` and host access to the local API (no content scripts, no background worker); a popup that preselects the packet for the current site, previews (with untickable rows), fills, records the fill, offers Copy for answers that found no field, and says plainly that nothing was submitted; page text is inserted as text only (a test proves a hostile label can't become HTML). Built with Vite into `extension/dist` (content script as one self-contained file). New CI job: format, lint, typecheck, 29 tests, build, and a check that fails if permissions widen. `fsevents` install script denied.
-- [ ] 9.4 Settings instructions, docs, browser check
+- [x] 9.4 Settings → Browser extension card (what it does, install steps, approved-packet count); `extension/README.md`. Real-browser check (Chrome via Playwright, scratch database) injecting the **built** content script: on a fictional form it filled name, email, school and the essay, refused a GPA longer than the field's `maxlength`, left an unknown field amber, never touched the password (its value was never changed) or the CAPTCHA, and the form was never submitted; on the app's own React form the filled value was picked up by React. Found and fixed: a blank `TAVILY_API_KEY=`/`ANTHROPIC_API_KEY=` counted as configured (now means not set), and tests could see real keys from `api/.env` (now blanked for every test).
 
 ## Known issues
 - Resolved 2026-11-27: pyright 1.1.414 now runs in CI (backend job) and pre-commit (owner-approved), after a pyright-only error from 5.2 reached main.
 - Resolved 2026-11-27: 8.2 and 8.3 were pushed without regenerated API types, so CI's api-contract job failed; fixed in 8.4, and a new `api-types` pre-commit hook now runs the same check before every commit that touches backend code.
+- Resolved 2026-11-27: a real Tavily key had been typed into the tracked `api/.env.example`; the gitleaks hook blocked the commit, nothing reached git history (verified), and the key was moved to the git-ignored `api/.env`.
+- The extension has been tested in jsdom and by injecting its built script in Chrome; it has not been loaded as an installed extension (Playwright here can't load unpacked extensions).
+- The local API has no authentication: anything on this Mac that can reach 127.0.0.1:8000 can read it. Websites can't (no CORS). Planned for Phase 10.
 - The weekly search has only been tested against a fake search service (no Tavily key on this machine).
 - Coaching and drafting prompts have only been tested with a scripted AI; their quality with a real model is unknown until a key or Ollama is set up.
 - The production build warns that the JS bundle is over 500 kB; code-splitting by route would fix it (not done overnight).
@@ -85,4 +89,5 @@
 - Owner: run `uv run alembic upgrade head` in `api/` once more (Phase 8 tables: notifications, watch states, user settings).
 - Owner, optional: `uv run scholar background on` (or Settings → Daily check) to install the 07:00 job; `TAVILY_API_KEY` in `api/.env` plus saved queries for the weekly search.
 - Optional: set `ANTHROPIC_API_KEY` and `SCHOLARSHIP_AI_PROVIDER=anthropic` in `api/.env` to try real extraction.
-- Owner review of Phase 8, then approval for Phase 9 (browser-extension autofill from approved packets).
+- Owner: install the extension (`cd extension && npm ci && npm run build`, then Load unpacked `extension/dist` in chrome://extensions).
+- Owner review of Phase 9, then approval for Phase 10 (security review incl. local API authentication, hardening, optional cloud deployment).

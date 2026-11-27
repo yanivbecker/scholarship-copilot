@@ -39,3 +39,7 @@ export const reviewSource = (id: number, approve: boolean) =>
   request<Schemas['SourceOut']>('POST', `${V1}/sources/${id}/review`, {
     body: { approve },
   })
+
+export type ApprovedPacket = Schemas['ApprovedPacketOut']
+
+export const listApprovedPackets = () => apiGet('/api/v1/autofill/packets')

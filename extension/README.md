@@ -17,7 +17,7 @@ In Chrome: open `chrome://extensions`, switch on **Developer mode**, click
 puzzle-piece menu if you like. After pulling new code, run `npm run build`
 again and press the reload icon on the extension's card.
 
-The app must be running (`uv run fastapi dev` in `api/`, port 8000).
+The app must be running (`uv run python -m app` in `api/`, port 8000).
 
 ## Use
 

@@ -15,6 +15,7 @@ from app.ai.factory import get_ai_provider
 from app.modules.background.launchd import Agent, DryRunLaunchctl
 from app.modules.background.service import get_agent
 from app.modules.sources.search import get_searcher
+from app.core.config import get_settings
 from app.core.db import get_session, make_engine
 from app.api.sources import get_fetcher
 from app.core.storage import LocalFileStorage, get_storage
@@ -32,6 +33,17 @@ def alembic_config(url: str) -> Config:
     config = Config(toml_file=str(API_DIR / "pyproject.toml"))
     config.set_main_option("sqlalchemy.url", url)
     return config
+
+
+@pytest.fixture(autouse=True)
+def no_real_keys(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Tests never see the owner's real API keys from api/.env: blank values
+    win over the file, and a blank key means "not set"."""
+    for name in ("ANTHROPIC_API_KEY", "TAVILY_API_KEY"):
+        monkeypatch.setenv(name, "")
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
 
 
 @pytest.fixture(name="db_url")

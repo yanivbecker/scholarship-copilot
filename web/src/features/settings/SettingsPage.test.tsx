@@ -39,6 +39,28 @@ const render = () =>
   )
 
 describe('SettingsPage', () => {
+  it('explains the browser extension and counts approved packets', async () => {
+    mockApi({
+      'GET /api/v1/background': background(),
+      'GET /api/v1/settings': appSettings(),
+      'GET /api/v1/autofill/packets': [
+        {
+          packet_id: 11,
+          scholarship_id: 7,
+          name: 'Test Foundation STEM Award',
+          hosts: ['example.org'],
+          approved_at: '2027-01-02T00:00:00Z',
+        },
+      ],
+    })
+    render()
+
+    expect(
+      await screen.findByText('1 approved packet(s) ready to fill.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/never submits/)).toBeInTheDocument()
+  })
+
   it('asks before installing the background job (FR-N2)', async () => {
     const calls = mockApi({
       'GET /api/v1/background': background(),

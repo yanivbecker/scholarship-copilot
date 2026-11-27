@@ -8,7 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -57,6 +57,14 @@ class Settings(BaseSettings):
     # plist into the data folder and log launchctl commands, never run them.
     # For trying the switch safely (e.g. a test copy of the app).
     background_dry_run: bool = False
+
+    @field_validator("anthropic_api_key", "tavily_api_key", mode="before")
+    @classmethod
+    def _blank_key_is_no_key(cls, value: object) -> object:
+        """`KEY=` (left empty in .env) means "not set", never an empty key."""
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
 
 @lru_cache
