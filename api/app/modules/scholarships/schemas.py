@@ -70,3 +70,19 @@ class ExtractionReportOut(BaseModel):
     criteria_saved: int
     criteria_rejected: int
     scholarships_rejected: int
+
+
+class DuplicateOut(BaseModel):
+    """Two scholarships that may be the same one (FR-D6)."""
+
+    first_id: int
+    first_name: str
+    second_id: int
+    second_name: str
+    score: float
+
+
+class MergeIn(BaseModel):
+    """Merge `other_id` into the scholarship in the URL."""
+
+    other_id: int

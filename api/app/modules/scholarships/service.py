@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.ai.base import AIError, AIProvider, AIUnavailableError
 from app.ai.structured import ask_structured
+from app.modules.scholarships.dedup import Candidate, is_same_scholarship
 from app.modules.scholarships.evidence import normalize_for_matching
 from app.modules.scholarships.extraction import (
     SYSTEM_PROMPT,
@@ -150,11 +151,7 @@ def _save(  # pylint: disable=too-many-arguments
 ) -> bool:
     """Create or update the scholarship and this year's cycle. True if new."""
     key = match_key(item.name, item.sponsor)
-    scholarship = session.scalars(
-        select(Scholarship).where(
-            Scholarship.user_id == snapshot.user_id, Scholarship.match_key == key
-        )
-    ).first()
+    scholarship = find_existing(session, snapshot.user_id, item, key)
     created = scholarship is None
     if scholarship is None:
         scholarship = Scholarship(
@@ -162,9 +159,8 @@ def _save(  # pylint: disable=too-many-arguments
         )
         session.add(scholarship)
     scholarship.sponsor = item.sponsor or scholarship.sponsor
-    scholarship.official_url = (
-        item.official_url or scholarship.official_url or snapshot.url
-    )
+    # Only the scholarship's own page; the listing page is cycle.source_url.
+    scholarship.official_url = item.official_url or scholarship.official_url
     scholarship.description = item.description or scholarship.description
     known = {f["signal"] for f in scholarship.scam_flags}
     scholarship.scam_flags = scholarship.scam_flags + [
@@ -209,6 +205,33 @@ def _save(  # pylint: disable=too-many-arguments
     ]
     session.flush()
     return created
+
+
+def find_existing(
+    session: Session, user_id: int, item: VerifiedScholarship, key: str
+) -> Scholarship | None:
+    """The stored scholarship this one is, if any (FR-D6).
+
+    Exact identity first; otherwise a near-certain fuzzy match (dedup.py).
+    """
+    exact = session.scalars(
+        select(Scholarship).where(
+            Scholarship.user_id == user_id, Scholarship.match_key == key
+        )
+    ).first()
+    if exact is not None:
+        return exact
+    new = Candidate(item.name, item.sponsor, item.official_url)
+    for existing in session.scalars(
+        select(Scholarship)
+        .where(Scholarship.user_id == user_id)
+        .order_by(Scholarship.id)
+    ):
+        if is_same_scholarship(
+            new, Candidate(existing.name, existing.sponsor, existing.official_url)
+        ):
+            return existing
+    return None
 
 
 def _summary(report: ExtractionReport) -> str:

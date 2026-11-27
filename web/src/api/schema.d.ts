@@ -4,6 +4,44 @@
  */
 
 export interface paths {
+    "/api/v1/discovery/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Now
+         * @description Check every source and extract what changed. Can take a while: each
+         *     site is contacted at most once per second, and AI extraction is slow.
+         */
+        post: operations["run_now"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/runs/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Latest Run */
+        get: operations["get_latest_run"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/eligibility": {
         parameters: {
             query?: never;
@@ -230,6 +268,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scholarships/duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Possible Duplicates
+         * @description Pairs that may be the same scholarship, for the student to decide.
+         */
+        get: operations["list_possible_duplicates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/scholarships/{scholarship_id}": {
         parameters: {
             query?: never;
@@ -278,6 +336,23 @@ export interface paths {
         get: operations["get_eligibility"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scholarships/{scholarship_id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Merge Scholarship */
+        post: operations["merge_scholarship"];
         delete?: never;
         options?: never;
         head?: never;
@@ -568,6 +643,22 @@ export interface components {
             year: number;
         };
         /**
+         * DuplicateOut
+         * @description Two scholarships that may be the same one (FR-D6).
+         */
+        DuplicateOut: {
+            /** First Id */
+            first_id: number;
+            /** First Name */
+            first_name: string;
+            /** Score */
+            score: number;
+            /** Second Id */
+            second_id: number;
+            /** Second Name */
+            second_name: string;
+        };
+        /**
          * EligibilityOut
          * @description The verdict for a scholarship's current cycle (FR-E2).
          */
@@ -708,6 +799,41 @@ export interface components {
             status: string;
             /** Version */
             version: string;
+        };
+        /**
+         * JobRunOut
+         * @description One discovery run and what it did.
+         */
+        JobRunOut: {
+            /** Error */
+            error: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Status */
+            status: string;
+            /** Summary */
+            summary: {
+                [key: string]: unknown;
+            };
+            /** Trigger */
+            trigger: string;
+        };
+        /**
+         * MergeIn
+         * @description Merge `other_id` into the scholarship in the URL.
+         */
+        MergeIn: {
+            /** Other Id */
+            other_id: number;
         };
         /**
          * MissingFactsOut
@@ -1058,6 +1184,46 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    run_now: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobRunOut"];
+                };
+            };
+        };
+    };
+    get_latest_run: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobRunOut"] | null;
+                };
+            };
+        };
+    };
     list_eligibility: {
         parameters: {
             query?: never;
@@ -1458,6 +1624,26 @@ export interface operations {
             };
         };
     };
+    list_possible_duplicates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DuplicateOut"][];
+                };
+            };
+        };
+    };
     get_scholarship: {
         parameters: {
             query?: never;
@@ -1543,6 +1729,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EligibilityOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    merge_scholarship: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scholarship_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScholarshipOut"];
                 };
             };
             /** @description Validation Error */

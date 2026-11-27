@@ -14,6 +14,7 @@ from app.modules.profile.catalog import FactValidationError, FieldErrorsError
 from app.modules.profile.service import NotFoundError, StoryValidationError
 from app.modules.resume.files import ResumeFileError
 from app.modules.resume.service import ResumeNotFoundError
+from app.modules.scholarships.merge import MergeError
 from app.modules.scholarships.service import ScholarshipNotFoundError
 from app.modules.sources.service import (
     DuplicateSourceError,
@@ -47,6 +48,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     UnsafeURLError: 422,
     PasteError: 422,
     NotConfirmableError: 422,
+    MergeError: 422,
     ResumeFileError: 422,
     DuplicateSourceError: 409,
     NotFoundError: 404,

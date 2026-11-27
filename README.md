@@ -35,6 +35,9 @@ cd web
 npm ci
 npm run dev                          # app on http://127.0.0.1:5173, proxies /api to the backend
 
+# Discovery: check every approved source and extract changed pages (from api/)
+uv run scholar discover
+
 # Git hooks (once, from api/)
 uv run pre-commit install
 ```

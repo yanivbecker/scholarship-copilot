@@ -9,7 +9,13 @@ from app.ai.base import AIProvider
 from app.ai.factory import get_ai_provider
 from app.api.deps import CurrentUser, SessionDep
 from app.modules.scholarships import service
-from app.modules.scholarships.schemas import ExtractionReportOut, ScholarshipOut
+from app.modules.scholarships import merge
+from app.modules.scholarships.schemas import (
+    DuplicateOut,
+    ExtractionReportOut,
+    MergeIn,
+    ScholarshipOut,
+)
 from app.modules.sources import service as sources
 
 router = APIRouter(tags=["scholarships"])
@@ -23,6 +29,34 @@ def list_scholarships(session: SessionDep, user: CurrentUser) -> list[Scholarshi
         ScholarshipOut.model_validate(s)
         for s in service.list_scholarships(session, user.id)
     ]
+
+
+@router.get("/scholarships/duplicates")
+def list_possible_duplicates(
+    session: SessionDep, user: CurrentUser
+) -> list[DuplicateOut]:
+    """Pairs that may be the same scholarship, for the student to decide."""
+    return [
+        DuplicateOut(
+            first_id=d.first.id,
+            first_name=d.first.name,
+            second_id=d.second.id,
+            second_name=d.second.name,
+            score=d.score,
+        )
+        for d in merge.possible_duplicates(session, user.id)
+    ]
+
+
+@router.post("/scholarships/{scholarship_id}/merge")
+def merge_scholarship(
+    scholarship_id: int, body: MergeIn, session: SessionDep, user: CurrentUser
+) -> ScholarshipOut:
+    kept = merge.merge_scholarships(session, user.id, scholarship_id, body.other_id)
+    session.commit()
+    return ScholarshipOut.model_validate(
+        service.get_scholarship(session, user.id, kept.id)
+    )
 
 
 @router.get("/scholarships/{scholarship_id}")

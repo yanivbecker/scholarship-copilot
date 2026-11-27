@@ -11,9 +11,15 @@ from typing import TextIO
 
 from sqlalchemy.orm import Session
 
+from app.ai.base import AIProvider
+from app.ai.factory import build_ai_provider
+from app.core.config import get_settings
 from app.core.db import get_session_factory
 from app.core.storage import FileStorage, get_storage
+from app.modules.fetcher.fetcher import PoliteFetcher
+from app.modules.jobs.discovery import run_discovery
 from app.modules.privacy.service import DeletionReport, delete_all_personal_data
+from app.modules.users.service import get_or_create_owner
 
 CONFIRM_WORD = "DELETE"
 
@@ -58,6 +64,38 @@ def cmd_delete_my_data(  # pylint: disable=too-many-arguments
     return 0
 
 
+def cmd_discover(
+    *,
+    session_factory: Callable[[], Session],
+    fetcher: PoliteFetcher,
+    provider: AIProvider,
+    out: TextIO,
+) -> int:
+    """Check every approved source and extract scholarships from changed pages."""
+    with session_factory() as session:
+        owner = get_or_create_owner(session)
+        session.commit()
+        job = run_discovery(
+            session, user_id=owner.id, fetcher=fetcher, provider=provider, trigger="cli"
+        )
+        summary = job.summary
+        for item in summary.get("sources", []):
+            extra = (
+                f", extraction: {item['extraction']}" if item.get("extraction") else ""
+            )
+            print(f"  {item['check']:<18} {item['url']}{extra}", file=out)
+            if item.get("message"):
+                print(f"  {'':<18} {item['message']}", file=out)
+        print(
+            f"Run {job.status}: {len(summary.get('sources', []))} sources checked, "
+            f"{summary.get('scholarships_created', 0)} new and "
+            f"{summary.get('scholarships_updated', 0)} updated scholarships"
+            f" (AI provider: {provider.name}).",
+            file=out,
+        )
+        return 0 if job.status == "succeeded" else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="scholar", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -71,14 +109,21 @@ def build_parser() -> argparse.ArgumentParser:
     delete.add_argument(
         "--yes", action="store_true", help="Don't ask for confirmation."
     )
+    commands.add_parser(
+        "discover",
+        help="Check every approved source and extract scholarships from "
+        "pages that changed.",
+    )
     return parser
 
 
-def run(
+def run(  # pylint: disable=too-many-arguments  # every dependency is injectable
     argv: Sequence[str] | None = None,
     *,
     session_factory: Callable[[], Session] | None = None,
     storage: FileStorage | None = None,
+    fetcher: PoliteFetcher | None = None,
+    provider: AIProvider | None = None,
     ask: Callable[[str], str] = input,
     out: TextIO = sys.stdout,
 ) -> int:
@@ -93,6 +138,19 @@ def run(
             ask=ask,
             out=out,
         )
+    if args.command == "discover":
+        own_fetcher = fetcher is None
+        fetcher = fetcher or PoliteFetcher()
+        try:
+            return cmd_discover(
+                session_factory=session_factory or get_session_factory(),
+                fetcher=fetcher,
+                provider=provider or build_ai_provider(get_settings()),
+                out=out,
+            )
+        finally:
+            if own_fetcher:
+                fetcher.close()
     raise AssertionError(f"Unhandled command {args.command}")  # pragma: no cover
 
 

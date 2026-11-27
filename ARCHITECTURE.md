@@ -115,3 +115,5 @@ scholarship-copilot/
 | 2026-11-26 | Eligibility computed on read, not stored | Pure, fast, deterministic; always reflects the current profile and criteria (FR-E4). A stored copy may be added for sorting at scale later. |
 | 2026-11-26 | When in doubt: unknown, never not met | A wrong "not met" hides a winnable scholarship; a question costs a moment. Applied to scales, places, majors and unreadable data. |
 | 2026-11-26 | FastAPI dependencies take no request-bindable config | Any dependency parameter becomes request input; server configuration only comes from the environment (security review finding). |
+| 2026-11-26 | Dedup: auto-merge only near-certain matches | A wrong merge mixes criteria and verdicts; uncertain pairs are suggested to the student instead (FR-D6). |
+| 2026-11-26 | Discovery commits per source | A failure late in a run doesn't lose earlier sources' results; the run is marked partial (`job_runs`). |

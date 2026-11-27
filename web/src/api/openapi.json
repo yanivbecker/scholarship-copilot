@@ -312,6 +312,40 @@
         "title": "CycleOut",
         "type": "object"
       },
+      "DuplicateOut": {
+        "description": "Two scholarships that may be the same one (FR-D6).",
+        "properties": {
+          "first_id": {
+            "title": "First Id",
+            "type": "integer"
+          },
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "second_id": {
+            "title": "Second Id",
+            "type": "integer"
+          },
+          "second_name": {
+            "title": "Second Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "first_id",
+          "first_name",
+          "second_id",
+          "second_name",
+          "score"
+        ],
+        "title": "DuplicateOut",
+        "type": "object"
+      },
       "EligibilityOut": {
         "description": "The verdict for a scholarship's current cycle (FR-E2).",
         "properties": {
@@ -704,6 +738,86 @@
           "version"
         ],
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "JobRunOut": {
+        "description": "One discovery run and what it did.",
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "additionalProperties": true,
+            "title": "Summary",
+            "type": "object"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "trigger",
+          "status",
+          "started_at",
+          "finished_at",
+          "summary",
+          "error"
+        ],
+        "title": "JobRunOut",
+        "type": "object"
+      },
+      "MergeIn": {
+        "description": "Merge `other_id` into the scholarship in the URL.",
+        "properties": {
+          "other_id": {
+            "title": "Other Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "other_id"
+        ],
+        "title": "MergeIn",
         "type": "object"
       },
       "MissingFactsOut": {
@@ -1558,6 +1672,57 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/discovery/run": {
+      "post": {
+        "description": "Check every source and extract what changed. Can take a while: each\nsite is contacted at most once per second, and AI extraction is slow.",
+        "operationId": "run_now",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRunOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Run Now",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/runs/latest": {
+      "get": {
+        "operationId": "get_latest_run",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/JobRunOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Latest Run"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Latest Run",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
     "/api/v1/eligibility": {
       "get": {
         "description": "Every scholarship, highest priority first.",
@@ -2072,6 +2237,32 @@
         ]
       }
     },
+    "/api/v1/scholarships/duplicates": {
+      "get": {
+        "description": "Pairs that may be the same scholarship, for the student to decide.",
+        "operationId": "list_possible_duplicates",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DuplicateOut"
+                  },
+                  "title": "Response List Possible Duplicates",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Possible Duplicates",
+        "tags": [
+          "scholarships"
+        ]
+      }
+    },
     "/api/v1/scholarships/{scholarship_id}": {
       "get": {
         "operationId": "get_scholarship",
@@ -2215,6 +2406,58 @@
         "summary": "Get Eligibility",
         "tags": [
           "eligibility"
+        ]
+      }
+    },
+    "/api/v1/scholarships/{scholarship_id}/merge": {
+      "post": {
+        "operationId": "merge_scholarship",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scholarship_id",
+            "required": true,
+            "schema": {
+              "title": "Scholarship Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScholarshipOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Merge Scholarship",
+        "tags": [
+          "scholarships"
         ]
       }
     },

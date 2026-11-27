@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
 from app import __version__
+from app.api.discovery import router as discovery_router
 from app.api.eligibility import router as eligibility_router
 from app.api.errors import register_error_handlers
 from app.api.health import router as health_router
@@ -37,6 +38,7 @@ def create_app() -> FastAPI:
         resume_router,
         scholarships_router,
         eligibility_router,
+        discovery_router,
         sources_router,
     ):
         application.include_router(router, prefix=API_PREFIX)
