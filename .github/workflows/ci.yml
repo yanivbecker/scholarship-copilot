@@ -23,9 +23,6 @@ jobs:
     defaults:
       run:
         working-directory: api
-    env:
-      # Keep CI data in the runner's temp dir, never in the repo (NFR-1).
-      SCHOLARSHIP_DATA_DIR: ${{ runner.temp }}/scholarship-data
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10
@@ -42,6 +39,10 @@ jobs:
       - name: pytest
         run: uv run pytest
       - name: Migrations apply cleanly and match the models
+        # Keep CI data in the runner's temp dir, never in the repo (NFR-1).
+        # (`runner.temp` only exists at step level, not in job-level env.)
+        env:
+          SCHOLARSHIP_DATA_DIR: ${{ runner.temp }}/scholarship-data
         run: |
           uv run alembic upgrade head
           uv run alembic check

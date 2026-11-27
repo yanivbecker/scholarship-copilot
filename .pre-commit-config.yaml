@@ -11,6 +11,13 @@ repos:
         pass_filenames: false
         always_run: true
 
+      # --- GitHub Actions workflows: catch errors GitHub would reject ---
+      - id: actionlint
+        name: actionlint
+        entry: actionlint
+        language: system
+        files: ^\.github/workflows/.*\.ya?ml$
+
       # --- Backend (api/) ---
       - id: ruff-format
         name: ruff format

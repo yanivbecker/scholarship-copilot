@@ -19,7 +19,8 @@ Python · FastAPI · SQLAlchemy · SQLite · React · TypeScript · Vite · Tail
 ## Development setup
 
 **Prerequisites:** [uv](https://docs.astral.sh/uv/) (installs Python 3.13 for you), Node.js 26,
-and [gitleaks](https://github.com/gitleaks/gitleaks) (`brew install gitleaks`) for the commit hook.
+[gitleaks](https://github.com/gitleaks/gitleaks) and [actionlint](https://github.com/rhysd/actionlint)
+(`brew install gitleaks actionlint`) for the commit hooks.
 
 ```bash
 # Backend (api/)
