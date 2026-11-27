@@ -12,6 +12,8 @@ from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
 from app.ai.factory import get_ai_provider
+from app.modules.background.launchd import Agent, DryRunLaunchctl
+from app.modules.background.service import get_agent
 from app.core.db import get_session, make_engine
 from app.api.sources import get_fetcher
 from app.core.storage import LocalFileStorage, get_storage
@@ -73,7 +75,7 @@ def fixture_web() -> FakeWeb:
 
 @pytest.fixture(name="client")
 def fixture_client(
-    engine: Engine, storage: LocalFileStorage, web: FakeWeb
+    engine: Engine, storage: LocalFileStorage, web: FakeWeb, tmp_path: Path
 ) -> Iterator[TestClient]:
     """An API client using this test's throwaway database, files and fake web."""
 
@@ -85,6 +87,13 @@ def fixture_client(
     app.dependency_overrides[get_session] = test_session
     app.dependency_overrides[get_storage] = lambda: storage
     app.dependency_overrides[get_fetcher] = web.fetcher
+    # Never the real launchd: a dry-run agent in this test's folder.
+    app.dependency_overrides[get_agent] = lambda: Agent(
+        tmp_path / "LaunchAgents",
+        DryRunLaunchctl(),
+        tmp_path / "data",
+        find_uv=lambda: "/opt/fake/bin/uv",
+    )
     with TestClient(app) as client:
         yield client
 

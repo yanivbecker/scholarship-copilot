@@ -16,6 +16,8 @@ from app.ai.factory import build_ai_provider
 from app.core.config import get_settings
 from app.core.db import get_session_factory
 from app.core.storage import FileStorage, get_storage
+from app.modules.background import service as background
+from app.modules.background.launchd import Agent, BackgroundError
 from app.modules.fetcher.fetcher import PoliteFetcher
 from app.modules.jobs.daily import SCHEDULE, run_daily
 from app.modules.jobs.discovery import run_discovery
@@ -130,6 +132,44 @@ def cmd_daily(  # pylint: disable=too-many-arguments
         return 0 if result.ok else 1
 
 
+def cmd_background(
+    action: str,
+    *,
+    session_factory: Callable[[], Session],
+    agent: Agent,
+    out: TextIO,
+) -> int:
+    """FR-N2: `scholar background on|off|status`."""
+    with session_factory() as session:
+        owner = get_or_create_owner(session)
+        session.commit()
+        if action in {"on", "off"}:
+            try:
+                background.switch(session, owner.id, agent, on=action == "on")
+            except BackgroundError as exc:
+                print(f"Couldn't switch background running {action}: {exc}", file=out)
+                return 1
+        state = background.status(session, owner.id, agent)
+        session.commit()
+        print(state.summary, file=out)
+        print(
+            f"  agent file: {state.plist_path} "
+            f"({'installed' if state.installed else 'not installed'}, "
+            f"{'loaded' if state.loaded else 'not loaded'})",
+            file=out,
+        )
+        if state.dry_run:
+            print("  dry run: launchctl was not called.", file=out)
+        last = state.last_scheduled_run
+        print(
+            f"  last scheduled run: {last.started_at:%Y-%m-%d %H:%M} ({last.status})"
+            if last
+            else "  last scheduled run: never",
+            file=out,
+        )
+        return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="scholar", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -158,6 +198,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run as the background job: does nothing while background "
         "running is switched off (used by launchd).",
     )
+    bg = commands.add_parser(
+        "background",
+        help="Switch the daily background job on or off, or show its status.",
+    )
+    bg.add_argument("action", choices=["on", "off", "status"])
     return parser
 
 
@@ -168,6 +213,7 @@ def run(  # pylint: disable=too-many-arguments  # every dependency is injectable
     storage: FileStorage | None = None,
     fetcher: PoliteFetcher | None = None,
     provider: AIProvider | None = None,
+    agent: Agent | None = None,
     ask: Callable[[str], str] = input,
     out: TextIO = sys.stdout,
 ) -> int:
@@ -209,6 +255,13 @@ def run(  # pylint: disable=too-many-arguments  # every dependency is injectable
         finally:
             if own_fetcher:
                 fetcher.close()
+    if args.command == "background":
+        return cmd_background(
+            args.action,
+            session_factory=session_factory or get_session_factory(),
+            agent=agent or background.get_agent(),
+            out=out,
+        )
     raise AssertionError(f"Unhandled command {args.command}")  # pragma: no cover
 
 

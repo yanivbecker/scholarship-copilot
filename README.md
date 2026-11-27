@@ -39,6 +39,8 @@ npm run dev                          # app on http://127.0.0.1:5173, proxies /ap
 uv run scholar discover
 # The daily job: discovery, then notifications (what the 07:00 schedule runs)
 uv run scholar daily
+# Background running (FR-N2): on | off | status. See ops/launchd/README.md
+uv run scholar background status
 
 # Git hooks (once, from api/)
 uv run pre-commit install

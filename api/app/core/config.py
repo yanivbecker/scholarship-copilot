@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     )
     search_interval_days: int = 7
 
+    # --- Background job (FR-N2) ---
+    # True: `scholar background on/off` and the Settings page only write the
+    # plist into the data folder and log launchctl commands, never run them.
+    # For trying the switch safely (e.g. a test copy of the app).
+    background_dry_run: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:

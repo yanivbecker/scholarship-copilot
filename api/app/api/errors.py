@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.ai.base import AIError, AIUnavailableError
 
+from app.modules.background.launchd import BackgroundError
 from app.modules.eligibility.service import CriterionNotFoundError, NotConfirmableError
 from app.modules.packets.provenance import MaterialError
 from app.modules.packets.rules import RulesError
@@ -61,6 +62,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     PacketError: 422,
     RulesError: 422,
     SettingsError: 422,
+    BackgroundError: 502,  # launchctl refused; the message says why
     MaterialError: 422,
     AIHelpBlockedError: 403,
     AIUnavailableError: 503,  # AI turned off or unreachable: say how to proceed
