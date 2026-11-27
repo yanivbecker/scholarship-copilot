@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
+from app.ai.factory import get_ai_provider
 from app.core.db import get_session, make_engine
 from app.api.sources import get_fetcher
 from app.core.storage import LocalFileStorage, get_storage
@@ -18,6 +19,8 @@ from app.main import create_app
 from app.modules.users.models import User
 from app.modules.users.service import get_or_create_owner
 from tests.fake_web import FakeWeb, new_web
+from tests.fakes import ScriptedProvider
+from tests.sample_listing import PAGE, answer, award
 
 API_DIR = Path(__file__).resolve().parents[1]
 
@@ -84,3 +87,17 @@ def fixture_client(
     app.dependency_overrides[get_fetcher] = web.fetcher
     with TestClient(app) as client:
         yield client
+
+
+@pytest.fixture(name="scholarship_id")
+def fixture_scholarship_id(client: TestClient) -> int:
+    """The fictional sample award, extracted through the API with a scripted AI."""
+    provider = ScriptedProvider(answer(award()))
+    client.app.dependency_overrides[get_ai_provider] = lambda: provider  # type: ignore[attr-defined]
+    source = client.post(
+        "/api/v1/sources", json={"url": "https://example.org/awards"}
+    ).json()
+    client.post(f"/api/v1/sources/{source['id']}/paste", json={"text": PAGE})
+    client.post(f"/api/v1/sources/{source['id']}/extract")
+    [scholarship] = client.get("/api/v1/scholarships").json()
+    return int(scholarship["id"])

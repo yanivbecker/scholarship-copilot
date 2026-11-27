@@ -14,6 +14,7 @@ from app.api.resume import router as resume_router
 from app.api.scholarships import router as scholarships_router
 from app.api.sources import router as sources_router
 from app.api.stories import router as stories_router
+from app.api.tracking import router as tracking_router
 
 API_PREFIX = "/api/v1"
 
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
         scholarships_router,
         eligibility_router,
         discovery_router,
+        tracking_router,
         sources_router,
     ):
         application.include_router(router, prefix=API_PREFIX)

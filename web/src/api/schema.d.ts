@@ -359,6 +359,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scholarships/{scholarship_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Status */
+        get: operations["get_status"];
+        put?: never;
+        /** Change Status */
+        post: operations["change_status"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources": {
         parameters: {
             query?: never;
@@ -525,6 +543,31 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * ApplicationStatus
+         * @description Where the student is with one scholarship.
+         * @enum {string}
+         */
+        ApplicationStatus: "discovered" | "eligibility_confirmed" | "ready_to_apply" | "in_progress" | "awaiting_approval" | "submitted" | "won" | "rejected";
+        /**
+         * AuditEventOut
+         * @description One recorded change.
+         */
+        AuditEventOut: {
+            /** Action */
+            action: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** From Status */
+            from_status: string | null;
+            /** Note */
+            note: string | null;
+            /** To Status */
+            to_status: string | null;
+        };
         /** Body_upload_resume */
         Body_upload_resume: {
             /** File */
@@ -844,6 +887,19 @@ export interface components {
             missing: string[];
         };
         /**
+         * NextStepOut
+         * @description A status this scholarship can move to (or why it can't yet).
+         */
+        NextStepOut: {
+            /** Blocked Reason */
+            blocked_reason: string | null;
+            /** Label */
+            label: string;
+            /** Needs Confirmation */
+            needs_confirmation: boolean;
+            status: components["schemas"]["ApplicationStatus"];
+        };
+        /**
          * OnboardingOut
          * @description The wizard's steps and where the student is (resumable, FR-P1).
          */
@@ -1109,6 +1165,33 @@ export interface components {
          * @enum {string}
          */
         SourceStatus: "approved" | "pending_review" | "rejected";
+        /**
+         * StatusChangeIn
+         * @description Move to `status`. Submitting needs `confirmed: true` (FR-A7).
+         */
+        StatusChangeIn: {
+            /**
+             * Confirmed
+             * @default false
+             */
+            confirmed: boolean;
+            /** Note */
+            note?: string | null;
+            status: components["schemas"]["ApplicationStatus"];
+        };
+        /**
+         * StatusOut
+         * @description Current status, possible next steps, and the history (FR-UI4).
+         */
+        StatusOut: {
+            /** History */
+            history: components["schemas"]["AuditEventOut"][];
+            /** Label */
+            label: string;
+            /** Next Steps */
+            next_steps: components["schemas"]["NextStepOut"][];
+            status: components["schemas"]["ApplicationStatus"];
+        };
         /**
          * StoryIn
          * @description A story to create or replace. Detailed rules are checked by the service.
@@ -1772,6 +1855,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScholarshipOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scholarship_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scholarship_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusChangeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusOut"];
                 };
             };
             /** @description Validation Error */

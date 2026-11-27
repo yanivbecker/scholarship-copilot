@@ -118,3 +118,4 @@ scholarship-copilot/
 | 2026-11-26 | Dedup: auto-merge only near-certain matches | A wrong merge mixes criteria and verdicts; uncertain pairs are suggested to the student instead (FR-D6). |
 | 2026-11-26 | Discovery commits per source | A failure late in a run doesn't lose earlier sources' results; the run is marked partial (`job_runs`). |
 | 2026-11-27 | Warning signs lower the priority score | A flagged listing is still shown with its evidence (FR-D9) but its score is cut to 25%, so it's never recommended first. |
+\n| 2026-11-27 | Status path is fixed, one step at a time (overnight decision) | Conservative reading of FR-UI4: no skipping, one step back to undo; eligibility confirmation needs an Eligible verdict; Submitted needs explicit confirmation. No extra statuses (e.g. archived) were added. |\n

@@ -6,7 +6,6 @@ facts and answers change and the verdict follows immediately.
 
 from typing import Any
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.ai.factory import get_ai_provider
@@ -14,20 +13,6 @@ from tests.fakes import ScriptedProvider
 from tests.sample_listing import PAGE, answer, award
 
 V1 = "/api/v1"
-
-
-@pytest.fixture(name="scholarship_id")
-def fixture_scholarship_id(client: TestClient) -> int:
-    """Extract the sample award and return its id."""
-    provider = ScriptedProvider(answer(award()))
-    client.app.dependency_overrides[get_ai_provider] = lambda: provider  # type: ignore[attr-defined]
-    source = client.post(
-        f"{V1}/sources", json={"url": "https://example.org/awards"}
-    ).json()
-    client.post(f"{V1}/sources/{source['id']}/paste", json={"text": PAGE})
-    client.post(f"{V1}/sources/{source['id']}/extract")
-    [scholarship] = client.get(f"{V1}/scholarships").json()
-    return int(scholarship["id"])
 
 
 def eligibility(client: TestClient, scholarship_id: int) -> dict[str, Any]:

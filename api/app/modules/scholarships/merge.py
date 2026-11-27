@@ -13,6 +13,7 @@ from app.modules.eligibility.models import CriterionConfirmation
 from app.modules.scholarships import service
 from app.modules.scholarships.dedup import Candidate, possible_duplicate_score
 from app.modules.scholarships.models import Scholarship
+from app.modules.tracking.models import AuditEvent
 
 
 class MergeError(ValueError):
@@ -83,6 +84,15 @@ def merge_scholarships(
             confirmation.scholarship_id = keep.id
         else:
             session.delete(confirmation)
+
+    # The merged scholarship's history now belongs to the kept one. The kept
+    # scholarship's status stays as it is (the conservative choice).
+    for event in session.scalars(
+        select(AuditEvent).where(
+            AuditEvent.user_id == user_id, AuditEvent.scholarship_id == other.id
+        )
+    ):
+        event.scholarship_id = keep.id
 
     keep.sponsor = keep.sponsor or other.sponsor
     keep.official_url = keep.official_url or other.official_url

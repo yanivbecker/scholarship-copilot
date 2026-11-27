@@ -22,6 +22,7 @@ from app.modules.sources.service import (
     SourceNotFoundError,
 )
 from app.modules.sources.url_safety import UnsafeURLError
+from app.modules.tracking.service import StatusChangeError
 
 type Handler = Callable[[Request, Exception], Awaitable[JSONResponse]]
 
@@ -49,6 +50,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     PasteError: 422,
     NotConfirmableError: 422,
     MergeError: 422,
+    StatusChangeError: 422,
     ResumeFileError: 422,
     DuplicateSourceError: 409,
     NotFoundError: 404,

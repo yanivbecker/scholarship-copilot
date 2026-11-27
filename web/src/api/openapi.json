@@ -1,6 +1,77 @@
 {
   "components": {
     "schemas": {
+      "ApplicationStatus": {
+        "description": "Where the student is with one scholarship.",
+        "enum": [
+          "discovered",
+          "eligibility_confirmed",
+          "ready_to_apply",
+          "in_progress",
+          "awaiting_approval",
+          "submitted",
+          "won",
+          "rejected"
+        ],
+        "title": "ApplicationStatus",
+        "type": "string"
+      },
+      "AuditEventOut": {
+        "description": "One recorded change.",
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "to_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Status"
+          }
+        },
+        "required": [
+          "action",
+          "from_status",
+          "to_status",
+          "note",
+          "created_at"
+        ],
+        "title": "AuditEventOut",
+        "type": "object"
+      },
       "Body_upload_resume": {
         "properties": {
           "file": {
@@ -837,6 +908,41 @@
         "title": "MissingFactsOut",
         "type": "object"
       },
+      "NextStepOut": {
+        "description": "A status this scholarship can move to (or why it can't yet).",
+        "properties": {
+          "blocked_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked Reason"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "needs_confirmation": {
+            "title": "Needs Confirmation",
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          }
+        },
+        "required": [
+          "status",
+          "label",
+          "blocked_reason",
+          "needs_confirmation"
+        ],
+        "title": "NextStepOut",
+        "type": "object"
+      },
       "OnboardingOut": {
         "description": "The wizard's steps and where the student is (resumable, FR-P1).",
         "properties": {
@@ -1542,6 +1648,70 @@
         ],
         "title": "SourceStatus",
         "type": "string"
+      },
+      "StatusChangeIn": {
+        "description": "Move to `status`. Submitting needs `confirmed: true` (FR-A7).",
+        "properties": {
+          "confirmed": {
+            "default": false,
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "StatusChangeIn",
+        "type": "object"
+      },
+      "StatusOut": {
+        "description": "Current status, possible next steps, and the history (FR-UI4).",
+        "properties": {
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/AuditEventOut"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "next_steps": {
+            "items": {
+              "$ref": "#/components/schemas/NextStepOut"
+            },
+            "title": "Next Steps",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          }
+        },
+        "required": [
+          "status",
+          "label",
+          "next_steps",
+          "history"
+        ],
+        "title": "StatusOut",
+        "type": "object"
       },
       "StoryIn": {
         "description": "A story to create or replace. Detailed rules are checked by the service.",
@@ -2504,6 +2674,98 @@
         "summary": "Merge Scholarship",
         "tags": [
           "scholarships"
+        ]
+      }
+    },
+    "/api/v1/scholarships/{scholarship_id}/status": {
+      "get": {
+        "operationId": "get_status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scholarship_id",
+            "required": true,
+            "schema": {
+              "title": "Scholarship Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Status",
+        "tags": [
+          "tracking"
+        ]
+      },
+      "post": {
+        "operationId": "change_status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scholarship_id",
+            "required": true,
+            "schema": {
+              "title": "Scholarship Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Change Status",
+        "tags": [
+          "tracking"
         ]
       }
     },
