@@ -38,6 +38,21 @@ def make_eligible(client: TestClient, sid: int) -> None:
             )
 
 
+def finished_packet(client: TestClient, sid: int) -> dict[str, Any]:
+    """A packet whose one required item (a document) is ticked off."""
+    packet: dict[str, Any] = client.get(f"{V1}/scholarships/{sid}/packet").json()
+    body = client.post(
+        f"{V1}/packets/{packet['id']}/items",
+        json={"kind": "document", "title": "Transcript"},
+    ).json()
+    item = body["items"][0]
+    client.put(
+        f"{V1}/packet-items/{item['id']}",
+        json={"kind": "document", "title": "Transcript", "done": True},
+    )
+    return packet
+
+
 def test_new_scholarships_start_as_discovered(
     client: TestClient, scholarship_id: int
 ) -> None:
@@ -73,13 +88,14 @@ def test_full_path_with_explicit_submission_and_audit(
     client: TestClient, scholarship_id: int
 ) -> None:
     make_eligible(client, scholarship_id)
-    for step in (
-        "eligibility_confirmed",
-        "ready_to_apply",
-        "in_progress",
-        "awaiting_approval",
-    ):
+    for step in ("eligibility_confirmed", "ready_to_apply", "in_progress"):
         assert move(client, scholarship_id, step).status_code == 200
+    packet = finished_packet(client, scholarship_id)
+    assert move(client, scholarship_id, "awaiting_approval").status_code == 200
+    not_approved = move(client, scholarship_id, "submitted", confirmed=True)
+    assert not_approved.status_code == 422
+    assert "Approve the application packet" in not_approved.json()["detail"]
+    client.post(f"{V1}/packets/{packet['id']}/approve")
 
     unconfirmed = move(client, scholarship_id, "submitted")
     assert unconfirmed.status_code == 422  # FR-A7: the student must say so
@@ -93,7 +109,7 @@ def test_full_path_with_explicit_submission_and_audit(
     assert done.json()["status"] == "submitted"
     assert move(client, scholarship_id, "won").json()["status"] == "won"
 
-    history = status(client, scholarship_id)["history"]
+    history = [h for h in status(client, scholarship_id)["history"] if h["to_status"]]
     assert [h["to_status"] for h in history] == [
         "won",
         "submitted",
@@ -152,3 +168,28 @@ def test_history_follows_a_merge(client: TestClient, scholarship_id: int) -> Non
 
     history = status(client, other["id"])["history"]
     assert [h["to_status"] for h in history] == ["eligibility_confirmed"]
+
+
+def test_approval_waits_for_a_complete_packet(
+    client: TestClient, scholarship_id: int
+) -> None:
+    """FR-A7: in progress -> awaiting approval only when every item is done."""
+    make_eligible(client, scholarship_id)
+    for step in ("eligibility_confirmed", "ready_to_apply", "in_progress"):
+        move(client, scholarship_id, step)
+    [step] = [
+        s
+        for s in status(client, scholarship_id)["next_steps"]
+        if s["status"] == "awaiting_approval"
+    ]
+    assert "Add the application's items" in step["blocked_reason"]
+
+    packet = client.get(f"{V1}/scholarships/{scholarship_id}/packet").json()
+    client.post(
+        f"{V1}/packets/{packet['id']}/items",
+        json={"kind": "essay", "title": "Leadership essay"},
+    )
+    refused = move(client, scholarship_id, "awaiting_approval")
+
+    assert refused.status_code == 422
+    assert "Leadership essay" in refused.json()["detail"]

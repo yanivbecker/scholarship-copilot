@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.eligibility import service as eligibility
 from app.modules.eligibility.engine import Verdict
+from app.modules.packets import service as packets
 from app.modules.scholarships import service as scholarships
 from app.modules.scholarships.models import Scholarship
 from app.modules.tracking.models import AuditEvent
@@ -51,6 +52,32 @@ def _blocked_reason(
                 "Eligibility can only be confirmed when every listed requirement "
                 "is met. Answer the open questions first."
             )
+    current = current_status(scholarship)
+    if (
+        target is ApplicationStatus.AWAITING_APPROVAL
+        and current is ApplicationStatus.IN_PROGRESS
+    ):
+        return _packet_incomplete(session, scholarship, today)
+    if (
+        target is ApplicationStatus.SUBMITTED
+        and current is ApplicationStatus.AWAITING_APPROVAL
+    ):
+        packet = packets.find_current_packet(session, scholarship, today)
+        if packet is None or packet.approved_at is None:
+            return "Approve the application packet before marking it submitted."
+    return None
+
+
+def _packet_incomplete(
+    session: Session, scholarship: Scholarship, today: date
+) -> str | None:
+    """FR-A7: approval waits until every required item is finished."""
+    packet = packets.find_current_packet(session, scholarship, today)
+    if packet is None or not packet.items:
+        return "Add the application's items to its packet first."
+    state = packets.progress(packet)
+    if not state.complete:
+        return "Finish every required item first: " + ", ".join(state.missing) + "."
     return None
 
 

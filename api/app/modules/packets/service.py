@@ -25,6 +25,7 @@ from app.modules.packets.models import (
     VersionOrigin,
 )
 from app.modules.scholarships import service as scholarships
+from app.modules.scholarships.models import Scholarship
 from app.modules.tracking.models import AuditEvent
 
 MAX_TITLE = 300
@@ -97,6 +98,20 @@ def get_or_create_packet(
         session.add(packet)
         session.flush()
     return packet
+
+
+def find_current_packet(
+    session: Session, scholarship: Scholarship, today: date
+) -> Packet | None:
+    """The current cycle's packet, if the student has started one."""
+    cycle = current_cycle(scholarship, today)
+    if cycle is None:
+        return None
+    return session.scalars(
+        select(Packet)
+        .where(Packet.cycle_id == cycle.id, Packet.user_id == scholarship.user_id)
+        .options(selectinload(Packet.items).selectinload(PacketItem.versions))
+    ).first()
 
 
 def get_packet(session: Session, user_id: int, packet_id: int) -> Packet:
