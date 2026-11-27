@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-**Phase 7 complete** (2026-11-27, overnight run). Owner reviewed it: overnight decisions approved, with coaching relaxed to on-by-default. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
+**Phase 8: Daily monitoring + notifications** in progress (approved 2026-11-27). Phase 7 complete and reviewed: overnight decisions approved, coaching relaxed to on-by-default (also when rules are unclear); drafting still needs confirmed "allowed" rules. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
@@ -54,6 +54,13 @@
 - [x] 7.4 Status gates tied to the packet (FR-A7): In progress → Awaiting approval needs every required item finished; Awaiting approval → Submitted needs the approved packet (plus the "I submitted it myself" confirmation). Undo steps stay open. Deliberate breaks caught.
 - [x] 7.5 Packet page UI (`/scholarships/:id/packet`): progress and packet approval, AI-use rules card (scan, pick a quote, confirm), checklist with documents ticked off, editor with a live word/character counter matching the API's count, copy buttons, versions (load, approve, check names and numbers, where each sentence came from), start from the library, writing help shown only when rules allow it (with a plain explanation otherwise). Status history now names packet events. 12 Vitest tests; browser check on a scratch database at desktop and 390 px (no horizontal overflow). The browser check found a claim-check bug ("Lincoln High School and"), fixed with a regression test.
 
+## Phase 8 checklist
+- [x] 8.1 Notifications with change detection (FR-N4, FR-N5): a saved "watch state" per scholarship (deadline, amount, verdict, requirements) so only material changes are announced, each once; new matches (not for ineligible or closed listings); deadline reminders at 14 and 3 days, keyed so each fires once; master switch plus per-kind switches that never cause a flood when turned back on; finished applications left alone. Notifications and settings API; search-query suggestions from an allowlist of facts. 12 tests, deliberate breaks caught. Migration `83986679184c` round-trips; delete-my-data covers the new tables.
+- [ ] 8.2 `scholar daily` job (FR-N1, FR-N2)
+- [ ] 8.3 Background switch: launchd template, `scholar background on/off/status` (FR-N2)
+- [ ] 8.4 Weekly source search with saved queries (FR-N3, FR-D1)
+- [ ] 8.5 UI: notifications, Settings page, suggested sources
+
 ## Known issues
 - Resolved 2026-11-27: pyright 1.1.414 now runs in CI (backend job) and pre-commit (owner-approved), after a pyright-only error from 5.2 reached main.
 - Coaching and drafting prompts have only been tested with a scripted AI; their quality with a real model is unknown until a key or Ollama is set up.
@@ -66,6 +73,6 @@
 - Resolved 2026-11-26: Starlette's TestClient deprecated `httpx`; switched the dev dependency to `httpx2` 2.16.2 (owner-approved; verified same maintainer, pydantic/httpx2).
 
 ## Next steps
-- Owner: run `uv run alembic upgrade head` in `api/` (several new migrations).
+- Owner: run `uv run alembic upgrade head` in `api/` again when Phase 8 lands (new tables: notifications, watch states, user settings).
 - Optional: set `ANTHROPIC_API_KEY` and `SCHOLARSHIP_AI_PROVIDER=anthropic` in `api/.env` to try real extraction.
 - Owner review of Phases 6 and 7 (see the overnight decisions in ARCHITECTURE.md's decision log), then approval for Phase 8 (daily monitoring + notifications).

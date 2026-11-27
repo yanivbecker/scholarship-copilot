@@ -8,9 +8,11 @@ from app.core.db import Base
 from app.modules.documents import models as documents_models
 from app.modules.eligibility import models as eligibility_models
 from app.modules.jobs import models as jobs_models
+from app.modules.notify import models as notify_models
 from app.modules.packets import models as packets_models
 from app.modules.profile import models as profile_models
 from app.modules.scholarships import models as scholarships_models
+from app.modules.settings import models as settings_models
 from app.modules.sources import models as sources_models
 from app.modules.tracking import models as tracking_models
 from app.modules.users import models as users_models
@@ -20,9 +22,11 @@ __all__ = [
     "documents_models",
     "eligibility_models",
     "jobs_models",
+    "notify_models",
     "packets_models",
     "profile_models",
     "scholarships_models",
+    "settings_models",
     "sources_models",
     "tracking_models",
     "users_models",

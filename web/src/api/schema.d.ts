@@ -182,6 +182,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Notifications */
+        get: operations["list_notifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Notifications Read */
+        post: operations["mark_notifications_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/onboarding": {
         parameters: {
             query?: never;
@@ -674,6 +708,60 @@ export interface paths {
         put?: never;
         /** Change Status */
         post: operations["change_status"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Settings */
+        get: operations["get_settings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Notification Kinds */
+        put: operations["set_notification_kinds"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/search-queries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Search Queries
+         * @description FR-N3: nothing is sent to search until the student saves queries here.
+         */
+        put: operations["set_search_queries"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1402,6 +1490,14 @@ export interface components {
          */
         LimitUnit: "chars" | "words";
         /**
+         * MarkReadIn
+         * @description Which notifications to mark read; leave out `ids` for all of them.
+         */
+        MarkReadIn: {
+            /** Ids */
+            ids?: number[] | null;
+        };
+        /**
          * MergeIn
          * @description Merge `other_id` into the scholarship in the URL.
          */
@@ -1446,6 +1542,54 @@ export interface components {
             /** Needs Confirmation */
             needs_confirmation: boolean;
             status: components["schemas"]["ApplicationStatus"];
+        };
+        /**
+         * NotificationKind
+         * @description What a notification is about (each can be switched off, FR-N5).
+         * @enum {string}
+         */
+        NotificationKind: "new_match" | "changed" | "deadline";
+        /**
+         * NotificationKindsIn
+         * @description FR-N5: turn each kind of notification on or off.
+         */
+        NotificationKindsIn: {
+            /** Kinds */
+            kinds: {
+                [key: string]: boolean;
+            };
+        };
+        /**
+         * NotificationOut
+         * @description One in-app notification.
+         */
+        NotificationOut: {
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            kind: components["schemas"]["NotificationKind"];
+            /** Read At */
+            read_at: string | null;
+            /** Scholarship Id */
+            scholarship_id: number | null;
+            /** Title */
+            title: string;
+        };
+        /**
+         * NotificationsOut
+         * @description Recent notifications, newest first, and how many are unread.
+         */
+        NotificationsOut: {
+            /** Items */
+            items: components["schemas"]["NotificationOut"][];
+            /** Unread */
+            unread: number;
         };
         /**
          * OnboardingOut
@@ -1756,6 +1900,14 @@ export interface components {
             value: number;
         };
         /**
+         * SearchQueriesIn
+         * @description FR-N3: the exact queries the student approves for web search.
+         */
+        SearchQueriesIn: {
+            /** Queries */
+            queries: string[];
+        };
+        /**
          * SectionOut
          * @description A group of facts, in display order.
          */
@@ -1777,6 +1929,28 @@ export interface components {
             sentence: string;
             /** Unsupported */
             unsupported: string[];
+        };
+        /**
+         * SettingsOut
+         * @description Background, notification and search settings.
+         */
+        SettingsOut: {
+            /** Background Enabled */
+            background_enabled: boolean;
+            /** Last Search At */
+            last_search_at: string | null;
+            /** Notification Kinds */
+            notification_kinds: {
+                [key: string]: boolean;
+            };
+            /** Notifications Enabled */
+            notifications_enabled: boolean;
+            /** Search Configured */
+            search_configured: boolean;
+            /** Search Queries */
+            search_queries: string[];
+            /** Suggested Queries */
+            suggested_queries: string[];
         };
         /**
          * SnapshotOrigin
@@ -2284,6 +2458,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LibraryEntryOut"][];
+                };
+            };
+        };
+    };
+    list_notifications: {
+        parameters: {
+            query?: {
+                unread_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_notifications_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkReadIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -3280,6 +3518,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsOut"];
+                };
+            };
+        };
+    };
+    set_notification_kinds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationKindsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_search_queries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchQueriesIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsOut"];
                 };
             };
             /** @description Validation Error */

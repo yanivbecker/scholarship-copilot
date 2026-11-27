@@ -1465,6 +1465,28 @@
         "title": "LimitUnit",
         "type": "string"
       },
+      "MarkReadIn": {
+        "description": "Which notifications to mark read; leave out `ids` for all of them.",
+        "properties": {
+          "ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "maxItems": 500,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ids"
+          }
+        },
+        "title": "MarkReadIn",
+        "type": "object"
+      },
       "MergeIn": {
         "description": "Merge `other_id` into the scholarship in the URL.",
         "properties": {
@@ -1559,6 +1581,117 @@
           "needs_confirmation"
         ],
         "title": "NextStepOut",
+        "type": "object"
+      },
+      "NotificationKind": {
+        "description": "What a notification is about (each can be switched off, FR-N5).",
+        "enum": [
+          "new_match",
+          "changed",
+          "deadline"
+        ],
+        "title": "NotificationKind",
+        "type": "string"
+      },
+      "NotificationKindsIn": {
+        "description": "FR-N5: turn each kind of notification on or off.",
+        "properties": {
+          "kinds": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/NotificationKind"
+            },
+            "title": "Kinds",
+            "type": "object"
+          }
+        },
+        "required": [
+          "kinds"
+        ],
+        "title": "NotificationKindsIn",
+        "type": "object"
+      },
+      "NotificationOut": {
+        "description": "One in-app notification.",
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/NotificationKind"
+          },
+          "read_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Read At"
+          },
+          "scholarship_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scholarship Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "scholarship_id",
+          "kind",
+          "title",
+          "body",
+          "created_at",
+          "read_at"
+        ],
+        "title": "NotificationOut",
+        "type": "object"
+      },
+      "NotificationsOut": {
+        "description": "Recent notifications, newest first, and how many are unread.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "unread": {
+            "title": "Unread",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "unread"
+        ],
+        "title": "NotificationsOut",
         "type": "object"
       },
       "OnboardingOut": {
@@ -2357,6 +2490,24 @@
         "title": "ScorePartOut",
         "type": "object"
       },
+      "SearchQueriesIn": {
+        "description": "FR-N3: the exact queries the student approves for web search.",
+        "properties": {
+          "queries": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Queries",
+            "type": "array"
+          }
+        },
+        "required": [
+          "queries"
+        ],
+        "title": "SearchQueriesIn",
+        "type": "object"
+      },
       "SectionOut": {
         "description": "A group of facts, in display order.",
         "properties": {
@@ -2408,6 +2559,70 @@
           "unsupported"
         ],
         "title": "SentenceCheckOut",
+        "type": "object"
+      },
+      "SettingsOut": {
+        "description": "Background, notification and search settings.",
+        "properties": {
+          "background_enabled": {
+            "title": "Background Enabled",
+            "type": "boolean"
+          },
+          "last_search_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Search At"
+          },
+          "notification_kinds": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/NotificationKind"
+            },
+            "title": "Notification Kinds",
+            "type": "object"
+          },
+          "notifications_enabled": {
+            "title": "Notifications Enabled",
+            "type": "boolean"
+          },
+          "search_configured": {
+            "title": "Search Configured",
+            "type": "boolean"
+          },
+          "search_queries": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Search Queries",
+            "type": "array"
+          },
+          "suggested_queries": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Suggested Queries",
+            "type": "array"
+          }
+        },
+        "required": [
+          "background_enabled",
+          "notifications_enabled",
+          "notification_kinds",
+          "search_queries",
+          "suggested_queries",
+          "search_configured",
+          "last_search_at"
+        ],
+        "title": "SettingsOut",
         "type": "object"
       },
       "SnapshotOrigin": {
@@ -3363,6 +3578,90 @@
         "summary": "List Library",
         "tags": [
           "packets"
+        ]
+      }
+    },
+    "/api/v1/notifications": {
+      "get": {
+        "operationId": "list_notifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "unread_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Unread Only",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Notifications",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/read": {
+      "post": {
+        "operationId": "mark_notifications_read",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkReadIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mark Notifications Read",
+        "tags": [
+          "notifications"
         ]
       }
     },
@@ -4781,6 +5080,110 @@
         "summary": "Change Status",
         "tags": [
           "tracking"
+        ]
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "operationId": "get_settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Settings",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/settings/notifications": {
+      "put": {
+        "operationId": "set_notification_kinds",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationKindsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Notification Kinds",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/settings/search-queries": {
+      "put": {
+        "description": "FR-N3: nothing is sent to search until the student saves queries here.",
+        "operationId": "set_search_queries",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchQueriesIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Search Queries",
+        "tags": [
+          "notifications"
         ]
       }
     },

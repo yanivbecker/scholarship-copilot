@@ -45,6 +45,13 @@ class Settings(BaseSettings):
     ollama_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "llama3.1:8b"
 
+    # --- Weekly source search (optional, FR-N3). Off without a key. ---
+    # Read from TAVILY_API_KEY. Only queries the student saved are sent.
+    tavily_api_key: SecretStr | None = Field(
+        default=None, validation_alias="TAVILY_API_KEY"
+    )
+    search_interval_days: int = 7
+
 
 @lru_cache
 def get_settings() -> Settings:

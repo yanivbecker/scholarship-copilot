@@ -21,6 +21,7 @@ from app.modules.profile.service import NotFoundError, StoryValidationError
 from app.modules.resume.files import ResumeFileError
 from app.modules.resume.service import ResumeNotFoundError
 from app.modules.scholarships.merge import MergeError
+from app.modules.settings.service import SettingsError
 from app.modules.scholarships.service import ScholarshipNotFoundError
 from app.modules.sources.service import (
     DuplicateSourceError,
@@ -59,6 +60,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     StatusChangeError: 422,
     PacketError: 422,
     RulesError: 422,
+    SettingsError: 422,
     MaterialError: 422,
     AIHelpBlockedError: 403,
     AIUnavailableError: 503,  # AI turned off or unreachable: say how to proceed
