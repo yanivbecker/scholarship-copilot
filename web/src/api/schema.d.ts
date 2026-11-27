@@ -193,6 +193,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scholarships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Scholarships */
+        get: operations["list_scholarships"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scholarships/{scholarship_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Scholarship */
+        get: operations["get_scholarship"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources": {
         parameters: {
             query?: never;
@@ -242,6 +276,26 @@ export interface paths {
          * @description Check now. A person asked, so known dead ends are retried too.
          */
         post: operations["check_source"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{source_id}/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Extract Source
+         * @description Extract from the source's latest text now (even if unchanged).
+         */
+        post: operations["extract_source"];
         delete?: never;
         options?: never;
         head?: never;
@@ -372,6 +426,80 @@ export interface components {
             label: string;
             /** Value */
             value: string;
+        };
+        /**
+         * CriterionKind
+         * @description What a criterion checks. Parameters are documented per kind below.
+         * @enum {string}
+         */
+        CriterionKind: "gpa_min" | "education_level_in" | "enrollment_status_in" | "grad_year_between" | "state_in" | "country_in" | "citizenship_in" | "major_in" | "first_generation" | "pell_eligible" | "has_disability" | "military_affiliation_in" | "race_ethnicity_in" | "household_income_max" | "age_between" | "community_service_min" | "free_text";
+        /**
+         * CriterionOut
+         * @description One requirement, with the exact words it came from (FR-D5).
+         */
+        CriterionOut: {
+            /** Id */
+            id: number;
+            kind: components["schemas"]["CriterionKind"];
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Quote */
+            quote: string;
+            /** Source Url */
+            source_url: string;
+        };
+        /**
+         * CycleOut
+         * @description One year of a scholarship (FR-D8).
+         */
+        CycleOut: {
+            /** Amount Max */
+            amount_max: number | null;
+            /** Amount Min */
+            amount_min: number | null;
+            /** Amount Text */
+            amount_text: string | null;
+            /** Criteria */
+            criteria: components["schemas"]["CriterionOut"][];
+            /** Deadline */
+            deadline: string | null;
+            /** Deadline Quote */
+            deadline_quote: string | null;
+            /**
+             * Extracted At
+             * Format: date-time
+             */
+            extracted_at: string;
+            /** Extracted By */
+            extracted_by: string;
+            /** Id */
+            id: number;
+            /** Source Url */
+            source_url: string;
+            /** Year */
+            year: number;
+        };
+        /**
+         * ExtractionReportOut
+         * @description What an extraction did.
+         */
+        ExtractionReportOut: {
+            /** Created */
+            created: number;
+            /** Criteria Rejected */
+            criteria_rejected: number;
+            /** Criteria Saved */
+            criteria_saved: number;
+            /** Message */
+            message: string;
+            /** Scholarships Rejected */
+            scholarships_rejected: number;
+            /** Status */
+            status: string;
+            /** Updated */
+            updated: number;
         };
         /**
          * FactDefinitionOut
@@ -577,6 +705,42 @@ export interface components {
             suggestions: components["schemas"]["SuggestionOut"][];
         };
         /**
+         * ScamFlagOut
+         * @description A warning sign and the text that triggered it (FR-D9).
+         */
+        ScamFlagOut: {
+            /** Evidence */
+            evidence: string;
+            /** Signal */
+            signal: string;
+        };
+        /**
+         * ScholarshipOut
+         * @description A scholarship with its cycles, newest first.
+         */
+        ScholarshipOut: {
+            /** Cycles */
+            cycles: components["schemas"]["CycleOut"][];
+            /** Description */
+            description: string | null;
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Needs Review */
+            needs_review: boolean;
+            /** Official Url */
+            official_url: string | null;
+            /** Review Reason */
+            review_reason: string | null;
+            /** Scam Flags */
+            scam_flags: components["schemas"]["ScamFlagOut"][];
+            /** Sponsor */
+            sponsor: string | null;
+            /** Status */
+            status: string;
+        };
+        /**
          * SectionOut
          * @description A group of facts, in display order.
          */
@@ -588,6 +752,50 @@ export interface components {
             label: string;
             /** Sensitive */
             sensitive: boolean;
+        };
+        /**
+         * Settings
+         * @description Typed view of the SCHOLARSHIP_* environment variables.
+         */
+        Settings: {
+            /** Anthropic Api Key */
+            ANTHROPIC_API_KEY?: string | null;
+            /**
+             * Ai Provider
+             * @default none
+             * @enum {string}
+             */
+            ai_provider: "none" | "ollama" | "anthropic";
+            /**
+             * Anthropic Effort
+             * @default medium
+             * @enum {string}
+             */
+            anthropic_effort: "low" | "medium" | "high";
+            /**
+             * Anthropic Model
+             * @default claude-opus-5-5
+             */
+            anthropic_model: string;
+            /** Data Dir */
+            data_dir?: string | null;
+            /** Database Url */
+            database_url?: string | null;
+            /**
+             * Ollama Model
+             * @default llama3.1:8b
+             */
+            ollama_model: string;
+            /**
+             * Ollama Url
+             * @default http://127.0.0.1:11434
+             */
+            ollama_url: string;
+            /**
+             * Port
+             * @default 8000
+             */
+            port: number;
         };
         /**
          * SnapshotOrigin
@@ -1100,6 +1308,57 @@ export interface operations {
             };
         };
     };
+    list_scholarships: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScholarshipOut"][];
+                };
+            };
+        };
+    };
+    get_scholarship: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                scholarship_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScholarshipOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_sources: {
         parameters: {
             query?: never;
@@ -1200,6 +1459,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    extract_source: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["Settings"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractionReportOut"];
                 };
             };
             /** @description Validation Error */

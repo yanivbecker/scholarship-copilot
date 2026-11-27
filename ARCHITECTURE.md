@@ -109,3 +109,6 @@ scholarship-copilot/
 | 2026-11-26 | AI default model `claude-opus-5-5`, configurable | Current Opus; `SCHOLARSHIP_ANTHROPIC_MODEL` can switch to a cheaper model (owner's call). Only changed pages are re-extracted (FR-D7), which keeps cost low. |
 | 2026-11-26 | One validation path for every provider | Providers return JSON text; Pydantic validation + one retry live in `ai/structured.py` (NFR-5), so Claude and Ollama are held to the same rules. |
 | 2026-11-26 | Untrusted text: labeled, escaped, no tools | Scraped text can't escape its block or trigger actions; code (not the model) checks quotes and decides eligibility (NFR-4). |
+| 2026-11-26 | Extraction: AI proposes, code verifies | Names, quotes, amounts and deadlines are checked against the page text before saving; unverifiable parts are dropped and counted, not trusted (FR-D5). |
+| 2026-11-26 | Unfit criteria become free text | A requirement that doesn't match a kind exactly is kept with its quote as free_text (unknown until the student confirms, FR-E3) instead of being forced into a kind that could produce a wrong verdict. |
+| 2026-11-26 | pylint: unsubscriptable-object off, similarity >= 8 lines | pylint misreads SQLAlchemy 2 generics (mypy --strict covers subscripts); short shared field lists between layers aren't duplication. |

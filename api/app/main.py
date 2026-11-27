@@ -9,6 +9,7 @@ from app.api.health import router as health_router
 from app.api.onboarding import router as onboarding_router
 from app.api.profile import router as profile_router
 from app.api.resume import router as resume_router
+from app.api.scholarships import router as scholarships_router
 from app.api.sources import router as sources_router
 from app.api.stories import router as stories_router
 
@@ -33,6 +34,7 @@ def create_app() -> FastAPI:
         onboarding_router,
         stories_router,
         resume_router,
+        scholarships_router,
         sources_router,
     ):
         application.include_router(router, prefix=API_PREFIX)

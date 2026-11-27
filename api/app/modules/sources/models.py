@@ -94,3 +94,7 @@ class PageSnapshot(Base):
     text: Mapped[str] = mapped_column(Text)
     changed: Mapped[bool] = mapped_column(Boolean)  # differs from the previous one
     fetched_at: Mapped[datetime] = mapped_column(UTCDateTime())
+    # Result of scholarship extraction from this text (5.3), if it ran.
+    extraction_status: Mapped[str | None] = mapped_column(String(32))
+    extraction_message: Mapped[str | None] = mapped_column(String(500))
+    extracted_at: Mapped[datetime | None] = mapped_column(UTCDateTime())

@@ -74,6 +74,212 @@
         "title": "ChoiceOut",
         "type": "object"
       },
+      "CriterionKind": {
+        "description": "What a criterion checks. Parameters are documented per kind below.",
+        "enum": [
+          "gpa_min",
+          "education_level_in",
+          "enrollment_status_in",
+          "grad_year_between",
+          "state_in",
+          "country_in",
+          "citizenship_in",
+          "major_in",
+          "first_generation",
+          "pell_eligible",
+          "has_disability",
+          "military_affiliation_in",
+          "race_ethnicity_in",
+          "household_income_max",
+          "age_between",
+          "community_service_min",
+          "free_text"
+        ],
+        "title": "CriterionKind",
+        "type": "string"
+      },
+      "CriterionOut": {
+        "description": "One requirement, with the exact words it came from (FR-D5).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CriterionKind"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "quote": {
+            "title": "Quote",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "params",
+          "quote",
+          "source_url"
+        ],
+        "title": "CriterionOut",
+        "type": "object"
+      },
+      "CycleOut": {
+        "description": "One year of a scholarship (FR-D8).",
+        "properties": {
+          "amount_max": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Max"
+          },
+          "amount_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Min"
+          },
+          "amount_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Text"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionOut"
+            },
+            "title": "Criteria",
+            "type": "array"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "deadline_quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline Quote"
+          },
+          "extracted_at": {
+            "format": "date-time",
+            "title": "Extracted At",
+            "type": "string"
+          },
+          "extracted_by": {
+            "title": "Extracted By",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "year",
+          "amount_text",
+          "amount_min",
+          "amount_max",
+          "deadline",
+          "deadline_quote",
+          "source_url",
+          "extracted_by",
+          "extracted_at",
+          "criteria"
+        ],
+        "title": "CycleOut",
+        "type": "object"
+      },
+      "ExtractionReportOut": {
+        "description": "What an extraction did.",
+        "properties": {
+          "created": {
+            "title": "Created",
+            "type": "integer"
+          },
+          "criteria_rejected": {
+            "title": "Criteria Rejected",
+            "type": "integer"
+          },
+          "criteria_saved": {
+            "title": "Criteria Saved",
+            "type": "integer"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "scholarships_rejected": {
+            "title": "Scholarships Rejected",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updated": {
+            "title": "Updated",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "created",
+          "updated",
+          "criteria_saved",
+          "criteria_rejected",
+          "scholarships_rejected"
+        ],
+        "title": "ExtractionReportOut",
+        "type": "object"
+      },
       "FactDefinitionOut": {
         "description": "One fact the app knows about, with the rules its value must follow.",
         "properties": {
@@ -598,6 +804,118 @@
         "title": "ResumeUploadOut",
         "type": "object"
       },
+      "ScamFlagOut": {
+        "description": "A warning sign and the text that triggered it (FR-D9).",
+        "properties": {
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "signal": {
+            "title": "Signal",
+            "type": "string"
+          }
+        },
+        "required": [
+          "signal",
+          "evidence"
+        ],
+        "title": "ScamFlagOut",
+        "type": "object"
+      },
+      "ScholarshipOut": {
+        "description": "A scholarship with its cycles, newest first.",
+        "properties": {
+          "cycles": {
+            "items": {
+              "$ref": "#/components/schemas/CycleOut"
+            },
+            "title": "Cycles",
+            "type": "array"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "needs_review": {
+            "title": "Needs Review",
+            "type": "boolean"
+          },
+          "official_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Url"
+          },
+          "review_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Reason"
+          },
+          "scam_flags": {
+            "items": {
+              "$ref": "#/components/schemas/ScamFlagOut"
+            },
+            "title": "Scam Flags",
+            "type": "array"
+          },
+          "sponsor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sponsor"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "sponsor",
+          "official_url",
+          "description",
+          "status",
+          "scam_flags",
+          "needs_review",
+          "review_reason",
+          "cycles"
+        ],
+        "title": "ScholarshipOut",
+        "type": "object"
+      },
       "SectionOut": {
         "description": "A group of facts, in display order.",
         "properties": {
@@ -627,6 +945,89 @@
           "facts"
         ],
         "title": "SectionOut",
+        "type": "object"
+      },
+      "Settings": {
+        "description": "Typed view of the SCHOLARSHIP_* environment variables.",
+        "properties": {
+          "ANTHROPIC_API_KEY": {
+            "anyOf": [
+              {
+                "format": "password",
+                "type": "string",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anthropic Api Key"
+          },
+          "ai_provider": {
+            "default": "none",
+            "enum": [
+              "none",
+              "ollama",
+              "anthropic"
+            ],
+            "title": "Ai Provider",
+            "type": "string"
+          },
+          "anthropic_effort": {
+            "default": "medium",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Anthropic Effort",
+            "type": "string"
+          },
+          "anthropic_model": {
+            "default": "claude-opus-5-5",
+            "title": "Anthropic Model",
+            "type": "string"
+          },
+          "data_dir": {
+            "anyOf": [
+              {
+                "format": "path",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Dir"
+          },
+          "database_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Database Url"
+          },
+          "ollama_model": {
+            "default": "llama3.1:8b",
+            "title": "Ollama Model",
+            "type": "string"
+          },
+          "ollama_url": {
+            "default": "http://127.0.0.1:11434",
+            "title": "Ollama Url",
+            "type": "string"
+          },
+          "port": {
+            "default": 8000,
+            "title": "Port",
+            "type": "integer"
+          }
+        },
+        "title": "Settings",
         "type": "object"
       },
       "SnapshotOrigin": {
@@ -1448,6 +1849,73 @@
         ]
       }
     },
+    "/api/v1/scholarships": {
+      "get": {
+        "operationId": "list_scholarships",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScholarshipOut"
+                  },
+                  "title": "Response List Scholarships",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Scholarships",
+        "tags": [
+          "scholarships"
+        ]
+      }
+    },
+    "/api/v1/scholarships/{scholarship_id}": {
+      "get": {
+        "operationId": "get_scholarship",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scholarship_id",
+            "required": true,
+            "schema": {
+              "title": "Scholarship Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScholarshipOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Scholarship",
+        "tags": [
+          "scholarships"
+        ]
+      }
+    },
     "/api/v1/sources": {
       "get": {
         "operationId": "list_sources",
@@ -1587,6 +2055,66 @@
         "summary": "Check Source",
         "tags": [
           "sources"
+        ]
+      }
+    },
+    "/api/v1/sources/{source_id}/extract": {
+      "post": {
+        "description": "Extract from the source's latest text now (even if unchanged).",
+        "operationId": "extract_source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "title": "Source Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Settings"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionReportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Extract Source",
+        "tags": [
+          "scholarships"
         ]
       }
     },

@@ -61,6 +61,11 @@ line-length = 88
 # lxml is a compiled (C) module; let pylint load it to see its names.
 extension-pkg-allow-list = ["lxml"]
 
+[tool.pylint.similarities]
+# Flag copied logic, not short field lists that API schemas and internal
+# dataclasses share on purpose.
+min-similarity-lines = 8
+
 [tool.pylint.format]
 max-line-length = 88
 
@@ -72,6 +77,10 @@ disable = [
     "assignment-from-no-return",
     "wrong-import-position",
     "too-few-public-methods",  # ORM/Pydantic models are mostly fields by design
+    # pylint's inference misreads SQLAlchemy 2's Mapped[...] / sessionmaker[...]
+    # (results vary with which files are linted together). mypy --strict checks
+    # every subscript with the real types, so this pylint check adds only noise.
+    "unsubscriptable-object",
 ]
 
 [tool.alembic]

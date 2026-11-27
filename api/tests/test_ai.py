@@ -26,6 +26,7 @@ from app.ai.ollama_provider import OllamaProvider
 from app.ai.prompting import UNTRUSTED_TAG, wrap_untrusted
 from app.ai.structured import ask_structured
 from app.core.config import Settings
+from tests.fakes import ScriptedProvider
 
 
 class Award(BaseModel):
@@ -33,23 +34,6 @@ class Award(BaseModel):
 
     name: str
     min_gpa: float | None = Field(default=None, ge=0, le=5)
-
-
-class ScriptedProvider:
-    """Returns prepared answers in order and records every prompt."""
-
-    name = "scripted"
-
-    def __init__(self, *answers: str) -> None:
-        self.answers = list(answers)
-        self.prompts: list[str] = []
-
-    def generate_json(
-        self, *, system: str, user: str, json_schema: dict[str, Any]
-    ) -> AIReply:
-        del system, json_schema  # same signature as AIProvider; not needed here
-        self.prompts.append(user)
-        return AIReply(self.answers.pop(0), "scripted", 10, 5)
 
 
 # --- Structured output + retry (NFR-5) --------------------------------------
@@ -62,7 +46,7 @@ def test_valid_answer_on_the_first_try() -> None:
 
     assert result.value == Award(name="Test Award", min_gpa=3.0)
     assert len(provider.prompts) == 1
-    assert result.input_tokens == 10 and result.output_tokens == 5
+    assert result.input_tokens == 1000 and result.output_tokens == 200
 
 
 def test_one_retry_tells_the_model_what_was_wrong() -> None:

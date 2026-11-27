@@ -13,6 +13,7 @@ from app.modules.profile.catalog import FactValidationError, FieldErrorsError
 from app.modules.profile.service import NotFoundError, StoryValidationError
 from app.modules.resume.files import ResumeFileError
 from app.modules.resume.service import ResumeNotFoundError
+from app.modules.scholarships.service import ScholarshipNotFoundError
 from app.modules.sources.service import (
     DuplicateSourceError,
     PasteError,
@@ -49,6 +50,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     NotFoundError: 404,
     SourceNotFoundError: 404,
     ResumeNotFoundError: 404,
+    ScholarshipNotFoundError: 404,
 }
 
 
