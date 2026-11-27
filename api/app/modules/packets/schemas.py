@@ -100,3 +100,19 @@ class LibraryEntryOut(BaseModel):
     text: str
     scholarship_name: str
     created_at: datetime
+
+
+class RulesScanOut(BaseModel):
+    """Sentences about AI use found on the source page, and a suggestion."""
+
+    suggested: RulesStatus
+    candidates: list[str]
+    source_url: str | None
+    has_text: bool
+
+
+class RulesIn(BaseModel):
+    """The student's confirmation (FR-A2). Allowed needs a verbatim quote."""
+
+    status: RulesStatus
+    quote: str | None = Field(default=None, max_length=1000)

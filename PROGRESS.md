@@ -48,7 +48,7 @@
 
 ## Phase 7 checklist
 - [x] 7.1 Packets (FR-A6, FR-A7, FR-A8): tables `packets` (one per cycle; rules check fields; approval), `packet_items` (essay / short answer / document / form field; verbatim prompt or own note; char or word limit; required), `response_versions` (never edited; origin student / ai_draft / library; provenance), `library_entries`. Length checks (FR-A6): over-limit versions can be saved but not approved. Approving a version is explicit, audited, adds it to the library, and resets packet approval. Documents/form fields are ticked off; writing items are finished only by approval. Packet approval needs every required item finished; audited; can be withdrawn. Library text starts a new unapproved version. API: `GET /scholarships/{id}/packet`, items CRUD, versions, approve, use-library, `GET /library`, packet approve/withdraw. **Tested:** 450 pytest (11 new); deliberate breaks (approve over limit, approve incomplete packet, approval surviving changes, library not filled) each failed tests.
-- [ ] 7.2 AI-use rules check (FR-A1, FR-A2)
+- [x] 7.2 AI-use rules check (FR-A1, FR-A2): code finds the sponsor's sentences about AI and academic honesty in the latest snapshot and suggests a reading; the student confirms; "allowed" needs a verbatim quote from the source; no AI sentence means unclear. 12 tests, deliberate breaks caught. No AI call is used for this (deterministic only).
 - [ ] 7.3 Coaching, drafting from facts + stories, provenance check (FR-A3-A5)
 - [ ] 7.4 Status gates tied to the packet (FR-A7)
 - [ ] 7.5 Packet page UI

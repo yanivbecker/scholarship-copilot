@@ -320,6 +320,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/packets/{packet_id}/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Confirm Packet Rules
+         * @description FR-A2: the student confirms the rules before any writing help.
+         */
+        put: operations["confirm_packet_rules"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packets/{packet_id}/rules/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Scan Packet Rules
+         * @description FR-A1: find what the sponsor says about AI use. Changes nothing.
+         */
+        get: operations["scan_packet_rules"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profile": {
         parameters: {
             query?: never;
@@ -1360,6 +1400,28 @@ export interface components {
             suggestions: components["schemas"]["SuggestionOut"][];
         };
         /**
+         * RulesIn
+         * @description The student's confirmation (FR-A2). Allowed needs a verbatim quote.
+         */
+        RulesIn: {
+            /** Quote */
+            quote?: string | null;
+            status: components["schemas"]["RulesStatus"];
+        };
+        /**
+         * RulesScanOut
+         * @description Sentences about AI use found on the source page, and a suggestion.
+         */
+        RulesScanOut: {
+            /** Candidates */
+            candidates: string[];
+            /** Has Text */
+            has_text: boolean;
+            /** Source Url */
+            source_url: string | null;
+            suggested: components["schemas"]["RulesStatus"];
+        };
+        /**
          * RulesStatus
          * @description The scholarship's policy on AI help (FR-A1). Unclear counts as no.
          * @enum {string}
@@ -2257,6 +2319,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_packet_rules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RulesIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    scan_packet_rules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RulesScanOut"];
                 };
             };
             /** @description Validation Error */

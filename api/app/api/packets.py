@@ -7,13 +7,16 @@ from fastapi import APIRouter, status
 from app.api.deps import CurrentUser, SessionDep
 from app.modules.packets import service
 from app.modules.packets.models import Packet, PacketItem
-from app.modules.packets.rules import ai_writing_allowed
+from app.modules.packets.rules import ai_writing_allowed, confirm_rules, scan_rules
+from app.modules.scholarships import service as scholarships
 from app.modules.packets.schemas import (
     ItemIn,
     ItemOut,
     LibraryEntryOut,
     PacketOut,
     ProgressOut,
+    RulesIn,
+    RulesScanOut,
     UseLibraryIn,
     VersionIn,
     VersionOut,
@@ -183,5 +186,32 @@ def withdraw_approval(
 ) -> PacketOut:
     packet = service.get_packet(session, user.id, packet_id)
     service.withdraw_packet_approval(session, packet)
+    session.commit()
+    return packet_out(session, packet)
+
+
+@router.get("/packets/{packet_id}/rules/scan")
+def scan_packet_rules(
+    packet_id: int, session: SessionDep, user: CurrentUser
+) -> RulesScanOut:
+    """FR-A1: find what the sponsor says about AI use. Changes nothing."""
+    packet = service.get_packet(session, user.id, packet_id)
+    scan = scan_rules(session, packet)
+    return RulesScanOut(
+        suggested=scan.suggested,
+        candidates=list(scan.candidates),
+        source_url=scan.source_url,
+        has_text=scan.has_text,
+    )
+
+
+@router.put("/packets/{packet_id}/rules")
+def confirm_packet_rules(
+    packet_id: int, body: RulesIn, session: SessionDep, user: CurrentUser
+) -> PacketOut:
+    """FR-A2: the student confirms the rules before any writing help."""
+    packet = service.get_packet(session, user.id, packet_id)
+    name = scholarships.get_scholarship(session, user.id, packet.scholarship_id).name
+    confirm_rules(session, packet, body.status, quote=body.quote, scholarship_name=name)
     session.commit()
     return packet_out(session, packet)

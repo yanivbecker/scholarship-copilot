@@ -1762,6 +1762,69 @@
         "title": "ResumeUploadOut",
         "type": "object"
       },
+      "RulesIn": {
+        "description": "The student's confirmation (FR-A2). Allowed needs a verbatim quote.",
+        "properties": {
+          "quote": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RulesStatus"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "RulesIn",
+        "type": "object"
+      },
+      "RulesScanOut": {
+        "description": "Sentences about AI use found on the source page, and a suggestion.",
+        "properties": {
+          "candidates": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "has_text": {
+            "title": "Has Text",
+            "type": "boolean"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "suggested": {
+            "$ref": "#/components/schemas/RulesStatus"
+          }
+        },
+        "required": [
+          "suggested",
+          "candidates",
+          "source_url",
+          "has_text"
+        ],
+        "title": "RulesScanOut",
+        "type": "object"
+      },
       "RulesStatus": {
         "description": "The scholarship's policy on AI help (FR-A1). Unclear counts as no.",
         "enum": [
@@ -3377,6 +3440,102 @@
           }
         },
         "summary": "Add Item",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
+    "/api/v1/packets/{packet_id}/rules": {
+      "put": {
+        "description": "FR-A2: the student confirms the rules before any writing help.",
+        "operationId": "confirm_packet_rules",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "title": "Packet Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RulesIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Packet Rules",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
+    "/api/v1/packets/{packet_id}/rules/scan": {
+      "get": {
+        "description": "FR-A1: find what the sponsor says about AI use. Changes nothing.",
+        "operationId": "scan_packet_rules",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "title": "Packet Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulesScanOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Scan Packet Rules",
         "tags": [
           "packets"
         ]
