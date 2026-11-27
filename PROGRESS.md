@@ -42,7 +42,7 @@
 ## Phase 6 checklist
 - [x] 6.0 pyright in CI and pre-commit (owner-approved), pinned 1.1.414.
 - [x] 6.1 Status tracking (FR-UI4, FR-A7): `tracking/` module. Fixed path Discovered -> Eligibility confirmed -> Ready to apply -> In progress -> Awaiting approval -> Submitted -> Won / Rejected; forward one step at a time, back one step to undo; anything else refused. System checks: "eligibility confirmed" only with an Eligible verdict; "submitted" only with an explicit `confirmed: true` (the student submits outside the app). Every change in `audit_events` (keeps the scholarship name; history moves with a merge). `GET/POST /scholarships/{id}/status` with next steps (and why one is blocked) and history. **Tested:** 431 pytest (6 new); deliberate breaks (eligibility guard, submission confirmation, step skipping, history on merge) each failed tests.
-- [ ] 6.2 Dashboard API: Today screen data (FR-UI1), table fields (status, amount, effort) (FR-UI2)
+- [x] 6.2 Dashboard API (FR-UI1, FR-UI2): `GET /dashboard/today` with actions (missing facts ranked by how many scholarships each would decide, yes/no requirements, eligibility ready to confirm, listings needing review, deadlines within 14 days for applications in progress, login-walled sources to paste), open deadlines in the next 60 days (excluding ineligible, finished and closed), matches found in the last 7 days, verdict counts and the last discovery run. `/eligibility` rows gain sponsor, status, amount, amount text and open-question count for the table. **Tested:** 439 pytest (8 new, with a pinned clock); deliberate breaks (finished/ineligible kept, facts not ranked) each failed tests.
 - [ ] 6.3 Frontend: Today screen, sortable/filterable table (plain React), detail page (FR-UI1-UI4)
 
 ## Known issues

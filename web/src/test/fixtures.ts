@@ -133,6 +133,12 @@ export const eligibilityItem = (
 ): Eligibility => ({
   scholarship_id: 7,
   name: 'Test Foundation STEM Award',
+  sponsor: 'Test Foundation',
+  status: 'discovered',
+  status_label: 'Discovered',
+  amount: 2500,
+  amount_text: '$2,500',
+  open_questions: 2,
   cycle_id: 70,
   year: 2027,
   deadline: '2027-03-01',

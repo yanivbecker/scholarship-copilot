@@ -1,6 +1,59 @@
 {
   "components": {
     "schemas": {
+      "ActionOut": {
+        "description": "Something to do now, and where (`page`) to do it.",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "fact_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fact Key"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "page": {
+            "title": "Page",
+            "type": "string"
+          },
+          "scholarship_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scholarship Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "detail",
+          "page",
+          "scholarship_id",
+          "fact_key"
+        ],
+        "title": "ActionOut",
+        "type": "object"
+      },
       "ApplicationStatus": {
         "description": "Where the student is with one scholarship.",
         "enum": [
@@ -383,6 +436,46 @@
         "title": "CycleOut",
         "type": "object"
       },
+      "DeadlineOut": {
+        "description": "An open deadline within the next 60 days.",
+        "properties": {
+          "days_left": {
+            "title": "Days Left",
+            "type": "integer"
+          },
+          "deadline": {
+            "format": "date",
+            "title": "Deadline",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "scholarship_id": {
+            "title": "Scholarship Id",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "verdict": {
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scholarship_id",
+          "name",
+          "deadline",
+          "days_left",
+          "verdict",
+          "status"
+        ],
+        "title": "DeadlineOut",
+        "type": "object"
+      },
       "DuplicateOut": {
         "description": "Two scholarships that may be the same one (FR-D6).",
         "properties": {
@@ -420,6 +513,28 @@
       "EligibilityOut": {
         "description": "The verdict for a scholarship's current cycle (FR-E2).",
         "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "amount_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Text"
+          },
           "as_of": {
             "format": "date",
             "title": "As Of",
@@ -459,6 +574,10 @@
             "title": "Name",
             "type": "string"
           },
+          "open_questions": {
+            "title": "Open Questions",
+            "type": "integer"
+          },
           "questions": {
             "items": {
               "$ref": "#/components/schemas/QuestionOut"
@@ -472,6 +591,25 @@
           },
           "score": {
             "$ref": "#/components/schemas/ScoreOut"
+          },
+          "sponsor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sponsor"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "status_label": {
+            "title": "Status Label",
+            "type": "string"
           },
           "summary": {
             "title": "Summary",
@@ -496,6 +634,12 @@
         "required": [
           "scholarship_id",
           "name",
+          "sponsor",
+          "status",
+          "status_label",
+          "amount",
+          "amount_text",
+          "open_questions",
           "cycle_id",
           "year",
           "deadline",
@@ -906,6 +1050,36 @@
           "missing"
         ],
         "title": "MissingFactsOut",
+        "type": "object"
+      },
+      "NewMatchOut": {
+        "description": "A scholarship found in the last 7 days.",
+        "properties": {
+          "found_at": {
+            "format": "date-time",
+            "title": "Found At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "scholarship_id": {
+            "title": "Scholarship Id",
+            "type": "integer"
+          },
+          "verdict": {
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scholarship_id",
+          "name",
+          "verdict",
+          "found_at"
+        ],
+        "title": "NewMatchOut",
         "type": "object"
       },
       "NextStepOut": {
@@ -1840,6 +2014,58 @@
         "title": "ThemesOut",
         "type": "object"
       },
+      "TodayOut": {
+        "description": "Actions needed, upcoming deadlines, new matches, last run (FR-UI1).",
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/ActionOut"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Counts",
+            "type": "object"
+          },
+          "deadlines": {
+            "items": {
+              "$ref": "#/components/schemas/DeadlineOut"
+            },
+            "title": "Deadlines",
+            "type": "array"
+          },
+          "last_run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobRunOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "new_matches": {
+            "items": {
+              "$ref": "#/components/schemas/NewMatchOut"
+            },
+            "title": "New Matches",
+            "type": "array"
+          }
+        },
+        "required": [
+          "actions",
+          "deadlines",
+          "new_matches",
+          "counts",
+          "last_run"
+        ],
+        "title": "TodayOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -1888,6 +2114,27 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/dashboard/today": {
+      "get": {
+        "operationId": "get_today",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Today",
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
     "/api/v1/discovery/run": {
       "post": {
         "description": "Check every source and extract what changed. Can take a while: each\nsite is contacted at most once per second, and AI extraction is slow.",

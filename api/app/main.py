@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
 from app import __version__
+from app.api.dashboard import router as dashboard_router
 from app.api.discovery import router as discovery_router
 from app.api.eligibility import router as eligibility_router
 from app.api.errors import register_error_handlers
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
         eligibility_router,
         discovery_router,
         tracking_router,
+        dashboard_router,
         sources_router,
     ):
         application.include_router(router, prefix=API_PREFIX)

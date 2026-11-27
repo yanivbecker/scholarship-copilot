@@ -48,6 +48,12 @@ class EligibilityOut(BaseModel):
 
     scholarship_id: int
     name: str
+    sponsor: str | None
+    status: str  # application status (FR-UI4)
+    status_label: str
+    amount: int | None  # the larger published amount, if any
+    amount_text: str | None
+    open_questions: int  # a rough effort signal (FR-UI2)
     cycle_id: int | None
     year: int | None
     deadline: date | None

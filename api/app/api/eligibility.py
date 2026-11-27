@@ -16,6 +16,8 @@ from app.modules.eligibility.schemas import (
     ScorePartOut,
 )
 from app.modules.scholarships.criteria import CriterionKind
+from app.modules.tracking.service import current_status
+from app.modules.tracking.status import LABELS
 
 router = APIRouter(tags=["eligibility"])
 
@@ -26,9 +28,16 @@ def _today() -> datetime:
 
 def _out(e: service.ScholarshipEligibility) -> EligibilityOut:
     criteria = {c.id: c for c in (e.cycle.criteria if e.cycle else [])}
+    status = current_status(e.scholarship)
     return EligibilityOut(
         scholarship_id=e.scholarship.id,
         name=e.scholarship.name,
+        sponsor=e.scholarship.sponsor,
+        status=status.value,
+        status_label=LABELS[status],
+        amount=(e.cycle.amount_max or e.cycle.amount_min) if e.cycle else None,
+        amount_text=e.cycle.amount_text if e.cycle else None,
+        open_questions=len(e.result.questions),
         cycle_id=e.cycle.id if e.cycle else None,
         year=e.cycle.year if e.cycle else None,
         deadline=e.cycle.deadline if e.cycle else None,

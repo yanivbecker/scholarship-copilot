@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/v1/dashboard/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Today */
+        get: operations["get_today"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/discovery/run": {
         parameters: {
             query?: never;
@@ -544,6 +561,24 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * ActionOut
+         * @description Something to do now, and where (`page`) to do it.
+         */
+        ActionOut: {
+            /** Detail */
+            detail: string;
+            /** Fact Key */
+            fact_key: string | null;
+            /** Kind */
+            kind: string;
+            /** Page */
+            page: string;
+            /** Scholarship Id */
+            scholarship_id: number | null;
+            /** Title */
+            title: string;
+        };
+        /**
          * ApplicationStatus
          * @description Where the student is with one scholarship.
          * @enum {string}
@@ -686,6 +721,27 @@ export interface components {
             year: number;
         };
         /**
+         * DeadlineOut
+         * @description An open deadline within the next 60 days.
+         */
+        DeadlineOut: {
+            /** Days Left */
+            days_left: number;
+            /**
+             * Deadline
+             * Format: date
+             */
+            deadline: string;
+            /** Name */
+            name: string;
+            /** Scholarship Id */
+            scholarship_id: number;
+            /** Status */
+            status: string;
+            /** Verdict */
+            verdict: string;
+        };
+        /**
          * DuplicateOut
          * @description Two scholarships that may be the same one (FR-D6).
          */
@@ -706,6 +762,10 @@ export interface components {
          * @description The verdict for a scholarship's current cycle (FR-E2).
          */
         EligibilityOut: {
+            /** Amount */
+            amount: number | null;
+            /** Amount Text */
+            amount_text: string | null;
             /**
              * As Of
              * Format: date
@@ -719,11 +779,19 @@ export interface components {
             deadline: string | null;
             /** Name */
             name: string;
+            /** Open Questions */
+            open_questions: number;
             /** Questions */
             questions: components["schemas"]["QuestionOut"][];
             /** Scholarship Id */
             scholarship_id: number;
             score: components["schemas"]["ScoreOut"];
+            /** Sponsor */
+            sponsor: string | null;
+            /** Status */
+            status: string;
+            /** Status Label */
+            status_label: string;
             /** Summary */
             summary: string;
             /** Verdict */
@@ -885,6 +953,23 @@ export interface components {
         MissingFactsOut: {
             /** Missing */
             missing: string[];
+        };
+        /**
+         * NewMatchOut
+         * @description A scholarship found in the last 7 days.
+         */
+        NewMatchOut: {
+            /**
+             * Found At
+             * Format: date-time
+             */
+            found_at: string;
+            /** Name */
+            name: string;
+            /** Scholarship Id */
+            scholarship_id: number;
+            /** Verdict */
+            verdict: string;
         };
         /**
          * NextStepOut
@@ -1253,6 +1338,23 @@ export interface components {
             /** Suggested */
             suggested: string[];
         };
+        /**
+         * TodayOut
+         * @description Actions needed, upcoming deadlines, new matches, last run (FR-UI1).
+         */
+        TodayOut: {
+            /** Actions */
+            actions: components["schemas"]["ActionOut"][];
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+            /** Deadlines */
+            deadlines: components["schemas"]["DeadlineOut"][];
+            last_run: components["schemas"]["JobRunOut"] | null;
+            /** New Matches */
+            new_matches: components["schemas"]["NewMatchOut"][];
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -1275,6 +1377,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    get_today: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TodayOut"];
+                };
+            };
+        };
+    };
     run_now: {
         parameters: {
             query?: never;
