@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.modules.packets.models import ItemKind, LimitUnit, RulesStatus, VersionOrigin
+from app.modules.packets.writing import FeedbackNote
 
 
 class VersionOut(BaseModel):
@@ -116,3 +117,70 @@ class RulesIn(BaseModel):
 
     status: RulesStatus
     quote: str | None = Field(default=None, max_length=1000)
+
+
+# --- Writing help (FR-A3-A5) ----------------------------------------------------
+
+
+class AnswerIn(BaseModel):
+    """A coaching question and the student's answer."""
+
+    question: str = Field(max_length=600)
+    answer: str = Field(max_length=3000)
+
+
+class OutlineIn(BaseModel):
+    """The student's own answers, and stories they chose to share."""
+
+    answers: list[AnswerIn] = Field(default_factory=list, max_length=12)
+    story_ids: list[int] = Field(default_factory=list, max_length=20)
+
+
+class FeedbackIn(BaseModel):
+    """Which saved version to get feedback on."""
+
+    version_id: int
+
+
+class FeedbackOut(BaseModel):
+    """Rubric notes plus a length note worked out by code."""
+
+    notes: list[FeedbackNote]
+    length_note: str | None
+
+
+class DraftIn(BaseModel):
+    """Only these facts and stories are sent to the AI."""
+
+    fact_keys: list[str] = Field(default_factory=list, max_length=50)
+    story_ids: list[int] = Field(default_factory=list, max_length=20)
+
+
+class RemovedSentenceOut(BaseModel):
+    """A draft sentence removed because it couldn't be traced."""
+
+    text: str
+    reason: str
+
+
+class DraftOut(BaseModel):
+    """The updated packet, the new draft version and what was removed."""
+
+    packet: PacketOut
+    version_id: int
+    kept: int
+    removed: list[RemovedSentenceOut]
+
+
+class SentenceCheckOut(BaseModel):
+    """One sentence and the claims in it we couldn't trace."""
+
+    sentence: str
+    unsupported: list[str]
+
+
+class ProvenanceOut(BaseModel):
+    """FR-A5: claims not found in your facts or stories, sentence by sentence."""
+
+    sentences: list[SentenceCheckOut]
+    unsupported_count: int

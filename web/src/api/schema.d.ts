@@ -234,6 +234,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/packet-items/{item_id}/coach/breakdown": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Coach Breakdown */
+        post: operations["coach_breakdown"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}/coach/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Coach Feedback */
+        post: operations["coach_feedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}/coach/outline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Coach Outline */
+        post: operations["coach_outline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}/coach/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Coach Questions */
+        post: operations["coach_questions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Draft Response
+         * @description FR-A4: a draft from chosen facts and stories, saved as a new version.
+         */
+        post: operations["draft_response"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/packet-items/{item_id}/use-library": {
         parameters: {
             query?: never;
@@ -279,6 +367,26 @@ export interface paths {
         put?: never;
         /** Approve Version */
         post: operations["approve_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packet-items/{item_id}/versions/{version_id}/claims": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check Version Claims
+         * @description FR-A5: highlight numbers and names not found in your facts or stories.
+         */
+        get: operations["check_version_claims"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -757,6 +865,16 @@ export interface components {
             title: string;
         };
         /**
+         * AnswerIn
+         * @description A coaching question and the student's answer.
+         */
+        AnswerIn: {
+            /** Answer */
+            answer: string;
+            /** Question */
+            question: string;
+        };
+        /**
          * ApplicationStatus
          * @description Where the student is with one scholarship.
          * @enum {string}
@@ -785,6 +903,32 @@ export interface components {
         Body_upload_resume: {
             /** File */
             file: string;
+        };
+        /**
+         * Breakdown
+         * @description FR-A3: the prompt split into what it asks (each part verified).
+         */
+        Breakdown: {
+            /** Parts */
+            parts: components["schemas"]["BreakdownPart"][];
+            /** Themes */
+            themes: string[];
+        };
+        /**
+         * BreakdownPart
+         * @description One thing the prompt asks for, with the prompt's exact words.
+         */
+        BreakdownPart: {
+            /**
+             * Ask
+             * @description What those words ask for, plainly.
+             */
+            ask: string;
+            /**
+             * Quote
+             * @description The exact words of the prompt.
+             */
+            quote: string;
         };
         /**
          * CatalogOut
@@ -918,6 +1062,29 @@ export interface components {
             status: string;
             /** Verdict */
             verdict: string;
+        };
+        /**
+         * DraftIn
+         * @description Only these facts and stories are sent to the AI.
+         */
+        DraftIn: {
+            /** Fact Keys */
+            fact_keys?: string[];
+            /** Story Ids */
+            story_ids?: number[];
+        };
+        /**
+         * DraftOut
+         * @description The updated packet, the new draft version and what was removed.
+         */
+        DraftOut: {
+            /** Kept */
+            kept: number;
+            packet: components["schemas"]["PacketOut"];
+            /** Removed */
+            removed: components["schemas"]["RemovedSentenceOut"][];
+            /** Version Id */
+            version_id: number;
         };
         /**
          * DuplicateOut
@@ -1074,6 +1241,42 @@ export interface components {
         FactType: "text" | "integer" | "number" | "boolean" | "date" | "choice" | "multi_choice";
         FactValueIn: string | number | boolean | string[];
         FactValueOut: string | number | boolean | string[];
+        /**
+         * FeedbackIn
+         * @description Which saved version to get feedback on.
+         */
+        FeedbackIn: {
+            /** Version Id */
+            version_id: number;
+        };
+        /**
+         * FeedbackNote
+         * @description One rubric comment; any quote is from the student's own text.
+         */
+        FeedbackNote: {
+            /**
+             * Aspect
+             * @description One of: answers the prompt, specific details, structure, voice, clarity.
+             */
+            aspect: string;
+            /** Comment */
+            comment: string;
+            /**
+             * Quote
+             * @description Exact words from the student's text, if any.
+             */
+            quote?: string | null;
+        };
+        /**
+         * FeedbackOut
+         * @description Rubric notes plus a length note worked out by code.
+         */
+        FeedbackOut: {
+            /** Length Note */
+            length_note: string | null;
+            /** Notes */
+            notes: components["schemas"]["FeedbackNote"][];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1292,6 +1495,39 @@ export interface components {
          */
         OperatingMode: "discovery" | "hybrid" | "automation";
         /**
+         * Outline
+         * @description FR-A3: an outline whose points all trace to the student's input.
+         */
+        Outline: {
+            /** Points */
+            points: components["schemas"]["OutlinePoint"][];
+        };
+        /**
+         * OutlineIn
+         * @description The student's own answers, and stories they chose to share.
+         */
+        OutlineIn: {
+            /** Answers */
+            answers?: components["schemas"]["AnswerIn"][];
+            /** Story Ids */
+            story_ids?: number[];
+        };
+        /**
+         * OutlinePoint
+         * @description One outline point and the answer or story it comes from.
+         */
+        OutlinePoint: {
+            /**
+             * Answer Number
+             * @description 1-based number of the answer it uses.
+             */
+            answer_number?: number | null;
+            /** Point */
+            point: string;
+            /** Story Id */
+            story_id?: number | null;
+        };
+        /**
          * PacketOut
          * @description The whole packet for one scholarship cycle.
          */
@@ -1366,6 +1602,16 @@ export interface components {
             required: number;
         };
         /**
+         * ProvenanceOut
+         * @description FR-A5: claims not found in your facts or stories, sentence by sentence.
+         */
+        ProvenanceOut: {
+            /** Sentences */
+            sentences: components["schemas"]["SentenceCheckOut"][];
+            /** Unsupported Count */
+            unsupported_count: number;
+        };
+        /**
          * QuestionOut
          * @description Answer this to resolve an unknown. `fact_key`: answer in the profile.
          */
@@ -1374,6 +1620,24 @@ export interface components {
             fact_key: string | null;
             /** Optional */
             optional: boolean;
+            /** Text */
+            text: string;
+        };
+        /**
+         * Questions
+         * @description FR-A3: questions that help the student recall their own material.
+         */
+        Questions: {
+            /** Questions */
+            questions: string[];
+        };
+        /**
+         * RemovedSentenceOut
+         * @description A draft sentence removed because it couldn't be traced.
+         */
+        RemovedSentenceOut: {
+            /** Reason */
+            reason: string;
             /** Text */
             text: string;
         };
@@ -1501,6 +1765,16 @@ export interface components {
             label: string;
             /** Sensitive */
             sensitive: boolean;
+        };
+        /**
+         * SentenceCheckOut
+         * @description One sentence and the claims in it we couldn't trace.
+         */
+        SentenceCheckOut: {
+            /** Sentence */
+            sentence: string;
+            /** Unsupported */
+            unsupported: string[];
         };
         /**
          * SnapshotOrigin
@@ -2133,6 +2407,173 @@ export interface operations {
             };
         };
     };
+    coach_breakdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Breakdown"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    coach_feedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    coach_outline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OutlineIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Outline"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    coach_questions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Questions"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    draft_response: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     use_library: {
         parameters: {
             query?: never;
@@ -2222,6 +2663,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_version_claims: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+                version_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProvenanceOut"];
                 };
             };
             /** @description Validation Error */

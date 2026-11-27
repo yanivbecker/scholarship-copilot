@@ -54,6 +54,27 @@
         "title": "ActionOut",
         "type": "object"
       },
+      "AnswerIn": {
+        "description": "A coaching question and the student's answer.",
+        "properties": {
+          "answer": {
+            "maxLength": 3000,
+            "title": "Answer",
+            "type": "string"
+          },
+          "question": {
+            "maxLength": 600,
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "answer"
+        ],
+        "title": "AnswerIn",
+        "type": "object"
+      },
       "ApplicationStatus": {
         "description": "Where the student is with one scholarship.",
         "enum": [
@@ -137,6 +158,59 @@
           "file"
         ],
         "title": "Body_upload_resume",
+        "type": "object"
+      },
+      "Breakdown": {
+        "description": "FR-A3: the prompt split into what it asks (each part verified).",
+        "properties": {
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownPart"
+            },
+            "maxItems": 8,
+            "title": "Parts",
+            "type": "array"
+          },
+          "themes": {
+            "items": {
+              "maxLength": 60,
+              "type": "string"
+            },
+            "maxItems": 6,
+            "title": "Themes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "parts",
+          "themes"
+        ],
+        "title": "Breakdown",
+        "type": "object"
+      },
+      "BreakdownPart": {
+        "description": "One thing the prompt asks for, with the prompt's exact words.",
+        "properties": {
+          "ask": {
+            "description": "What those words ask for, plainly.",
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Ask",
+            "type": "string"
+          },
+          "quote": {
+            "description": "The exact words of the prompt.",
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Quote",
+            "type": "string"
+          }
+        },
+        "required": [
+          "quote",
+          "ask"
+        ],
+        "title": "BreakdownPart",
         "type": "object"
       },
       "CatalogOut": {
@@ -474,6 +548,60 @@
           "status"
         ],
         "title": "DeadlineOut",
+        "type": "object"
+      },
+      "DraftIn": {
+        "description": "Only these facts and stories are sent to the AI.",
+        "properties": {
+          "fact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Fact Keys",
+            "type": "array"
+          },
+          "story_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 20,
+            "title": "Story Ids",
+            "type": "array"
+          }
+        },
+        "title": "DraftIn",
+        "type": "object"
+      },
+      "DraftOut": {
+        "description": "The updated packet, the new draft version and what was removed.",
+        "properties": {
+          "kept": {
+            "title": "Kept",
+            "type": "integer"
+          },
+          "packet": {
+            "$ref": "#/components/schemas/PacketOut"
+          },
+          "removed": {
+            "items": {
+              "$ref": "#/components/schemas/RemovedSentenceOut"
+            },
+            "title": "Removed",
+            "type": "array"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "packet",
+          "version_id",
+          "kept",
+          "removed"
+        ],
+        "title": "DraftOut",
         "type": "object"
       },
       "DuplicateOut": {
@@ -922,6 +1050,84 @@
             "type": "array"
           }
         ]
+      },
+      "FeedbackIn": {
+        "description": "Which saved version to get feedback on.",
+        "properties": {
+          "version_id": {
+            "title": "Version Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version_id"
+        ],
+        "title": "FeedbackIn",
+        "type": "object"
+      },
+      "FeedbackNote": {
+        "description": "One rubric comment; any quote is from the student's own text.",
+        "properties": {
+          "aspect": {
+            "description": "One of: answers the prompt, specific details, structure, voice, clarity.",
+            "maxLength": 60,
+            "title": "Aspect",
+            "type": "string"
+          },
+          "comment": {
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Comment",
+            "type": "string"
+          },
+          "quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Exact words from the student's text, if any.",
+            "title": "Quote"
+          }
+        },
+        "required": [
+          "aspect",
+          "comment"
+        ],
+        "title": "FeedbackNote",
+        "type": "object"
+      },
+      "FeedbackOut": {
+        "description": "Rubric notes plus a length note worked out by code.",
+        "properties": {
+          "length_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length Note"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/FeedbackNote"
+            },
+            "title": "Notes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "notes",
+          "length_note"
+        ],
+        "title": "FeedbackOut",
+        "type": "object"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1457,6 +1663,86 @@
         "title": "OperatingMode",
         "type": "string"
       },
+      "Outline": {
+        "description": "FR-A3: an outline whose points all trace to the student's input.",
+        "properties": {
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/OutlinePoint"
+            },
+            "maxItems": 12,
+            "title": "Points",
+            "type": "array"
+          }
+        },
+        "required": [
+          "points"
+        ],
+        "title": "Outline",
+        "type": "object"
+      },
+      "OutlineIn": {
+        "description": "The student's own answers, and stories they chose to share.",
+        "properties": {
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/AnswerIn"
+            },
+            "maxItems": 12,
+            "title": "Answers",
+            "type": "array"
+          },
+          "story_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 20,
+            "title": "Story Ids",
+            "type": "array"
+          }
+        },
+        "title": "OutlineIn",
+        "type": "object"
+      },
+      "OutlinePoint": {
+        "description": "One outline point and the answer or story it comes from.",
+        "properties": {
+          "answer_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "1-based number of the answer it uses.",
+            "title": "Answer Number"
+          },
+          "point": {
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Point",
+            "type": "string"
+          },
+          "story_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Story Id"
+          }
+        },
+        "required": [
+          "point"
+        ],
+        "title": "OutlinePoint",
+        "type": "object"
+      },
       "PacketOut": {
         "description": "The whole packet for one scholarship cycle.",
         "properties": {
@@ -1687,6 +1973,28 @@
         "title": "ProgressOut",
         "type": "object"
       },
+      "ProvenanceOut": {
+        "description": "FR-A5: claims not found in your facts or stories, sentence by sentence.",
+        "properties": {
+          "sentences": {
+            "items": {
+              "$ref": "#/components/schemas/SentenceCheckOut"
+            },
+            "title": "Sentences",
+            "type": "array"
+          },
+          "unsupported_count": {
+            "title": "Unsupported Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sentences",
+          "unsupported_count"
+        ],
+        "title": "ProvenanceOut",
+        "type": "object"
+      },
       "QuestionOut": {
         "description": "Answer this to resolve an unknown. `fact_key`: answer in the profile.",
         "properties": {
@@ -1716,6 +2024,46 @@
           "optional"
         ],
         "title": "QuestionOut",
+        "type": "object"
+      },
+      "Questions": {
+        "description": "FR-A3: questions that help the student recall their own material.",
+        "properties": {
+          "questions": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Questions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "questions"
+        ],
+        "title": "Questions",
+        "type": "object"
+      },
+      "RemovedSentenceOut": {
+        "description": "A draft sentence removed because it couldn't be traced.",
+        "properties": {
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "reason"
+        ],
+        "title": "RemovedSentenceOut",
         "type": "object"
       },
       "ResumeConfirmIn": {
@@ -2033,6 +2381,28 @@
           "facts"
         ],
         "title": "SectionOut",
+        "type": "object"
+      },
+      "SentenceCheckOut": {
+        "description": "One sentence and the claims in it we couldn't trace.",
+        "properties": {
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "unsupported": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unsupported",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sentence",
+          "unsupported"
+        ],
+        "title": "SentenceCheckOut",
         "type": "object"
       },
       "SnapshotOrigin": {
@@ -3156,6 +3526,247 @@
         ]
       }
     },
+    "/api/v1/packet-items/{item_id}/coach/breakdown": {
+      "post": {
+        "operationId": "coach_breakdown",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Breakdown"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Coach Breakdown",
+        "tags": [
+          "writing"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}/coach/feedback": {
+      "post": {
+        "operationId": "coach_feedback",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Coach Feedback",
+        "tags": [
+          "writing"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}/coach/outline": {
+      "post": {
+        "operationId": "coach_outline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutlineIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Outline"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Coach Outline",
+        "tags": [
+          "writing"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}/coach/questions": {
+      "post": {
+        "operationId": "coach_questions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Questions"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Coach Questions",
+        "tags": [
+          "writing"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}/draft": {
+      "post": {
+        "description": "FR-A4: a draft from chosen facts and stories, saved as a new version.",
+        "operationId": "draft_response",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Draft Response",
+        "tags": [
+          "writing"
+        ]
+      }
+    },
     "/api/v1/packet-items/{item_id}/use-library": {
       "post": {
         "operationId": "use_library",
@@ -3308,6 +3919,58 @@
         "summary": "Approve Version",
         "tags": [
           "packets"
+        ]
+      }
+    },
+    "/api/v1/packet-items/{item_id}/versions/{version_id}/claims": {
+      "get": {
+        "description": "FR-A5: highlight numbers and names not found in your facts or stories.",
+        "operationId": "check_version_claims",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvenanceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Version Claims",
+        "tags": [
+          "writing"
         ]
       }
     },

@@ -9,9 +9,13 @@ from collections.abc import Awaitable, Callable
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from app.ai.base import AIError, AIUnavailableError
+
 from app.modules.eligibility.service import CriterionNotFoundError, NotConfirmableError
+from app.modules.packets.provenance import MaterialError
 from app.modules.packets.rules import RulesError
 from app.modules.packets.service import PacketError, PacketNotFoundError
+from app.modules.packets.writing import AIHelpBlockedError
 from app.modules.profile.catalog import FactValidationError, FieldErrorsError
 from app.modules.profile.service import NotFoundError, StoryValidationError
 from app.modules.resume.files import ResumeFileError
@@ -55,6 +59,10 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     StatusChangeError: 422,
     PacketError: 422,
     RulesError: 422,
+    MaterialError: 422,
+    AIHelpBlockedError: 403,
+    AIUnavailableError: 503,  # AI turned off or unreachable: say how to proceed
+    AIError: 502,  # refusal or unusable output
     ResumeFileError: 422,
     DuplicateSourceError: 409,
     NotFoundError: 404,
