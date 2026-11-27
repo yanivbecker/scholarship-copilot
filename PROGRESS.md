@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-**Phase 8: Daily monitoring + notifications** in progress (approved 2026-11-27). Phase 7 complete and reviewed: overnight decisions approved, coaching relaxed to on-by-default (also when rules are unclear); drafting still needs confirmed "allowed" rules. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
+**Phase 8 complete** (2026-11-27); waiting for the owner's review. Phase 7 complete and reviewed: overnight decisions approved, coaching relaxed to on-by-default (also when rules are unclear); drafting still needs confirmed "allowed" rules. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
@@ -11,6 +11,7 @@
 - 2026-11-27: Phase 5 (discovery + eligibility) milestones 5.0-5.6 complete. Phase 5 approved; Phases 6 and 7 approved for an overnight run.
 - 2026-11-27: Phase 6 (dashboard) milestones 6.0-6.3 complete (overnight).
 - 2026-11-27: Phase 7 (application packets) milestones 7.1-7.5 complete (overnight).
+- 2026-11-27: Phase 8 (daily monitoring + notifications) milestones 8.1-8.5 complete.
 
 ## Phase 3 checklist
 - [x] Local git repository + planning docs
@@ -59,10 +60,12 @@
 - [x] 8.2 `scholar daily` job (FR-N1, FR-N2): discovery then notifications, recorded on the job run; `--scheduled` (used by launchd) does nothing while background running is off, manual runs and the app's "Run now" always work; a discovery failure doesn't stop deadline reminders. 5 tests, deliberate breaks caught.
 - [x] 8.3 Background switch (FR-N1, FR-N2): a generated launchd agent (daily 07:00, runs on wake, background priority, logs in the data folder, no secrets in the plist), `scholar background on/off/status` and a `/background` API for the Settings page. `off` saves the flag before unloading and deletes the file; a failed `on` never claims to be on. launchctl is behind an interface: 11 tests use a fake, tests can never reach the real launchd, and `SCHOLARSHIP_BACKGROUND_DRY_RUN` makes it safe to try. A dry run with the real CLI produced a plist that `plutil -lint` accepts. **Not loaded into the real launchd** (owner's call: `uv run scholar background on`).
 - [x] 8.4 Weekly source search (FR-N3, FR-D1): Tavily over the existing `httpx2` (no new dependency), only when `TAVILY_API_KEY` is set **and** the student saved queries; only the query text is sent. Runs at most once per `SCHOLARSHIP_SEARCH_INTERVAL_DAYS` (7) inside the daily job. Results pass the existing URL-safety and aggregator rules, become *pending* sources (never fetched until approved), at most 15 per run; rejected pages are never suggested again. Approve/reject API. A search failure is recorded and the daily job continues. 11 tests with a fake search service, deliberate breaks caught. **Not tried against the real Tavily service** (no key on this machine).
-- [ ] 8.5 UI: notifications, Settings page, suggested sources
+- [x] 8.5 UI (FR-N2, FR-N3, FR-N5): notifications on Today (unread first, linked, mark one or all read); a Settings page with the daily check (asks before installing the background job, dry-run notice, last scheduled run, Run now), notification switches (update instantly, roll back if saving fails) and the weekly search (says exactly what is sent; suggestions are only added when saved); suggested pages on Sources with Approve/Reject (rejected ones hidden). 9 new Vitest tests (111 total), deliberate breaks caught. Browser check on a scratch database with the background switch in dry-run mode, desktop and 390 px, no horizontal overflow; the real LaunchAgents folder was never touched.
 
 ## Known issues
 - Resolved 2026-11-27: pyright 1.1.414 now runs in CI (backend job) and pre-commit (owner-approved), after a pyright-only error from 5.2 reached main.
+- Resolved 2026-11-27: 8.2 and 8.3 were pushed without regenerated API types, so CI's api-contract job failed; fixed in 8.4, and a new `api-types` pre-commit hook now runs the same check before every commit that touches backend code.
+- The weekly search has only been tested against a fake search service (no Tavily key on this machine).
 - Coaching and drafting prompts have only been tested with a scripted AI; their quality with a real model is unknown until a key or Ollama is set up.
 - The production build warns that the JS bundle is over 500 kB; code-splitting by route would fix it (not done overnight).
 - Neither AI provider has been run against a real model yet (no Anthropic key or Ollama on the dev machine); both are tested with mocked HTTP.
@@ -73,6 +76,7 @@
 - Resolved 2026-11-26: Starlette's TestClient deprecated `httpx`; switched the dev dependency to `httpx2` 2.16.2 (owner-approved; verified same maintainer, pydantic/httpx2).
 
 ## Next steps
-- Owner: run `uv run alembic upgrade head` in `api/` again when Phase 8 lands (new tables: notifications, watch states, user settings).
+- Owner: run `uv run alembic upgrade head` in `api/` once more (Phase 8 tables: notifications, watch states, user settings).
+- Owner, optional: `uv run scholar background on` (or Settings → Daily check) to install the 07:00 job; `TAVILY_API_KEY` in `api/.env` plus saved queries for the weekly search.
 - Optional: set `ANTHROPIC_API_KEY` and `SCHOLARSHIP_AI_PROVIDER=anthropic` in `api/.env` to try real extraction.
-- Owner review of Phases 6 and 7 (see the overnight decisions in ARCHITECTURE.md's decision log), then approval for Phase 8 (daily monitoring + notifications).
+- Owner review of Phase 8, then approval for Phase 9 (browser-extension autofill from approved packets).

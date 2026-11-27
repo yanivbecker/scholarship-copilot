@@ -12,6 +12,7 @@ import {
   type JobRun,
   type Source,
 } from '@/api/sources'
+import { reviewSource } from '@/api/notifications'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -48,6 +49,11 @@ export function SourcesPage() {
       queryClient.invalidateQueries({ queryKey: ['eligibility'] }),
     ])
 
+  const all = sources.data ?? []
+  // Rejected suggestions stay on record (never suggested again) but hidden.
+  const suggested = all.filter((s) => s.status === 'pending_review')
+  const approved = all.filter((s) => s.status === 'approved')
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -76,6 +82,10 @@ export function SourcesPage() {
         </CardContent>
       </Card>
 
+      {suggested.length > 0 && (
+        <SuggestedSources sources={suggested} onChanged={refresh} />
+      )}
+
       <section aria-labelledby="your-sources" className="space-y-4">
         <h2 id="your-sources" className="text-lg font-semibold">
           Your sources
@@ -86,12 +96,12 @@ export function SourcesPage() {
             Couldn't load sources. Is the API running?
           </p>
         )}
-        {sources.isSuccess && sources.data.length === 0 && (
+        {sources.isSuccess && approved.length === 0 && (
           <p className="text-muted-foreground">No sources yet.</p>
         )}
         {sources.isSuccess && (
           <ul className="space-y-4">
-            {sources.data.map((source) => (
+            {approved.map((source) => (
               <li key={source.id}>
                 <SourceCard source={source} onChanged={refresh} />
               </li>
@@ -425,5 +435,81 @@ function SnapshotPreview({ sourceId }: { sourceId: number }) {
         </div>
       )}
     </details>
+  )
+}
+
+/** FR-D1/FR-N3: pages found by the weekly search wait for the student. */
+function SuggestedSources({
+  sources,
+  onChanged,
+}: {
+  sources: Source[]
+  onChanged: () => Promise<unknown>
+}) {
+  const review = useMutation({
+    mutationFn: ({ id, approve }: { id: number; approve: boolean }) =>
+      reviewSource(id, approve),
+    onSuccess: onChanged,
+  })
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle role="heading" aria-level={2}>
+          Suggested pages ({sources.length})
+        </CardTitle>
+        <CardDescription>
+          Found by the weekly search. Nothing is read from a page until you
+          approve it. Rejected pages are never suggested again.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-3">
+          {sources.map((source) => (
+            <li
+              key={source.id}
+              className="flex flex-wrap items-center justify-between gap-2 text-sm"
+            >
+              <div className="min-w-0 flex-1">
+                {source.label && <p className="font-medium">{source.label}</p>}
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all text-muted-foreground underline underline-offset-4"
+                >
+                  {source.url}
+                </a>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  disabled={review.isPending}
+                  onClick={() =>
+                    review.mutate({ id: source.id, approve: true })
+                  }
+                >
+                  Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={review.isPending}
+                  onClick={() =>
+                    review.mutate({ id: source.id, approve: false })
+                  }
+                >
+                  Reject
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+        {review.isError && (
+          <p role="alert" className="text-sm text-destructive">
+            {review.error.message}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   )
 }

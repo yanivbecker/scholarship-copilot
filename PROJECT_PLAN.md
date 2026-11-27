@@ -47,7 +47,7 @@ Each phase ends with a demo, test results, and an explicit approval before the n
 | 5 | Discovery + eligibility: sources, polite fetcher, extraction, AI provider switch, criteria engine, dedup | ✅ Done 2026-11-27 |
 | 6 | Dashboard: Today screen, scholarship table, detail with evidence, status tracking | ✅ Done 2026-11-27 (**end-of-year milestone reached**) |
 | 7 | Application packets: rules check, checklist, coaching, allowed drafting, provenance check, approvals | ✅ Done 2026-11-27 (ahead of the January 2027 target) |
-| 8 | Daily monitoring + notifications (launchd job with on/off switch, change detection, weekly search) | February 2027 |
+| 8 | Daily monitoring + notifications (launchd job with on/off switch, change detection, weekly search) | ✅ Done 2026-11-27 (ahead of the February 2027 target) |
 | 9 | Browser-extension autofill from approved packets | Spring 2027 |
 | 10 | Security review, hardening, optional cloud deployment (Checkpoint 4) | After Phase 9 |
 

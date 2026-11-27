@@ -3,6 +3,7 @@ import { createBrowserRouter, type RouteObject } from 'react-router'
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
 import { PacketPage } from '@/features/packets/PacketPage'
 import { ProfilePage } from '@/features/profile/ProfilePage'
+import { SettingsPage } from '@/features/settings/SettingsPage'
 import { ScholarshipDetailPage } from '@/features/scholarships/ScholarshipDetailPage'
 import { ScholarshipsPage } from '@/features/scholarships/ScholarshipsPage'
 import { SourcesPage } from '@/features/sources/SourcesPage'
@@ -20,6 +21,7 @@ export const routes: RouteObject[] = [
       { path: 'onboarding', Component: OnboardingPage },
       { path: 'profile', Component: ProfilePage },
       { path: 'stories', Component: StoriesPage },
+      { path: 'settings', Component: SettingsPage },
       { path: 'sources', Component: SourcesPage },
       { path: 'scholarships', Component: ScholarshipsPage },
       { path: 'scholarships/:id', Component: ScholarshipDetailPage },

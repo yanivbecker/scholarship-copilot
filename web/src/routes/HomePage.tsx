@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { HealthStatus } from '@/features/health/HealthStatus'
+import { NotificationsCard } from '@/features/notifications/NotificationsCard'
 import { SetupBanner } from '@/features/onboarding/SetupBanner'
 import { VerdictPill } from '@/features/scholarships/components'
 import { timeAgo } from '@/features/sources/status'
@@ -49,6 +50,7 @@ export function HomePage() {
       )}
       {today.isSuccess && (
         <div className="grid gap-6 lg:grid-cols-2">
+          <NotificationsCard />
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle role="heading" aria-level={2}>

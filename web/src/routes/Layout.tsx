@@ -8,6 +8,7 @@ const NAV = [
   { to: '/scholarships', label: 'Scholarships', end: false },
   { to: '/sources', label: 'Sources', end: false },
   { to: '/stories', label: 'Story bank', end: false },
+  { to: '/settings', label: 'Settings', end: false },
 ]
 
 /** App shell: skip link, header navigation, and the current page. */

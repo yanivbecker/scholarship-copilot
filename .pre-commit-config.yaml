@@ -69,3 +69,12 @@ repos:
         language: system
         files: ^web/.*\.(ts|tsx)$
         pass_filenames: false
+      # Same check as CI's api-contract job: backend changes must ship with
+      # regenerated frontend types. On failure the files are already
+      # regenerated: review them, `git add` them and commit again.
+      - id: api-types
+        name: API types up to date
+        entry: bash -c 'npm --prefix web run --silent gen:api >/dev/null && git diff --exit-code --stat -- web/src/api/openapi.json web/src/api/schema.d.ts'
+        language: system
+        files: ^api/app/.*\.py$
+        pass_filenames: false

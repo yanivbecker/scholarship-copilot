@@ -175,4 +175,32 @@ describe('timeAgo', () => {
   ])('%s -> %s', (iso, expected) => {
     expect(timeAgo(iso, now)).toBe(expected)
   })
+
+  it('lets the student approve or reject suggested pages (FR-D1)', async () => {
+    const calls = mockApi({
+      ...base([
+        source({ id: 1, url: 'https://example.org/awards' }),
+        source({
+          id: 2,
+          url: 'https://example.org/suggested',
+          label: 'A suggested award',
+          status: 'pending_review',
+        }),
+        source({ id: 3, url: 'https://example.org/no', status: 'rejected' }),
+      ]),
+      'POST /api/v1/sources/2/review': source({ id: 2, status: 'approved' }),
+    })
+    const user = userEvent.setup()
+    renderWithQueryClient(<SourcesPage />)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Suggested pages (1)' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('https://example.org/no')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Approve' }))
+
+    expect(calls.find((c) => c.path.endsWith('/review'))?.body).toEqual({
+      approve: true,
+    })
+  })
 })
