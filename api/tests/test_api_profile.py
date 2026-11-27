@@ -41,6 +41,8 @@ def test_catalog_lists_sections_with_sensitive_flags(client: TestClient) -> None
     assert by_key["education"]["sensitive"] is False
     gpa = next(f for f in by_key["education"]["facts"] if f["key"] == "gpa")
     assert gpa["type"] == "number" and gpa["max_value"] == 5
+    status = next(f for f in by_key["citizenship"]["facts"])
+    assert {"value": "us_citizen", "label": "U.S. citizen"} in status["choices"]
 
 
 # --- Facts (FR-P3, FR-P4, FR-P6) --------------------------------------------

@@ -18,12 +18,31 @@
         "title": "CatalogOut",
         "type": "object"
       },
+      "ChoiceOut": {
+        "description": "One option of a choice fact: the stored value and its display label.",
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ],
+        "title": "ChoiceOut",
+        "type": "object"
+      },
       "FactDefinitionOut": {
         "description": "One fact the app knows about, with the rules its value must follow.",
         "properties": {
           "choices": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/ChoiceOut"
             },
             "title": "Choices",
             "type": "array"

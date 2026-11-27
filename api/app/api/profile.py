@@ -6,9 +6,15 @@ from fastapi import APIRouter, Query, Response, status
 
 from app.api.deps import CurrentUser, SessionDep
 from app.modules.profile import service
-from app.modules.profile.catalog import CATALOG, SECTION_LABELS, SENSITIVE_SECTIONS
+from app.modules.profile.catalog import (
+    CATALOG,
+    SECTION_LABELS,
+    SENSITIVE_SECTIONS,
+    choice_label,
+)
 from app.modules.profile.schemas import (
     CatalogOut,
+    ChoiceOut,
     FactDefinitionOut,
     FactIn,
     FactOut,
@@ -60,7 +66,9 @@ def get_fact_catalog() -> CatalogOut:
                     section=d.section,
                     sensitive=d.sensitive,
                     help=d.help,
-                    choices=list(d.choices),
+                    choices=[
+                        ChoiceOut(value=c, label=choice_label(c)) for c in d.choices
+                    ],
                     min_value=d.min_value,
                     max_value=d.max_value,
                 )

@@ -82,6 +82,23 @@ class FactDefinition:  # pylint: disable=too-many-instance-attributes
         return self.section in SENSITIVE_SECTIONS
 
 
+# Labels for choice values that "first_word rest" capitalization gets wrong.
+_CHOICE_LABEL_OVERRIDES = {
+    "us_citizen": "U.S. citizen",
+    "daca": "DACA",
+    "middle_eastern_or_north_african": "Middle Eastern or North African",
+    "native_hawaiian_or_pacific_islander": "Native Hawaiian or Pacific Islander",
+    "american_indian_or_alaska_native": "American Indian or Alaska Native",
+    "black_or_african_american": "Black or African American",
+    "hispanic_or_latino": "Hispanic or Latino",
+}
+
+
+def choice_label(value: str) -> str:
+    """ "full_time" -> "Full time" (with overrides for names and acronyms)."""
+    return _CHOICE_LABEL_OVERRIDES.get(value, value.replace("_", " ").capitalize())
+
+
 class FactValidationError(ValueError):
     """A value doesn't fit its fact definition. The message is user-facing."""
 

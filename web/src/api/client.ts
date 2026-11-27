@@ -1,11 +1,13 @@
 /**
- * Typed access to the FastAPI backend.
+ * Low-level access to the FastAPI backend.
  *
  * Types come from ./schema.d.ts, generated from the API's OpenAPI schema with
  * `npm run gen:api`. If a backend response changes shape, regenerating makes
  * TypeScript flag every place in the frontend that needs updating.
  */
-import type { paths } from './schema'
+import type { components, paths } from './schema'
+
+export type Schemas = components['schemas']
 
 /** The JSON body of a successful (200) GET response for an API path. */
 type GetResponse<P extends keyof paths> = paths[P] extends {
@@ -24,20 +26,75 @@ export class ApiError extends Error {
   }
 }
 
-/** GET a JSON endpoint. Throws ApiError for non-2xx responses. */
-export async function apiGet<P extends keyof paths>(
-  path: P,
-): Promise<GetResponse<P>> {
-  const response = await fetch(path, {
-    headers: { Accept: 'application/json' },
+type Query = Record<string, string | string[] | undefined>
+
+type RequestOptions = {
+  body?: unknown
+  query?: Query
+}
+
+function withQuery(path: string, query?: Query): string {
+  if (!query) return path
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      if (item !== undefined) params.append(key, item)
+    }
+  }
+  const qs = params.toString()
+  return qs ? `${path}?${qs}` : path
+}
+
+/**
+ * The backend sends `{"detail": "message"}` for its own errors and
+ * `{"detail": [{msg, loc, ...}]}` for request-shape errors (FastAPI 422).
+ * Turn either into one readable sentence.
+ */
+async function errorMessage(response: Response): Promise<string> {
+  try {
+    const data: unknown = await response.json()
+    if (data && typeof data === 'object' && 'detail' in data) {
+      const { detail } = data
+      if (typeof detail === 'string') return detail
+      if (Array.isArray(detail)) {
+        return detail
+          .map((d: { msg?: unknown }) => String(d.msg ?? 'Invalid value'))
+          .join(' ')
+      }
+    }
+  } catch {
+    // Not JSON (e.g. the dev proxy's error page). Fall through.
+  }
+  return `Request failed (${response.status})`
+}
+
+/** Send a request. Throws ApiError for non-2xx responses. */
+export async function request<T>(
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+  path: string,
+  { body, query }: RequestOptions = {},
+): Promise<T> {
+  const response = await fetch(withQuery(path, query), {
+    method,
+    headers: {
+      Accept: 'application/json',
+      ...(body !== undefined && { 'Content-Type': 'application/json' }),
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
   })
   if (!response.ok) {
-    throw new ApiError(
-      response.status,
-      `GET ${path} failed: ${response.status}`,
-    )
+    throw new ApiError(response.status, await errorMessage(response))
   }
-  return (await response.json()) as GetResponse<P>
+  if (response.status === 204) return undefined as T
+  return (await response.json()) as T
+}
+
+/** GET a JSON endpoint, typed from the path alone. */
+export function apiGet<P extends keyof paths>(
+  path: P,
+  query?: Query,
+): Promise<GetResponse<P>> {
+  return request<GetResponse<P>>('GET', path, { query })
 }
 
 export type HealthResponse = GetResponse<'/api/v1/health'>

@@ -51,6 +51,13 @@ class ProfileUpdate(BaseModel):
 # --- Catalog ---
 
 
+class ChoiceOut(BaseModel):
+    """One option of a choice fact: the stored value and its display label."""
+
+    value: str
+    label: str
+
+
 class FactDefinitionOut(BaseModel):
     """One fact the app knows about, with the rules its value must follow."""
 
@@ -60,7 +67,7 @@ class FactDefinitionOut(BaseModel):
     section: FactSection
     sensitive: bool
     help: str
-    choices: list[str]
+    choices: list[ChoiceOut]
     min_value: float | None
     max_value: float | None
 

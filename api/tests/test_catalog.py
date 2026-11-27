@@ -10,6 +10,7 @@ from app.modules.profile.catalog import (
     FactSection,
     FactType,
     FactValidationError,
+    choice_label,
     get_definition,
     validate_value,
 )
@@ -45,6 +46,14 @@ def test_sensitive_facts_are_flagged(key: str) -> None:
 def test_education_facts_are_not_sensitive() -> None:
     assert not get_definition("gpa").sensitive
     assert get_definition("gpa").section is FactSection.EDUCATION
+
+
+@pytest.mark.parametrize(
+    ("value", "label"),
+    [("full_time", "Full time"), ("us_citizen", "U.S. citizen"), ("daca", "DACA")],
+)
+def test_choice_labels(value: str, label: str) -> None:
+    assert choice_label(value) == label
 
 
 def test_unknown_key_is_rejected() -> None:

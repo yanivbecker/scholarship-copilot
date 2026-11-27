@@ -174,12 +174,22 @@ export interface components {
             sections: components["schemas"]["SectionOut"][];
         };
         /**
+         * ChoiceOut
+         * @description One option of a choice fact: the stored value and its display label.
+         */
+        ChoiceOut: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: string;
+        };
+        /**
          * FactDefinitionOut
          * @description One fact the app knows about, with the rules its value must follow.
          */
         FactDefinitionOut: {
             /** Choices */
-            choices: string[];
+            choices: components["schemas"]["ChoiceOut"][];
             /** Help */
             help: string;
             /** Key */
