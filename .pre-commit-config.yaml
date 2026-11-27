@@ -39,6 +39,13 @@ repos:
         types: [python]
         files: ^api/
         pass_filenames: false
+      - id: pyright
+        name: pyright
+        entry: npx --yes pyright@1.1.414 api
+        language: system
+        types: [python]
+        files: ^api/
+        pass_filenames: false
 
       # --- Frontend (web/) ---
       - id: prettier

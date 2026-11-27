@@ -1,14 +1,14 @@
 # Progress
 
 ## Current status
-**Phase 5: Discovery + eligibility** complete (2026-11-27). Awaiting the owner's review and approval before Phase 6.
+**Phase 6: Dashboard** in progress (started 2026-11-27, overnight run). Phase 5 approved 2026-11-27. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
 - 2026-11-26: Repository created. PROJECT_PLAN, REQUIREMENTS, ARCHITECTURE, PROGRESS, README, CLAUDE.md written.
 - 2026-11-26: Phase 3 (project setup) complete. Checkpoint 3 approved.
 - 2026-11-26: Phase 4 (profile) milestones 4.1-4.5 complete. Phase 4 approved; Phase 5 approved, starting with NFR-12.
-- 2026-11-27: Phase 5 (discovery + eligibility) milestones 5.0-5.6 complete.
+- 2026-11-27: Phase 5 (discovery + eligibility) milestones 5.0-5.6 complete. Phase 5 approved; Phases 6 and 7 approved for an overnight run.
 
 ## Phase 3 checklist
 - [x] Local git repository + planning docs
@@ -40,7 +40,7 @@
 - [x] 5.6 Sources and scholarships UI (FR-D1-D4, FR-D6, FR-D9, FR-E1-E6, NFR-11): **Sources** page (add with server-side URL rules, plain-language fetch and extraction status, last checked/changed, Check now, Find scholarships (enabled only when there's text), Paste text (opens automatically for login walls; text sent verbatim), two-step remove, text preview, Run now + last run summary). **Scholarships** page (ranked by priority; verdict, amount, deadline; scam warnings with the offending sentences; needs-review notes; open questions linking to the profile plus a count of yes/no items; every requirement with outcome, reason, verbatim quote and source link; yes/no/clear for free-text requirements; score breakdown labeled listing vs estimate with the not-odds note; possible duplicates with merge). Sources now report their latest extraction status. **Tested:** 425 pytest, 73 Vitest (19 new); deliberate breaks (pasted text trimmed, scam warning hidden, Yes sending No) each failed tests. Browser run on a scratch DB + data dir seeded with fictional data. Found and fixed: a scam-flagged listing ranked first (warning signs now cut the priority to 25% with an explanation); the nav overflowed at phone width; "1 criteria"; a pyright error from 5.2 that CI didn't catch.
 
 ## Known issues
-- CI runs mypy but not pyright, so a pyright-only error from 5.2 reached main (fixed in 5.6). Add pyright to CI or pre-commit.
+- Resolved 2026-11-27: pyright 1.1.414 now runs in CI (backend job) and pre-commit (owner-approved), after a pyright-only error from 5.2 reached main.
 - Neither AI provider has been run against a real model yet (no Anthropic key or Ollama on the dev machine); both are tested with mocked HTTP.
 - JS-only pages (Playwright rendering) are not supported yet; paste the text instead.
 - Resolved 2026-11-26: automated security review found `POST /sources/{id}/extract` accepted a `Settings` request body (the AI provider dependency had a parameter FastAPI exposed). Fixed in `ddfab3a`; regression test `tests/test_api_contract.py` fails if any endpoint accepts `Settings` again.

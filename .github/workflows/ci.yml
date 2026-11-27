@@ -39,6 +39,12 @@ jobs:
         run: uv run pylint app tests
       - name: mypy
         run: uv run mypy app tests migrations
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26'
+      - name: pyright (catches what mypy doesn't; uses ../pyrightconfig.json)
+        working-directory: .
+        run: npx --yes pyright@1.1.414 api
       - name: pytest
         run: uv run pytest
       - name: Migrations apply cleanly and match the models
