@@ -5,6 +5,7 @@ from collections.abc import Iterator
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
+from pydantic import BaseModel
 
 from app.api.deps import CurrentUser, SessionDep
 from app.modules.fetcher.fetcher import PoliteFetcher
@@ -70,6 +71,21 @@ def check_source(
     outcome = service.check_source(session, fetcher, user.id, source_id, force=True)
     session.commit()
     return _check_out(session, outcome)
+
+
+class ReviewIn(BaseModel):
+    """Approve (check it from now on) or reject (never suggest it again)."""
+
+    approve: bool
+
+
+@router.post("/{source_id}/review")
+def review_source(
+    source_id: int, body: ReviewIn, session: SessionDep, user: CurrentUser
+) -> SourceOut:
+    source = service.review_source(session, user.id, source_id, approve=body.approve)
+    session.commit()
+    return SourceOut.model_validate(source)
 
 
 @router.post("/{source_id}/paste")

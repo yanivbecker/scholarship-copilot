@@ -59,6 +59,23 @@ def list_sources(session: Session, user_id: int) -> list[Source]:
     )
 
 
+class ReviewError(ValueError):
+    """The source isn't waiting for review. The message is user-facing."""
+
+
+def review_source(
+    session: Session, user_id: int, source_id: int, *, approve: bool
+) -> Source:
+    """FR-D1: the student approves or rejects a suggested page. A rejected
+    page stays on record (hidden), so search never suggests it again."""
+    source = get_source(session, user_id, source_id)
+    if source.status is not SourceStatus.PENDING_REVIEW:
+        raise ReviewError("Only suggested pages can be approved or rejected.")
+    source.status = SourceStatus.APPROVED if approve else SourceStatus.REJECTED
+    session.flush()
+    return source
+
+
 def delete_source(session: Session, user_id: int, source_id: int) -> None:
     session.delete(get_source(session, user_id, source_id))
     session.flush()

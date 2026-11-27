@@ -4,6 +4,24 @@
  */
 
 export interface paths {
+    "/api/v1/background": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Background */
+        get: operations["get_background"];
+        /** Set Background */
+        put: operations["set_background"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/dashboard/today": {
         parameters: {
             query?: never;
@@ -32,8 +50,9 @@ export interface paths {
         put?: never;
         /**
          * Run Now
-         * @description Check every source and extract what changed. Can take a while: each
-         *     site is contacted at most once per second, and AI extraction is slow.
+         * @description Run the daily job now (FR-N2 "Run now": works even with background
+         *     running off). Can take a while: each site is contacted at most once per
+         *     second, and AI extraction is slow.
          */
         post: operations["run_now"];
         delete?: never;
@@ -860,6 +879,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/{source_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Review Source */
+        post: operations["review_source"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources/{source_id}/snapshot": {
         parameters: {
             query?: never;
@@ -986,6 +1022,33 @@ export interface components {
             note: string | null;
             /** To Status */
             to_status: string | null;
+        };
+        /**
+         * BackgroundIn
+         * @description Switch background running on (install + load) or off (unload + remove).
+         */
+        BackgroundIn: {
+            /** Enabled */
+            enabled: boolean;
+        };
+        /**
+         * BackgroundOut
+         * @description Whether background running is on, and what launchd says.
+         */
+        BackgroundOut: {
+            /** Dry Run */
+            dry_run: boolean;
+            /** Enabled */
+            enabled: boolean;
+            /** Installed */
+            installed: boolean;
+            last_scheduled_run: components["schemas"]["JobRunOut"] | null;
+            /** Loaded */
+            loaded: boolean;
+            /** Schedule */
+            schedule: string;
+            /** Summary */
+            summary: string;
         };
         /** Body_upload_resume */
         Body_upload_resume: {
@@ -1810,6 +1873,14 @@ export interface components {
             suggestions: components["schemas"]["SuggestionOut"][];
         };
         /**
+         * ReviewIn
+         * @description Approve (check it from now on) or reject (never suggest it again).
+         */
+        ReviewIn: {
+            /** Approve */
+            approve: boolean;
+        };
+        /**
          * RulesIn
          * @description The student's confirmation (FR-A2). Allowed needs a verbatim quote.
          */
@@ -2207,6 +2278,59 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    get_background: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackgroundOut"];
+                };
+            };
+        };
+    };
+    set_background: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackgroundIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackgroundOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_today: {
         parameters: {
             query?: never;
@@ -3783,6 +3907,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_source: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceOut"];
                 };
             };
             /** @description Validation Error */

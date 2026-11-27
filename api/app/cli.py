@@ -22,6 +22,7 @@ from app.modules.fetcher.fetcher import PoliteFetcher
 from app.modules.jobs.daily import SCHEDULE, run_daily
 from app.modules.jobs.discovery import run_discovery
 from app.modules.jobs.models import JobRun
+from app.modules.sources.search import Searcher, TavilySearcher, build_searcher
 from app.modules.privacy.service import DeletionReport, delete_all_personal_data
 from app.modules.users.service import get_or_create_owner
 
@@ -108,6 +109,7 @@ def cmd_daily(  # pylint: disable=too-many-arguments
     session_factory: Callable[[], Session],
     fetcher: PoliteFetcher,
     provider: AIProvider,
+    searcher: Searcher | None,
     out: TextIO,
 ) -> int:
     """FR-N1: discovery, then notifications. Scheduled runs obey the switch."""
@@ -120,6 +122,8 @@ def cmd_daily(  # pylint: disable=too-many-arguments
             fetcher=fetcher,
             provider=provider,
             trigger=SCHEDULE if scheduled else "cli",
+            searcher=searcher,
+            search_interval_days=get_settings().search_interval_days,
         )
         if result.skipped:
             print(result.skipped, file=out)
@@ -128,6 +132,13 @@ def cmd_daily(  # pylint: disable=too-many-arguments
             _print_run(result.run, provider, out)
         else:
             print("Discovery failed; see the app's Today screen.", file=out)
+        search = (result.run.summary.get("search") if result.run else None) or {}
+        if search:
+            print(
+                f"Search: {search['suggested']} new page(s) to review"
+                + (f" ({search['error']})" if search.get("error") else ""),
+                file=out,
+            )
         print(f"{result.notifications} new notification(s).", file=out)
         return 0 if result.ok else 1
 
@@ -214,6 +225,7 @@ def run(  # pylint: disable=too-many-arguments  # every dependency is injectable
     fetcher: PoliteFetcher | None = None,
     provider: AIProvider | None = None,
     agent: Agent | None = None,
+    searcher: Searcher | None = None,
     ask: Callable[[str], str] = input,
     out: TextIO = sys.stdout,
 ) -> int:
@@ -245,13 +257,20 @@ def run(  # pylint: disable=too-many-arguments  # every dependency is injectable
         own_fetcher = fetcher is None
         fetcher = fetcher or PoliteFetcher()
         try:
-            return cmd_daily(
-                scheduled=args.scheduled,
-                session_factory=session_factory or get_session_factory(),
-                fetcher=fetcher,
-                provider=provider or build_ai_provider(get_settings()),
-                out=out,
-            )
+            own_searcher = searcher is None
+            searcher = searcher or build_searcher(get_settings())
+            try:
+                return cmd_daily(
+                    scheduled=args.scheduled,
+                    session_factory=session_factory or get_session_factory(),
+                    fetcher=fetcher,
+                    provider=provider or build_ai_provider(get_settings()),
+                    searcher=searcher,
+                    out=out,
+                )
+            finally:
+                if own_searcher and isinstance(searcher, TavilySearcher):
+                    searcher.client.close()
         finally:
             if own_fetcher:
                 fetcher.close()

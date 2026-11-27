@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.ai.factory import get_ai_provider
 from app.modules.background.launchd import Agent, DryRunLaunchctl
 from app.modules.background.service import get_agent
+from app.modules.sources.search import get_searcher
 from app.core.db import get_session, make_engine
 from app.api.sources import get_fetcher
 from app.core.storage import LocalFileStorage, get_storage
@@ -87,6 +88,8 @@ def fixture_client(
     app.dependency_overrides[get_session] = test_session
     app.dependency_overrides[get_storage] = lambda: storage
     app.dependency_overrides[get_fetcher] = web.fetcher
+    # Never a real search service, even if api/.env has a key.
+    app.dependency_overrides[get_searcher] = lambda: None
     # Never the real launchd: a dry-run agent in this test's folder.
     app.dependency_overrides[get_agent] = lambda: Agent(
         tmp_path / "LaunchAgents",

@@ -27,6 +27,7 @@ from app.modules.scholarships.service import ScholarshipNotFoundError
 from app.modules.sources.service import (
     DuplicateSourceError,
     PasteError,
+    ReviewError,
     SourceNotFoundError,
 )
 from app.modules.sources.url_safety import UnsafeURLError
@@ -56,6 +57,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     StoryValidationError: 422,
     UnsafeURLError: 422,
     PasteError: 422,
+    ReviewError: 422,
     NotConfirmableError: 422,
     MergeError: 422,
     StatusChangeError: 422,

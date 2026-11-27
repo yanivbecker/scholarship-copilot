@@ -1,4 +1,5 @@
-"""The daily job (FR-N1): discovery, then notifications.
+"""The daily job (FR-N1): discovery, the weekly search if due (FR-N3), then
+notifications.
 
 Run by launchd as `scholar daily --scheduled` (default 07:00, and on wake if
 the Mac was asleep), by `scholar daily` by hand, or by "Run now" in the app.
@@ -23,6 +24,7 @@ from app.modules.jobs.discovery import run_discovery
 from app.modules.jobs.models import JobRun
 from app.modules.notify import service as notify
 from app.modules.settings import service as settings
+from app.modules.sources.search import Searcher, run_search, search_due
 
 log = logging.getLogger(__name__)
 
@@ -52,6 +54,8 @@ def run_daily(  # pylint: disable=too-many-arguments
     fetcher: PoliteFetcher,
     provider: AIProvider,
     trigger: str,
+    searcher: Searcher | None = None,
+    search_interval_days: int = 7,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
 ) -> DailyResult:
     if (
@@ -77,8 +81,18 @@ def run_daily(  # pylint: disable=too-many-arguments
         session.rollback()
 
     now = clock()
+    search = None
+    if searcher is not None and search_due(
+        settings.get_settings(session, user_id), now, search_interval_days
+    ):
+        search = run_search(session, user_id, searcher, now=now)
+        session.commit()
     created = notify.generate(session, user_id, today=now.date(), now=now)
     if run is not None:
-        run.summary = {**run.summary, "notifications_created": len(created)}
+        run.summary = {
+            **run.summary,
+            "notifications_created": len(created),
+            "search": search.as_summary() if search else None,
+        }
     session.commit()
     return DailyResult(run=run, notifications=len(created))

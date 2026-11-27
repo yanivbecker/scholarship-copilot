@@ -146,6 +146,70 @@
         "title": "AuditEventOut",
         "type": "object"
       },
+      "BackgroundIn": {
+        "description": "Switch background running on (install + load) or off (unload + remove).",
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "title": "BackgroundIn",
+        "type": "object"
+      },
+      "BackgroundOut": {
+        "description": "Whether background running is on, and what launchd says.",
+        "properties": {
+          "dry_run": {
+            "title": "Dry Run",
+            "type": "boolean"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "installed": {
+            "title": "Installed",
+            "type": "boolean"
+          },
+          "last_scheduled_run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobRunOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "loaded": {
+            "title": "Loaded",
+            "type": "boolean"
+          },
+          "schedule": {
+            "title": "Schedule",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "installed",
+          "loaded",
+          "dry_run",
+          "schedule",
+          "summary",
+          "last_scheduled_run"
+        ],
+        "title": "BackgroundOut",
+        "type": "object"
+      },
       "Body_upload_resume": {
         "properties": {
           "file": {
@@ -2248,6 +2312,20 @@
         "title": "ResumeUploadOut",
         "type": "object"
       },
+      "ReviewIn": {
+        "description": "Approve (check it from now on) or reject (never suggest it again).",
+        "properties": {
+          "approve": {
+            "title": "Approve",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "approve"
+        ],
+        "title": "ReviewIn",
+        "type": "object"
+      },
       "RulesIn": {
         "description": "The student's confirmation (FR-A2). Allowed needs a verbatim quote.",
         "properties": {
@@ -3260,6 +3338,66 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/background": {
+      "get": {
+        "operationId": "get_background",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Background",
+        "tags": [
+          "background"
+        ]
+      },
+      "put": {
+        "operationId": "set_background",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackgroundIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Background",
+        "tags": [
+          "background"
+        ]
+      }
+    },
     "/api/v1/dashboard/today": {
       "get": {
         "operationId": "get_today",
@@ -3283,7 +3421,7 @@
     },
     "/api/v1/discovery/run": {
       "post": {
-        "description": "Check every source and extract what changed. Can take a while: each\nsite is contacted at most once per second, and AI extraction is slow.",
+        "description": "Run the daily job now (FR-N2 \"Run now\": works even with background\nrunning off). Can take a while: each site is contacted at most once per\nsecond, and AI extraction is slow.",
         "operationId": "run_now",
         "responses": {
           "200": {
@@ -5419,6 +5557,58 @@
           }
         },
         "summary": "Paste Source Text",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/api/v1/sources/{source_id}/review": {
+      "post": {
+        "operationId": "review_source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "title": "Source Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review Source",
         "tags": [
           "sources"
         ]
