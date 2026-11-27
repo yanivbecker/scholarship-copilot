@@ -1,0 +1,6 @@
+dist
+node_modules
+package-lock.json
+# Generated from the backend by `npm run gen:api`; don't hand-format.
+src/api/openapi.json
+src/api/schema.d.ts

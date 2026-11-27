@@ -1,0 +1,61 @@
+[project]
+name = "api"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.20.1",
+    "fastapi>=0.165.0",
+    "pydantic-settings>=2.16.3",
+    "sqlalchemy>=2.1.9",
+    "uvicorn>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.2",
+    "mypy>=2.4.1",
+    "pre-commit>=4.7.0",
+    "pylint>=4.1.4",
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+
+[tool.mypy]
+strict = true
+disallow_untyped_defs = true
+explicit_package_bases = true
+disable_error_code = ["empty-body", "return"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint."messages control"]
+disable = [
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "import-error",
+    "assignment-from-no-return",
+    "wrong-import-position",
+    "too-few-public-methods",  # ORM/Pydantic models are mostly fields by design
+]
+
+[tool.alembic]
+# Migration scripts live in api/migrations. The database URL is NOT set here:
+# migrations/env.py reads it from app settings (SCHOLARSHIP_* env vars).
+script_location = "%(here)s/migrations"
+prepend_sys_path = ["."]
+
+# Format each newly generated migration so it passes the ruff pre-commit hook.
+[[tool.alembic.post_write_hooks]]
+name = "ruff"
+type = "module"
+module = "ruff"
+options = "format REVISION_SCRIPT_FILENAME"

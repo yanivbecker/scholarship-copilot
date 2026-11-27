@@ -1,0 +1,39 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Personal data: must never be committed (real data lives in ~/ScholarshipCopilotData/)
+*.db
+*.sqlite
+*.sqlite3
+data/
+uploads/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+*.log
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Claude Code local-only settings
+.claude/settings.local.json
+
+# Playwright MCP screenshots/snapshots (local tooling output)
+.playwright-mcp/
