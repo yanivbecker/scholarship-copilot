@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 
 from app.ai.base import NoAIProvider
 from app.ai.factory import get_ai_provider
+from app.modules.packets.provenance import claims_in
 from tests.fakes import ScriptedProvider
 from tests.sample_listing import PAGE
 
@@ -333,3 +334,17 @@ def test_ai_turned_off_says_how_to_proceed(
 
     assert response.status_code == 503
     assert "AI is turned off" in response.json()["detail"]
+
+
+@pytest.mark.parametrize(
+    ("sentence", "claims"),
+    [
+        # Found in the browser check: a joining word was kept on the end.
+        ("I tutored at Lincoln High School and the library.", ["Lincoln High School"]),
+        ("I volunteered at the Bank of America office.", ["Bank of America"]),
+        ("My GPA is 3.80.", ["GPA", "3.80"]),
+        ("When I joined, I learned a lot.", []),
+    ],
+)
+def test_claims_are_names_and_numbers(sentence: str, claims: list[str]) -> None:
+    assert sorted(claims_in(sentence)) == sorted(claims)

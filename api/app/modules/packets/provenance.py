@@ -134,6 +134,9 @@ def claims_in(sentence: str) -> list[str]:
             words = words[1:]  # "My", "When", "Our": capitalized by grammar
             while words and words[0][0].islower():
                 words = words[1:]
+        # "of"/"and" may join a name ("Bank of America") but never end one.
+        while words and words[-1][0].islower():
+            words = words[:-1]
         if not words or (len(words) == 1 and words[0].lower() in _NOT_NAMES):
             continue
         found.append(" ".join(words))

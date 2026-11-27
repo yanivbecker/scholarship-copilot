@@ -6,6 +6,8 @@ export const scholarshipKeys = {
   scholarships: ['scholarships'] as const,
   duplicates: ['scholarships', 'duplicates'] as const,
   status: (id: number) => ['scholarships', id, 'status'] as const,
+  packet: (id: number) => ['scholarships', id, 'packet'] as const,
+  library: ['library'] as const,
 }
 
 export const VERDICTS: Record<string, { text: string; tone: Tone }> = {

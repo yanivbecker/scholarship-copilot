@@ -1,6 +1,7 @@
 import { createBrowserRouter, type RouteObject } from 'react-router'
 
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage'
+import { PacketPage } from '@/features/packets/PacketPage'
 import { ProfilePage } from '@/features/profile/ProfilePage'
 import { ScholarshipDetailPage } from '@/features/scholarships/ScholarshipDetailPage'
 import { ScholarshipsPage } from '@/features/scholarships/ScholarshipsPage'
@@ -22,6 +23,7 @@ export const routes: RouteObject[] = [
       { path: 'sources', Component: SourcesPage },
       { path: 'scholarships', Component: ScholarshipsPage },
       { path: 'scholarships/:id', Component: ScholarshipDetailPage },
+      { path: 'scholarships/:id/packet', Component: PacketPage },
     ],
   },
 ]

@@ -159,6 +159,22 @@ export function ScholarshipDetailPage() {
       </Card>
 
       <StatusCard scholarshipId={id} />
+      <Card>
+        <CardHeader>
+          <CardTitle role="heading" aria-level={2}>
+            Application packet
+          </CardTitle>
+          <CardDescription>
+            The checklist, your answers and their versions, and the AI-use rules
+            check.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild size="sm" variant="outline">
+            <Link to={`/scholarships/${id}/packet`}>Open the packet</Link>
+          </Button>
+        </CardContent>
+      </Card>
       <MissingInfo item={item} />
 
       <Card>
@@ -404,7 +420,7 @@ function StatusCard({ scholarshipId }: { scholarshipId: number }) {
             <ol className="mt-2 space-y-1 text-sm">
               {history.map((h, i) => (
                 <li key={i}>
-                  {timeAgo(h.created_at)}: {h.from_status} → {h.to_status}
+                  {timeAgo(h.created_at)}: {describeEvent(h)}
                   {h.note && ` (${h.note})`}
                 </li>
               ))}
@@ -414,4 +430,37 @@ function StatusCard({ scholarshipId }: { scholarshipId: number }) {
       </CardContent>
     </Card>
   )
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  discovered: 'Discovered',
+  eligibility_confirmed: 'Eligibility confirmed',
+  ready_to_apply: 'Ready to apply',
+  in_progress: 'In progress',
+  awaiting_approval: 'Awaiting approval',
+  submitted: 'Submitted',
+  won: 'Won',
+  rejected: 'Rejected',
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  response_approved: 'You approved a response',
+  packet_approved: 'You approved the packet',
+  packet_approval_withdrawn: 'You withdrew the packet approval',
+  rules_confirmed: 'You confirmed the AI-use rules',
+}
+
+/** Status changes read "A → B"; packet events have no status. */
+function describeEvent(h: {
+  action: string
+  from_status: string | null
+  to_status: string | null
+}): string {
+  if (h.to_status) {
+    const from = h.from_status
+      ? (STATUS_LABELS[h.from_status] ?? h.from_status)
+      : '—'
+    return `${from} → ${STATUS_LABELS[h.to_status] ?? h.to_status}`
+  }
+  return ACTION_LABELS[h.action] ?? h.action
 }

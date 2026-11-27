@@ -1,4 +1,5 @@
 /** Fictional test data (NFR-10). Shaped like real API responses. */
+import type { Packet, PacketItem, Version } from '@/api/packets'
 import type { Catalog, Fact, Profile, Story } from '@/api/profile'
 import type { Eligibility, Scholarship } from '@/api/scholarships'
 import type { Source } from '@/api/sources'
@@ -218,5 +219,54 @@ export const scholarshipRecord = (
       criteria: [],
     },
   ],
+  ...overrides,
+})
+
+// --- Application packets (fictional) ---
+
+export const version = (overrides: Partial<Version> = {}): Version => ({
+  id: 31,
+  number: 1,
+  text: 'I led our robotics team.',
+  origin: 'student',
+  provenance: null,
+  created_at: '2026-11-20T12:00:00Z',
+  approved_at: null,
+  chars: 24,
+  words: 5,
+  over_limit: false,
+  ...overrides,
+})
+
+export const packetItem = (
+  overrides: Partial<PacketItem> = {},
+): PacketItem => ({
+  id: 21,
+  kind: 'essay',
+  title: 'Leadership essay',
+  prompt: 'Describe a time you led a group.',
+  prompt_source_url: null,
+  limit_value: 10,
+  limit_unit: 'words',
+  required: true,
+  done: false,
+  finished: false,
+  approved_version_id: null,
+  versions: [],
+  ...overrides,
+})
+
+export const packet = (overrides: Partial<Packet> = {}): Packet => ({
+  id: 11,
+  scholarship_id: 7,
+  cycle_id: 3,
+  rules_status: 'unchecked',
+  rules_quote: null,
+  rules_source_url: null,
+  rules_confirmed_at: null,
+  ai_writing_allowed: false,
+  approved_at: null,
+  items: [],
+  progress: { finished: 0, required: 0, missing: [], complete: true },
   ...overrides,
 })

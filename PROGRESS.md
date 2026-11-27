@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-**Phase 7: Application packets** in progress (started 2026-11-27, overnight run). Phase 6 complete 2026-11-27. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
+**Phase 7 complete** (2026-11-27, overnight run); waiting for the owner's review. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
@@ -10,6 +10,7 @@
 - 2026-11-26: Phase 4 (profile) milestones 4.1-4.5 complete. Phase 4 approved; Phase 5 approved, starting with NFR-12.
 - 2026-11-27: Phase 5 (discovery + eligibility) milestones 5.0-5.6 complete. Phase 5 approved; Phases 6 and 7 approved for an overnight run.
 - 2026-11-27: Phase 6 (dashboard) milestones 6.0-6.3 complete (overnight).
+- 2026-11-27: Phase 7 (application packets) milestones 7.1-7.5 complete (overnight).
 
 ## Phase 3 checklist
 - [x] Local git repository + planning docs
@@ -51,10 +52,12 @@
 - [x] 7.2 AI-use rules check (FR-A1, FR-A2): code finds the sponsor's sentences about AI and academic honesty in the latest snapshot and suggests a reading; the student confirms; "allowed" needs a verbatim quote from the source; no AI sentence means unclear. 12 tests, deliberate breaks caught. No AI call is used for this (deterministic only).
 - [x] 7.3 Coaching, drafting from facts + stories, provenance check (FR-A3-A5): prompt breakdown, interview questions, outline and rubric feedback; drafts from only the facts and stories the student ticks, every sentence citing them, with invented numbers/names or fake quotes removed and listed; a deterministic claim check for any version. All AI help refused (403) unless rules are confirmed allowed. 11 tests with a scripted AI (no real AI call), deliberate breaks caught. **Not yet tried against a real model** (no API key or Ollama on this machine).
 - [x] 7.4 Status gates tied to the packet (FR-A7): In progress → Awaiting approval needs every required item finished; Awaiting approval → Submitted needs the approved packet (plus the "I submitted it myself" confirmation). Undo steps stay open. Deliberate breaks caught.
-- [ ] 7.5 Packet page UI
+- [x] 7.5 Packet page UI (`/scholarships/:id/packet`): progress and packet approval, AI-use rules card (scan, pick a quote, confirm), checklist with documents ticked off, editor with a live word/character counter matching the API's count, copy buttons, versions (load, approve, check names and numbers, where each sentence came from), start from the library, writing help shown only when rules allow it (with a plain explanation otherwise). Status history now names packet events. 12 Vitest tests; browser check on a scratch database at desktop and 390 px (no horizontal overflow). The browser check found a claim-check bug ("Lincoln High School and"), fixed with a regression test.
 
 ## Known issues
 - Resolved 2026-11-27: pyright 1.1.414 now runs in CI (backend job) and pre-commit (owner-approved), after a pyright-only error from 5.2 reached main.
+- Coaching and drafting prompts have only been tested with a scripted AI; their quality with a real model is unknown until a key or Ollama is set up.
+- The production build warns that the JS bundle is over 500 kB; code-splitting by route would fix it (not done overnight).
 - Neither AI provider has been run against a real model yet (no Anthropic key or Ollama on the dev machine); both are tested with mocked HTTP.
 - JS-only pages (Playwright rendering) are not supported yet; paste the text instead.
 - Resolved 2026-11-26: automated security review found `POST /sources/{id}/extract` accepted a `Settings` request body (the AI provider dependency had a parameter FastAPI exposed). Fixed in `ddfab3a`; regression test `tests/test_api_contract.py` fails if any endpoint accepts `Settings` again.
@@ -65,4 +68,4 @@
 ## Next steps
 - Owner: run `uv run alembic upgrade head` in `api/` (several new migrations).
 - Optional: set `ANTHROPIC_API_KEY` and `SCHOLARSHIP_AI_PROVIDER=anthropic` in `api/.env` to try real extraction.
-- Owner review of Phase 5, then approval to start Phase 6 (dashboard: Today screen, scholarship table, detail page, status tracking).
+- Owner review of Phases 6 and 7 (see the overnight decisions in ARCHITECTURE.md's decision log), then approval for Phase 8 (daily monitoring + notifications).
