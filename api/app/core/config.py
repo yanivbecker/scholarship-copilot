@@ -6,7 +6,9 @@ Secrets and personal paths never live in code (NFR-1, NFR-2).
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -29,6 +31,19 @@ class Settings(BaseSettings):
     database_url: str | None = None
 
     port: int = 8000
+
+    # --- AI (optional, NFR-6). "none" works without any AI. ---
+    ai_provider: Literal["none", "ollama", "anthropic"] = "none"
+    # Read from ANTHROPIC_API_KEY (the SDK's usual name), also from .env.
+    # If unset, the SDK falls back to an `ant auth login` profile.
+    anthropic_api_key: SecretStr | None = Field(
+        default=None, validation_alias="ANTHROPIC_API_KEY"
+    )
+    anthropic_model: str = "claude-opus-5-5"
+    anthropic_effort: Literal["low", "medium", "high"] = "medium"
+    # Local models only: scraped text must not leave this computer via Ollama.
+    ollama_url: str = "http://127.0.0.1:11434"
+    ollama_model: str = "llama3.1:8b"
 
 
 @lru_cache
