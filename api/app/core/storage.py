@@ -26,6 +26,10 @@ class FileStorage(Protocol):
 
     def delete(self, key: str) -> None: ...
 
+    def list_keys(self) -> list[str]:
+        """Every stored key (used to find files no record points to)."""
+        ...  # pylint: disable=unnecessary-ellipsis
+
 
 class LocalFileStorage:
     """Files in a folder on this computer, readable only by this user."""
@@ -48,6 +52,11 @@ class LocalFileStorage:
 
     def delete(self, key: str) -> None:
         self._path(key).unlink(missing_ok=True)
+
+    def list_keys(self) -> list[str]:
+        if not self.root.is_dir():
+            return []
+        return sorted(p.name for p in self.root.iterdir() if p.is_file())
 
     def _path(self, key: str) -> Path:
         # Keys are flat names we generated; refuse anything else.

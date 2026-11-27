@@ -10,7 +10,6 @@ from enum import StrEnum
 from sqlalchemy import (
     JSON,
     Boolean,
-    DateTime,
     Enum,
     ForeignKey,
     String,
@@ -22,6 +21,7 @@ from sqlalchemy import true as sa_true  # SQL TRUE, portable to Postgres
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
+from app.core.types import UTCDateTime
 from app.modules.profile.catalog import FactValue
 
 
@@ -59,10 +59,10 @@ def _user_fk() -> Mapped[int]:
 
 class _Timestamps:
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
+        UTCDateTime(), server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        UTCDateTime(), server_default=func.now(), onupdate=func.now()
     )
 
 
@@ -84,9 +84,7 @@ class Profile(_Timestamps, Base):
     )
     # Last wizard step the student finished; None until they start (FR-P1).
     onboarding_step: Mapped[str | None] = mapped_column(String(50))
-    onboarding_completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
+    onboarding_completed_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
 
 
 class ProfileFact(_Timestamps, Base):

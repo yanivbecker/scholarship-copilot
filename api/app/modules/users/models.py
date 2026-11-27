@@ -4,10 +4,11 @@ here through a user_id foreign key, so adding users later needs no rewrite
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
+from app.core.types import UTCDateTime
 
 
 class User(Base):
@@ -18,5 +19,5 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     display_name: Mapped[str] = mapped_column(String(100))
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
+        UTCDateTime(), server_default=func.now()
     )

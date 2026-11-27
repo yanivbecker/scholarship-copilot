@@ -7,10 +7,11 @@ snapshots, and candidates suggested by web search (FR-D1).
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, UniqueConstraint, func
+from sqlalchemy import Enum, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
+from app.core.types import UTCDateTime
 
 
 class SourceStatus(StrEnum):
@@ -43,5 +44,5 @@ class Source(Base):
         default=SourceStatus.APPROVED,
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
+        UTCDateTime(), server_default=func.now()
     )

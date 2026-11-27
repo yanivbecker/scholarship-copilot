@@ -61,3 +61,11 @@ From Anthropic's official marketplace (`/plugin install <name>@claude-plugins-of
 ## Privacy
 This repository never contains personal data. All personal data (database, uploaded documents)
 lives outside the repo in `~/ScholarshipCopilotData/`. Any demo data is fictional and labeled as such.
+
+To delete everything the app stores about you (database rows, uploaded files, and the deleted
+rows' leftover space in the SQLite file), run in `api/`:
+
+```bash
+uv run scholar delete-my-data --dry-run   # show what would be deleted
+uv run scholar delete-my-data             # asks you to type DELETE first
+```

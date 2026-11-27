@@ -1,13 +1,13 @@
 # Progress
 
 ## Current status
-**Phase 4: Profile** complete (2026-11-26). Awaiting the owner's review and approval before Phase 5.
+**Phase 5: Discovery + eligibility** in progress (started 2026-11-26). Phase 4 complete and approved 2026-11-26.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
 - 2026-11-26: Repository created. PROJECT_PLAN, REQUIREMENTS, ARCHITECTURE, PROGRESS, README, CLAUDE.md written.
 - 2026-11-26: Phase 3 (project setup) complete. Checkpoint 3 approved.
-- 2026-11-26: Phase 4 (profile) milestones 4.1-4.5 complete.
+- 2026-11-26: Phase 4 (profile) milestones 4.1-4.5 complete. Phase 4 approved; Phase 5 approved, starting with NFR-12.
 
 ## Phase 3 checklist
 - [x] Local git repository + planning docs
@@ -29,9 +29,18 @@
 - [x] 4.4 Onboarding wizard (FR-P1, FR-P4, FR-P6, FR-P7, FR-D1, FR-D3, NFR-4): 5 steps (basics, resume placeholder, questionnaire, mode + in-app notifications, first sources); progress saved per step and resumed on reload; no skipping ahead; fact steps ask only for missing facts (`/facts/missing`), validate all answers before saving any (per-field `field_errors`), origin `questionnaire`. New `sources` module: URL normalization + safety checks (http(s) only, no credentials, no aggregators, no private/loopback/link-local IPs incl. `127.1`/hex/decimal/octal/IPv4-mapped forms, no `.local`/`localhost`); manual sources start approved. `profiles.notifications_enabled`. Migration `a770e1c8c607` (portable boolean default). **Tested:** 159 pytest (63 new), 46 Vitest (9 new); deliberate breaks (numeric-IP check, partial saves, sending unanswered facts, step skipping) each failed the matching tests. Full wizard run in a browser on a scratch DB, including reload-resume and a blocked private IP. Found and fixed: sensitive-field hint ran into the label for screen readers.
 - [x] 4.5 Resume import (FR-P2, FR-P3, NFR-1, NFR-8): `POST /resume` (multipart) checks the file by its bytes (PDF/DOCX), caps size (5 MB), pages (20), text length and unzipped DOCX size (zip bomb), rejects encrypted/damaged/scanned files with clear messages; file stored under a random name in `<data dir>/files` (0600, folder 0700) behind a `FileStorage` interface. Rule-based suggestions (name, email, phone, GPA + scale, graduation year, school, major, education level) each with the exact resume line as evidence, validated by the catalog. Confirm re-reads the stored file and re-extracts on the server: unchanged values get origin `resume`, edited ones `manual` ("edited from <file>"), facts not in the resume are refused; all or nothing. Delete removes the file, keeps confirmed facts. UI on the profile page and in onboarding step 2: review each suggestion (evidence, "replaces" note, unchanged ones unticked), edit, untick, confirm, then optionally delete the file. Migration `66d046b406b6` (`documents`). **Tested:** 214 pytest (55 new), 54 Vitest (8 new); deliberate breaks (always-`resume` origin, claiming facts not in the resume, saving unticked rows) each failed the matching tests. Browser run with real PDF and DOCX on a scratch DB and data dir. Found and fixed: duplicate element ids when the resume review and profile forms show the same fact; evidence was a whitespace-tidied line instead of the original.
 
+## Phase 5 checklist
+- [x] 5.0 Data deletion and UTC datetimes (NFR-12): `uv run scholar delete-my-data` (`--dry-run`, typed DELETE confirmation or `--yes`) deletes every user (cascading all owned rows), every stored file including strays, then VACUUMs SQLite so deleted text isn't left in the file; schema stays. `scholar` CLI via `[project.scripts]` + `uv_build`. `UTCDateTime` column type: stored as UTC, always returned timezone-aware (no migration needed). **Tested:** 226 pytest (12 new); deliberate breaks of file deletion and VACUUM each failed a test (the first VACUUM test was too weak to notice; replaced with a check that the deleted text is absent from the raw DB file).
+- [ ] 5.1 Polite fetcher (FR-D2, FR-D3, FR-D4, FR-D7, NFR-4): robots.txt, ≤1 req/s per domain, timeouts, size limits, conditional requests, IP re-check on every connection and redirect, page snapshots + content hash, login-wall detection, "paste listing text"
+- [ ] 5.2 AI provider switch (NFR-5, NFR-6): `none` / `ollama` / `anthropic`, schema-validated output with one retry, scraped text treated as data
+- [ ] 5.3 Scholarship + criteria extraction (FR-D5, FR-D8, FR-D9): every criterion has a verbatim quote that must appear in the source text; cycles; scam signals
+- [ ] 5.4 Eligibility engine (FR-E1-E6): deterministic met / not met / unknown, verdicts with exact questions, recalculation on change, priority score with verified vs estimated parts
+- [ ] 5.5 Dedup (FR-D6) and jobs (`scholar discover`, `job_runs`)
+- [ ] 5.6 Sources page UI: manage sources, check now, fetch status, paste text; minimal scholarship list (full dashboard is Phase 6)
+
 ## Known issues
-- NFR-12 (delete all personal data) has no command yet. Deleting the user cascades every DB row, but uploaded files in `<data dir>/files` would stay. Build the deletion command (DB + files) before real use beyond testing.
-- SQLite drops timezone info, so datetimes (e.g. `onboarding_completed_at`) come back without an offset. Harmless now; fix with a UTC-aware column type before any time-based logic (Phase 6 deadlines).
+None open.
+- Resolved 2026-11-26: NFR-12 deletion command and UTC-aware timestamps (milestone 5.0).
 - Resolved 2026-11-26: linter decision. Owner chose oxlint over ESLint (see ARCHITECTURE.md decision log).
 - Resolved 2026-11-26: Starlette's TestClient deprecated `httpx`; switched the dev dependency to `httpx2` 2.16.2 (owner-approved; verified same maintainer, pydantic/httpx2).
 
