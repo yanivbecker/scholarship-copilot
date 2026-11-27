@@ -1,7 +1,7 @@
 # Progress
 
 ## Current status
-**Phase 8 complete** (2026-11-27); waiting for the owner's review. Phase 7 complete and reviewed: overnight decisions approved, coaching relaxed to on-by-default (also when rules are unclear); drafting still needs confirmed "allowed" rules. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
+**Phase 9: Browser-extension autofill** in progress (approved 2026-11-27). Phase 8 complete. Phase 7 complete and reviewed: overnight decisions approved, coaching relaxed to on-by-default (also when rules are unclear); drafting still needs confirmed "allowed" rules. Phase 8 is not approved and was not started. Owner pre-approved Phases 6 and 7, pyright in CI and extra shadcn components; not approved: TanStack Table (table built with plain React), Phase 8+.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
@@ -61,6 +61,12 @@
 - [x] 8.3 Background switch (FR-N1, FR-N2): a generated launchd agent (daily 07:00, runs on wake, background priority, logs in the data folder, no secrets in the plist), `scholar background on/off/status` and a `/background` API for the Settings page. `off` saves the flag before unloading and deletes the file; a failed `on` never claims to be on. launchctl is behind an interface: 11 tests use a fake, tests can never reach the real launchd, and `SCHOLARSHIP_BACKGROUND_DRY_RUN` makes it safe to try. A dry run with the real CLI produced a plist that `plutil -lint` accepts. **Not loaded into the real launchd** (owner's call: `uv run scholar background on`).
 - [x] 8.4 Weekly source search (FR-N3, FR-D1): Tavily over the existing `httpx2` (no new dependency), only when `TAVILY_API_KEY` is set **and** the student saved queries; only the query text is sent. Runs at most once per `SCHOLARSHIP_SEARCH_INTERVAL_DAYS` (7) inside the daily job. Results pass the existing URL-safety and aggregator rules, become *pending* sources (never fetched until approved), at most 15 per run; rejected pages are never suggested again. Approve/reject API. A search failure is recorded and the daily job continues. 11 tests with a fake search service, deliberate breaks caught. **Not tried against the real Tavily service** (no key on this machine).
 - [x] 8.5 UI (FR-N2, FR-N3, FR-N5): notifications on Today (unread first, linked, mark one or all read); a Settings page with the daily check (asks before installing the background job, dry-run notice, last scheduled run, Run now), notification switches (update instantly, roll back if saving fails) and the weekly search (says exactly what is sent; suggestions are only added when saved); suggested pages on Sources with Approve/Reject (rejected ones hidden). 9 new Vitest tests (111 total), deliberate breaks caught. Browser check on a scratch database with the background switch in dry-run mode, desktop and 390 px, no horizontal overflow; the real LaunchAgents folder was never touched.
+
+## Phase 9 checklist
+- [x] 9.1 Fill sheet backend (FR-X1, FR-A7): form-field items now hold answers that are versioned and approved like essays (they can't just be ticked off); "Add common form fields from my profile" copies name, email, phone, birth date, city, state, school, major, GPA and graduation year as *unapproved* values (never sensitive facts); a read-only `/autofill` API that only returns an approved packet's approved text; each fill is audited with counts and the site's host only. 6 tests, deliberate breaks caught. Packet page updated (form fields get the editor; no AI writing help for them).
+- [ ] 9.2 Extension core: find, match and fill fields (FR-X1, FR-X2)
+- [ ] 9.3 Extension shell: manifest, popup, build, CI
+- [ ] 9.4 Settings instructions, docs, browser check
 
 ## Known issues
 - Resolved 2026-11-27: pyright 1.1.414 now runs in CI (backend job) and pre-commit (owner-approved), after a pyright-only error from 5.2 reached main.

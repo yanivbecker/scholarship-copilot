@@ -9,6 +9,7 @@ from app.api.discovery import router as discovery_router
 from app.api.eligibility import router as eligibility_router
 from app.api.errors import register_error_handlers
 from app.api.health import router as health_router
+from app.api.autofill import router as autofill_router
 from app.api.background import router as background_router
 from app.api.notifications import router as notifications_router
 from app.api.packets import router as packets_router
@@ -47,6 +48,7 @@ def create_app() -> FastAPI:
         discovery_router,
         tracking_router,
         dashboard_router,
+        autofill_router,
         background_router,
         notifications_router,
         packets_router,

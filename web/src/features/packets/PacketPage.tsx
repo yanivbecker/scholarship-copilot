@@ -3,6 +3,7 @@ import { useId, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import {
+  addCommonFields,
   addItem,
   approvePacket,
   getPacket,
@@ -101,6 +102,7 @@ export function PacketPage() {
             item={item}
           />
         ))}
+        <CommonFields scholarshipId={scholarshipId} packet={packet.data} />
         <AddItemForm scholarshipId={scholarshipId} packet={packet.data} />
       </section>
     </div>
@@ -305,5 +307,37 @@ function AddItemForm({
         </form>
       </CardContent>
     </Card>
+  )
+}
+
+/** Name, email, school… copied from the profile as answers to approve. */
+function CommonFields({
+  scholarshipId,
+  packet,
+}: {
+  scholarshipId: number
+  packet: Packet
+}) {
+  const add = usePacketChange(scholarshipId, () => addCommonFields(packet.id))
+  return (
+    <div className="space-y-1 text-sm">
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={add.isPending}
+        onClick={() => add.mutate(undefined)}
+      >
+        Add common form fields from my profile
+      </Button>
+      <p className="text-xs text-muted-foreground">
+        Name, email, phone, school, GPA and similar, each as a form field with
+        your profile's value. Approve each one before the extension can use it.
+      </p>
+      {add.isError && (
+        <p role="alert" className="text-destructive">
+          {add.error.message}
+        </p>
+      )}
+    </div>
   )
 }

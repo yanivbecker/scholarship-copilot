@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, status
 
 from app.api.deps import CurrentUser, SessionDep
-from app.modules.packets import service
+from app.modules.packets import autofill, service
 from app.modules.packets.models import Packet, PacketItem
 from app.modules.packets.rules import (
     ai_coaching_allowed,
@@ -219,5 +219,16 @@ def confirm_packet_rules(
     packet = service.get_packet(session, user.id, packet_id)
     name = scholarships.get_scholarship(session, user.id, packet.scholarship_id).name
     confirm_rules(session, packet, body.status, quote=body.quote, scholarship_name=name)
+    session.commit()
+    return packet_out(session, packet)
+
+
+@router.post("/packets/{packet_id}/common-fields", status_code=status.HTTP_201_CREATED)
+def add_common_fields(
+    packet_id: int, session: SessionDep, user: CurrentUser
+) -> PacketOut:
+    """Name, email, school… from your profile, as answers you still approve."""
+    packet = service.get_packet(session, user.id, packet_id)
+    autofill.add_common_fields(session, packet)
     session.commit()
     return packet_out(session, packet)

@@ -39,7 +39,12 @@ export const ORIGIN_LABELS: Record<string, string> = {
   student: 'Written by you',
   ai_draft: 'AI draft from your stories',
   library: 'From your library',
+  profile: 'From your profile',
 }
 
 export const isWriting = (kind: string) =>
   kind === 'essay' || kind === 'short_answer'
+
+/** Items answered with text you approve (and the extension can fill). */
+export const hasAnswer = (kind: string) =>
+  isWriting(kind) || kind === 'form_field'

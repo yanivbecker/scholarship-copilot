@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils'
 
 import { lengthLabel, measure } from './length'
 import {
+  hasAnswer,
   isWriting,
   KIND_LABELS,
   ORIGIN_LABELS,
@@ -75,14 +76,16 @@ export function ItemCard({ scholarshipId, packet, item }: Props) {
           </p>
         )}
 
-        {isWriting(item.kind) ? (
+        {hasAnswer(item.kind) ? (
           <>
             <Editor scholarshipId={scholarshipId} item={item} />
-            <WritingHelp
-              scholarshipId={scholarshipId}
-              packet={packet}
-              item={item}
-            />
+            {isWriting(item.kind) && (
+              <WritingHelp
+                scholarshipId={scholarshipId}
+                packet={packet}
+                item={item}
+              />
+            )}
           </>
         ) : (
           <label className="flex items-center gap-2 text-sm">
@@ -166,10 +169,12 @@ function Editor({
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <Label htmlFor={`${id}-text`}>Your response</Label>
+        <Label htmlFor={`${id}-text`}>
+          {isWriting(item.kind) ? 'Your response' : 'Value to enter'}
+        </Label>
         <Textarea
           id={`${id}-text`}
-          className="min-h-40"
+          className={isWriting(item.kind) ? 'min-h-40' : 'min-h-10'}
           value={text}
           onChange={(e) => setText(e.target.value)}
           aria-describedby={`${id}-count`}

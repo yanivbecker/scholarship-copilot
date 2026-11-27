@@ -90,6 +90,44 @@
         "title": "ApplicationStatus",
         "type": "string"
       },
+      "ApprovedPacketOut": {
+        "description": "An approved packet the extension can fill from.",
+        "properties": {
+          "approved_at": {
+            "format": "date-time",
+            "title": "Approved At",
+            "type": "string"
+          },
+          "hosts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Hosts",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "packet_id": {
+            "title": "Packet Id",
+            "type": "integer"
+          },
+          "scholarship_id": {
+            "title": "Scholarship Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "packet_id",
+          "scholarship_id",
+          "name",
+          "hosts",
+          "approved_at"
+        ],
+        "title": "ApprovedPacketOut",
+        "type": "object"
+      },
       "AuditEventOut": {
         "description": "One recorded change.",
         "properties": {
@@ -1191,6 +1229,115 @@
           "length_note"
         ],
         "title": "FeedbackOut",
+        "type": "object"
+      },
+      "FillEntryOut": {
+        "description": "One approved answer. The extension matches `title`/`prompt` to a field.",
+        "properties": {
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ItemKind"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "kind",
+          "title",
+          "prompt",
+          "text"
+        ],
+        "title": "FillEntryOut",
+        "type": "object"
+      },
+      "FillReportIn": {
+        "description": "What the extension did: counts and the site's host only, no page content.",
+        "properties": {
+          "filled": {
+            "maximum": 500.0,
+            "minimum": 0.0,
+            "title": "Filled",
+            "type": "integer"
+          },
+          "host": {
+            "maxLength": 253,
+            "minLength": 1,
+            "title": "Host",
+            "type": "string"
+          },
+          "unmatched": {
+            "maximum": 500.0,
+            "minimum": 0.0,
+            "title": "Unmatched",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "host",
+          "filled",
+          "unmatched"
+        ],
+        "title": "FillReportIn",
+        "type": "object"
+      },
+      "FillSheetOut": {
+        "description": "Everything the extension may type into one application.",
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/FillEntryOut"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "official_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Url"
+          },
+          "packet_id": {
+            "title": "Packet Id",
+            "type": "integer"
+          },
+          "scholarship_name": {
+            "title": "Scholarship Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "packet_id",
+          "scholarship_name",
+          "official_url",
+          "entries"
+        ],
+        "title": "FillSheetOut",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -3247,7 +3394,8 @@
         "enum": [
           "student",
           "ai_draft",
-          "library"
+          "library",
+          "profile"
         ],
         "title": "VersionOrigin",
         "type": "string"
@@ -3338,6 +3486,118 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/autofill/packets": {
+      "get": {
+        "operationId": "list_approved_packets",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovedPacketOut"
+                  },
+                  "title": "Response List Approved Packets",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Approved Packets",
+        "tags": [
+          "autofill"
+        ]
+      }
+    },
+    "/api/v1/autofill/packets/{packet_id}": {
+      "get": {
+        "operationId": "get_fill_sheet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "title": "Packet Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FillSheetOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Fill Sheet",
+        "tags": [
+          "autofill"
+        ]
+      }
+    },
+    "/api/v1/autofill/packets/{packet_id}/fills": {
+      "post": {
+        "operationId": "report_fill",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "title": "Packet Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FillReportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report Fill",
+        "tags": [
+          "autofill"
+        ]
+      }
+    },
     "/api/v1/background": {
       "get": {
         "operationId": "get_background",
@@ -4493,6 +4753,49 @@
           }
         },
         "summary": "Approve Packet",
+        "tags": [
+          "packets"
+        ]
+      }
+    },
+    "/api/v1/packets/{packet_id}/common-fields": {
+      "post": {
+        "description": "Name, email, school\u2026 from your profile, as answers you still approve.",
+        "operationId": "add_common_fields",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "packet_id",
+            "required": true,
+            "schema": {
+              "title": "Packet Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacketOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Common Fields",
         "tags": [
           "packets"
         ]

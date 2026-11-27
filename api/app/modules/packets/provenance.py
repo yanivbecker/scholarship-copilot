@@ -44,6 +44,12 @@ class MaterialError(ValueError):
 
 def fact_text(fact: ProfileFact) -> str:
     """ "GPA: 3.8", "State of residence: Ohio" — how a fact reads in a prompt."""
+    label, shown = fact_parts(fact)
+    return f"{label}: {shown}"
+
+
+def fact_parts(fact: ProfileFact) -> tuple[str, str]:
+    """(label, value as a person would write it), e.g. ("GPA", "3.8")."""
     try:
         definition = get_definition(fact.key)
         label, has_choices = definition.label, bool(definition.choices)
@@ -60,7 +66,7 @@ def fact_text(fact: ProfileFact) -> str:
         shown = choice_label(value)
     else:
         shown = str(value)
-    return f"{label}: {shown}"
+    return label, shown
 
 
 @dataclass(frozen=True)

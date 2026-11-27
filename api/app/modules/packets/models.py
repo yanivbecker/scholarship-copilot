@@ -62,6 +62,7 @@ class VersionOrigin(StrEnum):
     STUDENT = "student"  # typed by the student
     AI_DRAFT = "ai_draft"  # drafted from profile facts + stories (FR-A4)
     LIBRARY = "library"  # copied from a previously approved response
+    PROFILE = "profile"  # a form-field value copied from a profile fact
 
 
 def _str_enum(enum_class: type[StrEnum], length: int = 20) -> Enum:

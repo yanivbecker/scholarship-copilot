@@ -32,6 +32,8 @@ MAX_TITLE = 300
 MAX_PROMPT = 5000
 MAX_RESPONSE = 50_000
 WRITING_KINDS = frozenset({ItemKind.ESSAY, ItemKind.SHORT_ANSWER})
+# Items whose answer is text the student approves (and the extension fills).
+RESPONSE_KINDS = WRITING_KINDS | {ItemKind.FORM_FIELD}
 
 VERSION_APPROVED = "response_approved"
 PACKET_APPROVED = "packet_approved"
@@ -205,8 +207,8 @@ def update_item(
     item.limit_unit = clean.limit_unit
     item.required = clean.required
     if done is not None:
-        if done and item.kind in WRITING_KINDS:
-            raise PacketError("Writing items are finished by approving a response.")
+        if done and item.kind in RESPONSE_KINDS:
+            raise PacketError("This item is finished by approving its answer.")
         item.done = done
     session.flush()
     return item
@@ -238,8 +240,8 @@ def save_version(  # pylint: disable=too-many-arguments
     provenance: list[dict[str, object]] | None = None,
 ) -> ResponseVersion:
     """Add a new version. Earlier versions stay exactly as they were."""
-    if item.kind not in WRITING_KINDS:
-        raise PacketError("Only essays and short answers have written responses.")
+    if item.kind not in RESPONSE_KINDS:
+        raise PacketError("Documents are ticked off, not answered.")
     if not text.strip():
         raise PacketError("Write something before saving.")
     if len(text) > MAX_RESPONSE:
@@ -347,7 +349,7 @@ class Progress:
 
 
 def item_finished(item: PacketItem) -> bool:
-    if item.kind in WRITING_KINDS:
+    if item.kind in RESPONSE_KINDS:
         return approved_version(item) is not None
     return item.done
 

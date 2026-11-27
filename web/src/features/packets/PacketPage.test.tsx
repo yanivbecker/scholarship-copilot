@@ -303,4 +303,42 @@ describe('PacketPage', () => {
       screen.getByRole('button', { name: 'Approve the whole packet' }),
     ).toBeDisabled()
   })
+
+  it('gives form fields a value to approve, without AI writing help', async () => {
+    const field = packetItem({
+      id: 23,
+      kind: 'form_field',
+      title: 'Email',
+      prompt: null,
+      limit_value: null,
+      limit_unit: null,
+      versions: [version({ text: 'sam@example.org', origin: 'profile' })],
+    })
+    const calls = mockApi({
+      ...base,
+      [PACKET]: packet({
+        rules_status: 'allowed',
+        ai_writing_allowed: true,
+        items: [field],
+      }),
+      'POST /api/v1/packets/11/common-fields': packet({ items: [field] }),
+    })
+    const user = userEvent.setup()
+    render()
+
+    expect(await screen.findByLabelText('Value to enter')).toHaveValue(
+      'sam@example.org',
+    )
+    expect(screen.queryByText('Writing help (AI)')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Filled in')).not.toBeInTheDocument()
+    await user.click(screen.getByText('Versions (1)'))
+    expect(screen.getByText(/From your profile/)).toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Add common form fields from my profile',
+      }),
+    )
+    expect(calls.some((c) => c.path.endsWith('/common-fields'))).toBe(true)
+  })
 })

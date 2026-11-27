@@ -27,6 +27,9 @@ export const getPacket = (scholarshipId: number) =>
 export const addItem = (packetId: number, body: ItemIn) =>
   request<Packet>('POST', `${V1}/packets/${packetId}/items`, { body })
 
+export const addCommonFields = (packetId: number) =>
+  request<Packet>('POST', `${V1}/packets/${packetId}/common-fields`)
+
 export const updateItem = (itemId: number, body: ItemIn) =>
   request<Packet>('PUT', `${V1}/packet-items/${itemId}`, { body })
 

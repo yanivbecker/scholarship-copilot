@@ -4,6 +4,57 @@
  */
 
 export interface paths {
+    "/api/v1/autofill/packets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Approved Packets */
+        get: operations["list_approved_packets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/autofill/packets/{packet_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Fill Sheet */
+        get: operations["get_fill_sheet"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/autofill/packets/{packet_id}/fills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report Fill */
+        post: operations["report_fill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/background": {
         parameters: {
             query?: never;
@@ -459,6 +510,26 @@ export interface paths {
         post: operations["approve_packet"];
         /** Withdraw Approval */
         delete: operations["withdraw_approval"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packets/{packet_id}/common-fields": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Common Fields
+         * @description Name, email, school… from your profile, as answers you still approve.
+         */
+        post: operations["add_common_fields"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1005,6 +1076,25 @@ export interface components {
          */
         ApplicationStatus: "discovered" | "eligibility_confirmed" | "ready_to_apply" | "in_progress" | "awaiting_approval" | "submitted" | "won" | "rejected";
         /**
+         * ApprovedPacketOut
+         * @description An approved packet the extension can fill from.
+         */
+        ApprovedPacketOut: {
+            /**
+             * Approved At
+             * Format: date-time
+             */
+            approved_at: string;
+            /** Hosts */
+            hosts: string[];
+            /** Name */
+            name: string;
+            /** Packet Id */
+            packet_id: number;
+            /** Scholarship Id */
+            scholarship_id: number;
+        };
+        /**
          * AuditEventOut
          * @description One recorded change.
          */
@@ -1427,6 +1517,47 @@ export interface components {
             length_note: string | null;
             /** Notes */
             notes: components["schemas"]["FeedbackNote"][];
+        };
+        /**
+         * FillEntryOut
+         * @description One approved answer. The extension matches `title`/`prompt` to a field.
+         */
+        FillEntryOut: {
+            /** Item Id */
+            item_id: number;
+            kind: components["schemas"]["ItemKind"];
+            /** Prompt */
+            prompt: string | null;
+            /** Text */
+            text: string;
+            /** Title */
+            title: string;
+        };
+        /**
+         * FillReportIn
+         * @description What the extension did: counts and the site's host only, no page content.
+         */
+        FillReportIn: {
+            /** Filled */
+            filled: number;
+            /** Host */
+            host: string;
+            /** Unmatched */
+            unmatched: number;
+        };
+        /**
+         * FillSheetOut
+         * @description Everything the extension may type into one application.
+         */
+        FillSheetOut: {
+            /** Entries */
+            entries: components["schemas"]["FillEntryOut"][];
+            /** Official Url */
+            official_url: string | null;
+            /** Packet Id */
+            packet_id: number;
+            /** Scholarship Name */
+            scholarship_name: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -2238,7 +2369,7 @@ export interface components {
          * @description Who produced a version's text.
          * @enum {string}
          */
-        VersionOrigin: "student" | "ai_draft" | "library";
+        VersionOrigin: "student" | "ai_draft" | "library" | "profile";
         /**
          * VersionOut
          * @description One saved version, with its length against the item's limit.
@@ -2278,6 +2409,90 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_approved_packets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovedPacketOut"][];
+                };
+            };
+        };
+    };
+    get_fill_sheet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FillSheetOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_fill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FillReportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_background: {
         parameters: {
             query?: never;
@@ -3116,6 +3331,37 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacketOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_common_fields: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                packet_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
