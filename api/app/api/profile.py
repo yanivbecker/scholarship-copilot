@@ -34,6 +34,7 @@ def get_profile(session: SessionDep, user: CurrentUser) -> ProfileOut:
     return ProfileOut(
         display_name=user.display_name,
         operating_mode=profile.operating_mode,
+        notifications_enabled=profile.notifications_enabled,
         onboarding_step=profile.onboarding_step,
         onboarding_completed_at=profile.onboarding_completed_at,
     )
@@ -47,6 +48,9 @@ def update_profile(
         user.display_name = body.display_name.strip() or user.display_name
     if body.operating_mode is not None:
         service.set_operating_mode(session, user.id, body.operating_mode)
+    if body.notifications_enabled is not None:
+        profile = service.get_or_create_profile(session, user.id)
+        profile.notifications_enabled = body.notifications_enabled
     session.commit()
     return get_profile(session, user)
 

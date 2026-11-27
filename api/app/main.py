@@ -6,7 +6,9 @@ from fastapi.routing import APIRoute
 from app import __version__
 from app.api.errors import register_error_handlers
 from app.api.health import router as health_router
+from app.api.onboarding import router as onboarding_router
 from app.api.profile import router as profile_router
+from app.api.sources import router as sources_router
 from app.api.stories import router as stories_router
 
 API_PREFIX = "/api/v1"
@@ -24,7 +26,13 @@ def create_app() -> FastAPI:
         version=__version__,
         generate_unique_id_function=_operation_id,
     )
-    for router in (health_router, profile_router, stories_router):
+    for router in (
+        health_router,
+        profile_router,
+        onboarding_router,
+        stories_router,
+        sources_router,
+    ):
         application.include_router(router, prefix=API_PREFIX)
     register_error_handlers(application)
     return application

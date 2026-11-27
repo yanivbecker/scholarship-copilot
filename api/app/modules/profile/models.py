@@ -9,6 +9,7 @@ from enum import StrEnum
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     DateTime,
     Enum,
     ForeignKey,
@@ -17,6 +18,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy import true as sa_true  # SQL TRUE, portable to Postgres
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -75,6 +77,10 @@ class Profile(_Timestamps, Base):
     )
     operating_mode: Mapped[OperatingMode] = mapped_column(
         _str_enum(OperatingMode), default=OperatingMode.HYBRID
+    )
+    # In-app notifications only in v1 (FR-N5). Used from Phase 8.
+    notifications_enabled: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default=sa_true()
     )
     # Last wizard step the student finished; None until they start (FR-P1).
     onboarding_step: Mapped[str | None] = mapped_column(String(50))

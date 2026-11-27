@@ -37,6 +37,7 @@ class ProfileOut(BaseModel):
 
     display_name: str
     operating_mode: OperatingMode
+    notifications_enabled: bool
     onboarding_step: str | None
     onboarding_completed_at: datetime | None
 
@@ -46,6 +47,36 @@ class ProfileUpdate(BaseModel):
 
     display_name: str | None = Field(default=None, min_length=1, max_length=100)
     operating_mode: OperatingMode | None = None
+    notifications_enabled: bool | None = None
+
+
+# --- Onboarding ---
+
+
+class OnboardingStepOut(BaseModel):
+    """One wizard step. Fact steps list the catalog keys they ask about."""
+
+    key: str
+    label: str
+    fact_keys: list[str]
+
+
+class OnboardingOut(BaseModel):
+    """The wizard's steps and where the student is (resumable, FR-P1)."""
+
+    steps: list[OnboardingStepOut]
+    completed: list[str]
+    next_step: str | None
+    completed_at: datetime | None
+
+
+class OnboardingStepIn(BaseModel):
+    """Answers for a fact step (leave out anything not answered).
+
+    Empty for the other steps, which save through their own endpoints.
+    """
+
+    facts: dict[str, FactValueIn] = {}
 
 
 # --- Catalog ---

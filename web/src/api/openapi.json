@@ -312,6 +312,98 @@
         "title": "MissingFactsOut",
         "type": "object"
       },
+      "OnboardingOut": {
+        "description": "The wizard's steps and where the student is (resumable, FR-P1).",
+        "properties": {
+          "completed": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Completed",
+            "type": "array"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/OnboardingStepOut"
+            },
+            "title": "Steps",
+            "type": "array"
+          }
+        },
+        "required": [
+          "steps",
+          "completed",
+          "next_step",
+          "completed_at"
+        ],
+        "title": "OnboardingOut",
+        "type": "object"
+      },
+      "OnboardingStepIn": {
+        "description": "Answers for a fact step (leave out anything not answered).\n\nEmpty for the other steps, which save through their own endpoints.",
+        "properties": {
+          "facts": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FactValueIn"
+            },
+            "default": {},
+            "title": "Facts",
+            "type": "object"
+          }
+        },
+        "title": "OnboardingStepIn",
+        "type": "object"
+      },
+      "OnboardingStepOut": {
+        "description": "One wizard step. Fact steps list the catalog keys they ask about.",
+        "properties": {
+          "fact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fact Keys",
+            "type": "array"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "fact_keys"
+        ],
+        "title": "OnboardingStepOut",
+        "type": "object"
+      },
       "OperatingMode": {
         "description": "FR-P7. Hybrid is the flagship mode.",
         "enum": [
@@ -328,6 +420,10 @@
           "display_name": {
             "title": "Display Name",
             "type": "string"
+          },
+          "notifications_enabled": {
+            "title": "Notifications Enabled",
+            "type": "boolean"
           },
           "onboarding_completed_at": {
             "anyOf": [
@@ -359,6 +455,7 @@
         "required": [
           "display_name",
           "operating_mode",
+          "notifications_enabled",
           "onboarding_step",
           "onboarding_completed_at"
         ],
@@ -380,6 +477,17 @@
               }
             ],
             "title": "Display Name"
+          },
+          "notifications_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notifications Enabled"
           },
           "operating_mode": {
             "anyOf": [
@@ -425,6 +533,82 @@
         ],
         "title": "SectionOut",
         "type": "object"
+      },
+      "SourceIn": {
+        "description": "A page to add. Checked by url_safety before it's stored.",
+        "properties": {
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "SourceIn",
+        "type": "object"
+      },
+      "SourceOut": {
+        "description": "A stored source. `url` is the normalized form.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SourceStatus"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "label",
+          "status",
+          "created_at"
+        ],
+        "title": "SourceOut",
+        "type": "object"
+      },
+      "SourceStatus": {
+        "description": "Added by hand = approved. Search suggestions start as pending (Phase 5).",
+        "enum": [
+          "approved",
+          "pending_review",
+          "rejected"
+        ],
+        "title": "SourceStatus",
+        "type": "string"
       },
       "StoryIn": {
         "description": "A story to create or replace. Detailed rules are checked by the service.",
@@ -760,6 +944,79 @@
         ]
       }
     },
+    "/api/v1/onboarding": {
+      "get": {
+        "operationId": "get_onboarding",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Onboarding",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    },
+    "/api/v1/onboarding/steps/{step}": {
+      "post": {
+        "operationId": "submit_onboarding_step",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "step",
+            "required": true,
+            "schema": {
+              "title": "Step",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingStepIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Onboarding Step",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    },
     "/api/v1/profile": {
       "get": {
         "operationId": "get_profile",
@@ -817,6 +1074,105 @@
         "summary": "Update Profile",
         "tags": [
           "profile"
+        ]
+      }
+    },
+    "/api/v1/sources": {
+      "get": {
+        "operationId": "list_sources",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SourceOut"
+                  },
+                  "title": "Response List Sources",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Sources",
+        "tags": [
+          "sources"
+        ]
+      },
+      "post": {
+        "operationId": "add_source",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Source",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/api/v1/sources/{source_id}": {
+      "delete": {
+        "operationId": "delete_source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "title": "Source Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Source",
+        "tags": [
+          "sources"
         ]
       }
     },

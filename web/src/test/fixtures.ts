@@ -94,6 +94,7 @@ export const fact = (
 export const profile: Profile = {
   display_name: 'Test Student',
   operating_mode: 'hybrid',
+  notifications_enabled: true,
   onboarding_step: null,
   onboarding_completed_at: null,
 }

@@ -17,28 +17,9 @@ import {
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 
+import { MODES } from './modes'
 import { ProfileSectionForm } from './ProfileSectionForm'
 import { queryKeys, useCatalog, useFacts, useProfile } from './queries'
-
-const MODES: { value: OperatingMode; label: string; description: string }[] = [
-  {
-    value: 'hybrid',
-    label: 'Hybrid',
-    description:
-      'The app prepares everything; you review, approve, and submit.',
-  },
-  {
-    value: 'discovery',
-    label: 'Discovery',
-    description: 'Find, evaluate, and track scholarships only.',
-  },
-  {
-    value: 'automation',
-    label: 'Automation',
-    description:
-      'Later: a browser extension fills forms from approved packets. It never submits.',
-  },
-]
 
 /** Settings, every catalog section, and custom answers (FR-P3, FR-P6, FR-P7). */
 export function ProfilePage() {

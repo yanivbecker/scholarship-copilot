@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 
 import { HealthStatus } from '@/features/health/HealthStatus'
+import { SetupBanner } from '@/features/onboarding/SetupBanner'
 
 export function HomePage() {
   return (
@@ -19,6 +20,7 @@ export function HomePage() {
           .
         </p>
       </div>
+      <SetupBanner />
       <HealthStatus />
     </div>
   )

@@ -45,7 +45,10 @@ export function FactField({
     <div className="space-y-1.5">
       {d.type === 'multi_choice' ? (
         <fieldset aria-describedby={describedBy}>
-          <legend className="text-sm font-medium">{d.label}</legend>
+          <legend className="text-sm font-medium">
+            {d.label}
+            <SensitiveHint show={d.sensitive} />
+          </legend>
           <Controller
             control={control}
             name={d.key}
@@ -81,7 +84,10 @@ export function FactField({
         </fieldset>
       ) : (
         <>
-          <Label htmlFor={id}>{d.label}</Label>
+          <Label htmlFor={id}>
+            {d.label}
+            <SensitiveHint show={d.sensitive} />
+          </Label>
           {d.type === 'boolean' || d.type === 'choice' ? (
             <NativeSelect className="w-full" {...common} {...register(d.key)}>
               <NativeSelectOption value="">Not set</NativeSelectOption>
@@ -133,5 +139,20 @@ export function FactField({
         </p>
       )}
     </div>
+  )
+}
+
+/** Marks sensitive facts as optional right where they're asked (FR-P6). */
+function SensitiveHint({ show }: { show: boolean }) {
+  if (!show) return null
+  // A real space (not just CSS margin) so screen readers don't run the
+  // label and the hint together.
+  return (
+    <>
+      {' '}
+      <span className="text-xs font-normal text-muted-foreground">
+        (optional, sensitive)
+      </span>
+    </>
   )
 }

@@ -18,11 +18,26 @@ type GetResponse<P extends keyof paths> = paths[P] extends {
 
 export class ApiError extends Error {
   readonly status: number
+  /** The parsed JSON error body, when there was one (e.g. field_errors). */
+  readonly data: unknown
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, data?: unknown) {
     super(message)
     this.name = 'ApiError'
     this.status = status
+    this.data = data
+  }
+
+  /** Per-field messages from the onboarding endpoint, if any. */
+  get fieldErrors(): Record<string, string> {
+    const data = this.data
+    if (data && typeof data === 'object' && 'field_errors' in data) {
+      const errors = data.field_errors
+      if (errors && typeof errors === 'object') {
+        return errors as Record<string, string>
+      }
+    }
+    return {}
   }
 }
 
@@ -50,22 +65,24 @@ function withQuery(path: string, query?: Query): string {
  * `{"detail": [{msg, loc, ...}]}` for request-shape errors (FastAPI 422).
  * Turn either into one readable sentence.
  */
-async function errorMessage(response: Response): Promise<string> {
+async function toApiError(response: Response): Promise<ApiError> {
+  let data: unknown
   try {
-    const data: unknown = await response.json()
-    if (data && typeof data === 'object' && 'detail' in data) {
-      const { detail } = data
-      if (typeof detail === 'string') return detail
-      if (Array.isArray(detail)) {
-        return detail
-          .map((d: { msg?: unknown }) => String(d.msg ?? 'Invalid value'))
-          .join(' ')
-      }
-    }
+    data = await response.json()
   } catch {
-    // Not JSON (e.g. the dev proxy's error page). Fall through.
+    // Not JSON (e.g. the dev proxy's error page).
   }
-  return `Request failed (${response.status})`
+  let message = `Request failed (${response.status})`
+  if (data && typeof data === 'object' && 'detail' in data) {
+    const { detail } = data
+    if (typeof detail === 'string') message = detail
+    else if (Array.isArray(detail)) {
+      message = detail
+        .map((d: { msg?: unknown }) => String(d.msg ?? 'Invalid value'))
+        .join(' ')
+    }
+  }
+  return new ApiError(response.status, message, data)
 }
 
 /** Send a request. Throws ApiError for non-2xx responses. */
@@ -83,7 +100,7 @@ export async function request<T>(
     body: body === undefined ? undefined : JSON.stringify(body),
   })
   if (!response.ok) {
-    throw new ApiError(response.status, await errorMessage(response))
+    throw await toApiError(response)
   }
   if (response.status === 204) return undefined as T
   return (await response.json()) as T

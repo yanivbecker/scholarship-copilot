@@ -90,6 +90,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Onboarding */
+        get: operations["get_onboarding"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/onboarding/steps/{step}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Onboarding Step */
+        post: operations["submit_onboarding_step"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profile": {
         parameters: {
             query?: never;
@@ -106,6 +140,41 @@ export interface paths {
         head?: never;
         /** Update Profile */
         patch: operations["update_profile"];
+        trace?: never;
+    };
+    "/api/v1/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sources */
+        get: operations["list_sources"];
+        put?: never;
+        /** Add Source */
+        post: operations["add_source"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{source_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Source */
+        delete: operations["delete_source"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/stories": {
@@ -284,6 +353,47 @@ export interface components {
             missing: string[];
         };
         /**
+         * OnboardingOut
+         * @description The wizard's steps and where the student is (resumable, FR-P1).
+         */
+        OnboardingOut: {
+            /** Completed */
+            completed: string[];
+            /** Completed At */
+            completed_at: string | null;
+            /** Next Step */
+            next_step: string | null;
+            /** Steps */
+            steps: components["schemas"]["OnboardingStepOut"][];
+        };
+        /**
+         * OnboardingStepIn
+         * @description Answers for a fact step (leave out anything not answered).
+         *
+         *     Empty for the other steps, which save through their own endpoints.
+         */
+        OnboardingStepIn: {
+            /**
+             * Facts
+             * @default {}
+             */
+            facts: {
+                [key: string]: components["schemas"]["FactValueIn"];
+            };
+        };
+        /**
+         * OnboardingStepOut
+         * @description One wizard step. Fact steps list the catalog keys they ask about.
+         */
+        OnboardingStepOut: {
+            /** Fact Keys */
+            fact_keys: string[];
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+        };
+        /**
          * OperatingMode
          * @description FR-P7. Hybrid is the flagship mode.
          * @enum {string}
@@ -296,6 +406,8 @@ export interface components {
         ProfileOut: {
             /** Display Name */
             display_name: string;
+            /** Notifications Enabled */
+            notifications_enabled: boolean;
             /** Onboarding Completed At */
             onboarding_completed_at: string | null;
             /** Onboarding Step */
@@ -309,6 +421,8 @@ export interface components {
         ProfileUpdate: {
             /** Display Name */
             display_name?: string | null;
+            /** Notifications Enabled */
+            notifications_enabled?: boolean | null;
             operating_mode?: components["schemas"]["OperatingMode"] | null;
         };
         /**
@@ -324,6 +438,40 @@ export interface components {
             /** Sensitive */
             sensitive: boolean;
         };
+        /**
+         * SourceIn
+         * @description A page to add. Checked by url_safety before it's stored.
+         */
+        SourceIn: {
+            /** Label */
+            label?: string | null;
+            /** Url */
+            url: string;
+        };
+        /**
+         * SourceOut
+         * @description A stored source. `url` is the normalized form.
+         */
+        SourceOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Label */
+            label: string | null;
+            status: components["schemas"]["SourceStatus"];
+            /** Url */
+            url: string;
+        };
+        /**
+         * SourceStatus
+         * @description Added by hand = approved. Search suggestions start as pending (Phase 5).
+         * @enum {string}
+         */
+        SourceStatus: "approved" | "pending_review" | "rejected";
         /**
          * StoryIn
          * @description A story to create or replace. Detailed rules are checked by the service.
@@ -548,6 +696,61 @@ export interface operations {
             };
         };
     };
+    get_onboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingOut"];
+                };
+            };
+        };
+    };
+    submit_onboarding_step: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                step: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingStepIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_profile: {
         parameters: {
             query?: never;
@@ -589,6 +792,88 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ProfileOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceOut"][];
+                };
+            };
+        };
+    };
+    add_source: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourceIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_source: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
