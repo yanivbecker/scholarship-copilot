@@ -12,6 +12,7 @@ from sqlalchemy import pool
 
 from app.core.config import get_database_url
 from app.core.db import make_engine
+from app.core.types import alembic_render_item as render_item
 from app.models import Base
 
 config = context.config
@@ -34,6 +35,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         render_as_batch=True,
+        render_item=render_item,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -50,6 +52,7 @@ def run_migrations_online() -> None:
             # SQLite can't ALTER most things in place; batch mode recreates the
             # table instead. Harmless on Postgres.
             render_as_batch=True,
+            render_item=render_item,
         )
         with context.begin_transaction():
             context.run_migrations()

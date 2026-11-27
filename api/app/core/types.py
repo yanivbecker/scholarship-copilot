@@ -7,6 +7,9 @@ and Postgres alike. Deadlines (Phase 6) depend on this.
 """
 
 from datetime import UTC, datetime
+from typing import Any, Literal
+
+from alembic.autogenerate.api import AutogenContext
 
 from sqlalchemy import DateTime
 from sqlalchemy.engine import Dialect
@@ -39,3 +42,16 @@ class UTCDateTime(  # pylint: disable=abstract-method,too-many-ancestors
         if value.tzinfo is None:
             return value.replace(tzinfo=UTC)
         return value.astimezone(UTC)
+
+
+def alembic_render_item(
+    type_: str, obj: Any, _context: AutogenContext
+) -> str | Literal[False]:
+    """Alembic hook: write app column types as plain SQLAlchemy types.
+
+    Migrations must keep working forever, so they shouldn't import app code
+    that may change. In the database, UTCDateTime is just DateTime(timezone).
+    """
+    if type_ == "type" and isinstance(obj, UTCDateTime):
+        return "sa.DateTime(timezone=True)"
+    return False  # Alembic's default rendering for everything else

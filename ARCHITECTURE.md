@@ -38,7 +38,7 @@ flowchart TB
 | Database | SQLite (local) → PostgreSQL (cloud) |
 | Frontend | React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query, React Router, react-hook-form + zod |
 | API contract | FastAPI OpenAPI schema → `openapi-typescript` generated types |
-| Scraping | httpx, trafilatura, Playwright (JS-only pages), urllib.robotparser |
+| Scraping | httpx2, trafilatura (+ lxml fallback), urllib.robotparser; Playwright for JS-only pages deferred |
 | Parsing | pypdf / pdfplumber, python-docx; python-multipart for uploads |
 | Matching | rapidfuzz |
 | AI | Provider interface: `none` · `ollama` · `anthropic` |
@@ -102,3 +102,7 @@ scholarship-copilot/
 | 2026-11-26 | Uploaded files: random names, 0600, behind `FileStorage` | Hostile file names can't choose paths; files stay in the data dir (NFR-1); swappable for cloud storage (NFR-8). |
 | 2026-11-26 | `scholar` CLI with argparse (stdlib) | Jobs and data deletion run from any scheduler or terminal. No CLI framework dependency needed yet. |
 | 2026-11-26 | Data deletion ends with SQLite VACUUM | Deleted rows otherwise stay readable in the database file's free pages (NFR-12). |
+| 2026-11-26 | Fetcher pins the vetted IP | Resolve DNS ourselves, require every address to be public, connect to that IP with Host + TLS SNI = real name. Closes the DNS-rebinding gap between check and connect (NFR-4). |
+| 2026-11-26 | httpx2 as the runtime HTTP client | Same maintainer as httpx; already used for tests; supports per-request SNI. |
+| 2026-11-26 | Unknown robots.txt = don't fetch | 401/403/429/5xx/unreachable robots.txt means we don't know the rules, so the page isn't read (FR-D2). 404 means no rules. |
+| 2026-11-26 | Playwright (JS-only pages) deferred | Not needed for the sources tested so far; adds a browser runtime. Revisit if real sources are JS-only (paste text works meanwhile). |

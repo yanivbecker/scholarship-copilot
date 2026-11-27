@@ -5,11 +5,13 @@ requires-python = ">=3.13"
 dependencies = [
     "alembic>=1.20.1",
     "fastapi>=0.165.0",
+    "httpx2>=2.16.2",
     "pydantic-settings>=2.16.3",
     "pypdf>=7.2.0",
     "python-docx>=1.2.0",
     "python-multipart>=0.0.34",
     "sqlalchemy>=2.1.9",
+    "trafilatura>=2.4.0",
     "uvicorn>=0.54.0",
 ]
 
@@ -28,7 +30,6 @@ module-root = ""
 
 [dependency-groups]
 dev = [
-    "httpx2>=2.16.2",
     "mypy>=2.4.1",
     "pre-commit>=4.7.0",
     "pylint>=4.1.4",
@@ -47,8 +48,17 @@ disallow_untyped_defs = true
 explicit_package_bases = true
 disable_error_code = ["empty-body", "return"]
 
+[[tool.mypy.overrides]]
+# lxml ships without type hints; treat it as untyped instead of adding stubs.
+module = ["lxml", "lxml.*"]
+ignore_missing_imports = true
+
 [tool.ruff]
 line-length = 88
+
+[tool.pylint.main]
+# lxml is a compiled (C) module; let pylint load it to see its names.
+extension-pkg-allow-list = ["lxml"]
 
 [tool.pylint.format]
 max-line-length = 88

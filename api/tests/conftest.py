@@ -12,10 +12,12 @@ from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
 from app.core.db import get_session, make_engine
+from app.api.sources import get_fetcher
 from app.core.storage import LocalFileStorage, get_storage
 from app.main import create_app
 from app.modules.users.models import User
 from app.modules.users.service import get_or_create_owner
+from tests.fake_web import FakeWeb, new_web
 
 API_DIR = Path(__file__).resolve().parents[1]
 
@@ -60,9 +62,17 @@ def fixture_storage(tmp_path: Path) -> LocalFileStorage:
     return LocalFileStorage(tmp_path / "files")
 
 
+@pytest.fixture(name="web")
+def fixture_web() -> FakeWeb:
+    """A fake web (no real network). example.org exists and allows everything."""
+    return new_web()
+
+
 @pytest.fixture(name="client")
-def fixture_client(engine: Engine, storage: LocalFileStorage) -> Iterator[TestClient]:
-    """An API client using this test's throwaway database and file storage."""
+def fixture_client(
+    engine: Engine, storage: LocalFileStorage, web: FakeWeb
+) -> Iterator[TestClient]:
+    """An API client using this test's throwaway database, files and fake web."""
 
     def test_session() -> Iterator[Session]:
         with Session(engine) as session:
@@ -71,5 +81,6 @@ def fixture_client(engine: Engine, storage: LocalFileStorage) -> Iterator[TestCl
     app = create_app()
     app.dependency_overrides[get_session] = test_session
     app.dependency_overrides[get_storage] = lambda: storage
+    app.dependency_overrides[get_fetcher] = web.fetcher
     with TestClient(app) as client:
         yield client

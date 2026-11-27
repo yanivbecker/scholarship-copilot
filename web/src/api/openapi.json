@@ -32,6 +32,29 @@
         "title": "CatalogOut",
         "type": "object"
       },
+      "CheckOut": {
+        "description": "The source after a check, and whether its text changed.",
+        "properties": {
+          "changed": {
+            "title": "Changed",
+            "type": "boolean"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "boolean"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceOut"
+          }
+        },
+        "required": [
+          "source",
+          "skipped",
+          "changed"
+        ],
+        "title": "CheckOut",
+        "type": "object"
+      },
       "ChoiceOut": {
         "description": "One option of a choice fact: the stored value and its display label.",
         "properties": {
@@ -428,6 +451,20 @@
         "title": "OperatingMode",
         "type": "string"
       },
+      "PasteIn": {
+        "description": "Listing text copied from a page that needs a login (FR-D4).",
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "PasteIn",
+        "type": "object"
+      },
       "ProfileOut": {
         "description": "The student's settings and onboarding progress.",
         "properties": {
@@ -592,6 +629,61 @@
         "title": "SectionOut",
         "type": "object"
       },
+      "SnapshotOrigin": {
+        "description": "How a snapshot's text was obtained.",
+        "enum": [
+          "fetched",
+          "pasted"
+        ],
+        "title": "SnapshotOrigin",
+        "type": "string"
+      },
+      "SnapshotOut": {
+        "description": "The most recent text stored for a source.",
+        "properties": {
+          "changed": {
+            "title": "Changed",
+            "type": "boolean"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "fetched_at": {
+            "format": "date-time",
+            "title": "Fetched At",
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/SnapshotOrigin"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin",
+          "url",
+          "content_type",
+          "text",
+          "changed",
+          "fetched_at"
+        ],
+        "title": "SnapshotOut",
+        "type": "object"
+      },
       "SourceIn": {
         "description": "A page to add. Checked by url_safety before it's stored.",
         "properties": {
@@ -640,6 +732,52 @@
             ],
             "title": "Label"
           },
+          "last_changed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Changed At"
+          },
+          "last_checked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Checked At"
+          },
+          "last_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Message"
+          },
+          "last_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Result"
+          },
           "status": {
             "$ref": "#/components/schemas/SourceStatus"
           },
@@ -653,7 +791,11 @@
           "url",
           "label",
           "status",
-          "created_at"
+          "created_at",
+          "last_checked_at",
+          "last_result",
+          "last_message",
+          "last_changed_at"
         ],
         "title": "SourceOut",
         "type": "object"
@@ -1400,6 +1542,151 @@
           }
         },
         "summary": "Delete Source",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/api/v1/sources/{source_id}/check": {
+      "post": {
+        "description": "Check now. A person asked, so known dead ends are retried too.",
+        "operationId": "check_source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "title": "Source Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Source",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/api/v1/sources/{source_id}/paste": {
+      "post": {
+        "operationId": "paste_source_text",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "title": "Source Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasteIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Paste Source Text",
+        "tags": [
+          "sources"
+        ]
+      }
+    },
+    "/api/v1/sources/{source_id}/snapshot": {
+      "get": {
+        "operationId": "get_latest_snapshot",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "title": "Source Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SnapshotOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Latest Snapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Latest Snapshot",
         "tags": [
           "sources"
         ]

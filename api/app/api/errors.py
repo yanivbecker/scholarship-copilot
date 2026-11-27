@@ -13,7 +13,11 @@ from app.modules.profile.catalog import FactValidationError, FieldErrorsError
 from app.modules.profile.service import NotFoundError, StoryValidationError
 from app.modules.resume.files import ResumeFileError
 from app.modules.resume.service import ResumeNotFoundError
-from app.modules.sources.service import DuplicateSourceError, SourceNotFoundError
+from app.modules.sources.service import (
+    DuplicateSourceError,
+    PasteError,
+    SourceNotFoundError,
+)
 from app.modules.sources.url_safety import UnsafeURLError
 
 type Handler = Callable[[Request, Exception], Awaitable[JSONResponse]]
@@ -39,6 +43,7 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     FactValidationError: 422,
     StoryValidationError: 422,
     UnsafeURLError: 422,
+    PasteError: 422,
     ResumeFileError: 422,
     DuplicateSourceError: 409,
     NotFoundError: 404,

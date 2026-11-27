@@ -228,6 +228,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sources/{source_id}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check Source
+         * @description Check now. A person asked, so known dead ends are retried too.
+         */
+        post: operations["check_source"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{source_id}/paste": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Paste Source Text */
+        post: operations["paste_source_text"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sources/{source_id}/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Latest Snapshot */
+        get: operations["get_latest_snapshot"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stories": {
         parameters: {
             query?: never;
@@ -297,6 +351,17 @@ export interface components {
         CatalogOut: {
             /** Sections */
             sections: components["schemas"]["SectionOut"][];
+        };
+        /**
+         * CheckOut
+         * @description The source after a check, and whether its text changed.
+         */
+        CheckOut: {
+            /** Changed */
+            changed: boolean;
+            /** Skipped */
+            skipped: boolean;
+            source: components["schemas"]["SourceOut"];
         };
         /**
          * ChoiceOut
@@ -456,6 +521,14 @@ export interface components {
          */
         OperatingMode: "discovery" | "hybrid" | "automation";
         /**
+         * PasteIn
+         * @description Listing text copied from a page that needs a login (FR-D4).
+         */
+        PasteIn: {
+            /** Text */
+            text: string;
+        };
+        /**
          * ProfileOut
          * @description The student's settings and onboarding progress.
          */
@@ -517,6 +590,32 @@ export interface components {
             sensitive: boolean;
         };
         /**
+         * SnapshotOrigin
+         * @description How a snapshot's text was obtained.
+         * @enum {string}
+         */
+        SnapshotOrigin: "fetched" | "pasted";
+        /**
+         * SnapshotOut
+         * @description The most recent text stored for a source.
+         */
+        SnapshotOut: {
+            /** Changed */
+            changed: boolean;
+            /** Content Type */
+            content_type: string | null;
+            /**
+             * Fetched At
+             * Format: date-time
+             */
+            fetched_at: string;
+            origin: components["schemas"]["SnapshotOrigin"];
+            /** Text */
+            text: string;
+            /** Url */
+            url: string;
+        };
+        /**
          * SourceIn
          * @description A page to add. Checked by url_safety before it's stored.
          */
@@ -540,6 +639,14 @@ export interface components {
             id: number;
             /** Label */
             label: string | null;
+            /** Last Changed At */
+            last_changed_at: string | null;
+            /** Last Checked At */
+            last_checked_at: string | null;
+            /** Last Message */
+            last_message: string | null;
+            /** Last Result */
+            last_result: string | null;
             status: components["schemas"]["SourceStatus"];
             /** Url */
             url: string;
@@ -1063,6 +1170,103 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_source: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    paste_source_text: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasteIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_latest_snapshot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SnapshotOut"] | null;
+                };
             };
             /** @description Validation Error */
             422: {
