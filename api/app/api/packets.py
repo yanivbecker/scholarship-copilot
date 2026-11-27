@@ -7,7 +7,12 @@ from fastapi import APIRouter, status
 from app.api.deps import CurrentUser, SessionDep
 from app.modules.packets import service
 from app.modules.packets.models import Packet, PacketItem
-from app.modules.packets.rules import ai_writing_allowed, confirm_rules, scan_rules
+from app.modules.packets.rules import (
+    ai_coaching_allowed,
+    ai_writing_allowed,
+    confirm_rules,
+    scan_rules,
+)
 from app.modules.scholarships import service as scholarships
 from app.modules.packets.schemas import (
     ItemIn,
@@ -72,6 +77,7 @@ def packet_out(session: SessionDep, packet: Packet) -> PacketOut:
         rules_source_url=packet.rules_source_url,
         rules_confirmed_at=packet.rules_confirmed_at,
         ai_writing_allowed=ai_writing_allowed(packet),
+        ai_coaching_allowed=ai_coaching_allowed(packet),
         approved_at=packet.approved_at,
         progress=ProgressOut(
             finished=state.finished,

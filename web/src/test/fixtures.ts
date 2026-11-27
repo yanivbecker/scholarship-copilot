@@ -265,6 +265,7 @@ export const packet = (overrides: Partial<Packet> = {}): Packet => ({
   rules_source_url: null,
   rules_confirmed_at: null,
   ai_writing_allowed: false,
+  ai_coaching_allowed: true,
   approved_at: null,
   items: [],
   progress: { finished: 0, required: 0, missing: [], complete: true },

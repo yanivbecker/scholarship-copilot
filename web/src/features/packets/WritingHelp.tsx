@@ -21,17 +21,15 @@ import { usePacketChange } from './queries'
 type Props = { scholarshipId: number; packet: Packet; item: PacketItem }
 
 /**
- * FR-A3/A4: AI coaching and drafting. Off unless the rules were confirmed as
- * allowing AI help (the API refuses too; this only explains it).
+ * FR-A3/A4: AI coaching and drafting (the API enforces the same gates; this
+ * only explains them). Coaching never writes the answer, so it's off only when
+ * the rules prohibit AI help. Drafting needs rules confirmed as allowing it.
  */
 export function WritingHelp({ scholarshipId, packet, item }: Props) {
-  if (!packet.ai_writing_allowed) {
+  if (!packet.ai_coaching_allowed) {
     return (
       <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-        AI help is off for this scholarship.{' '}
-        {packet.rules_status === 'unchecked'
-          ? 'Check its AI-use rules above first.'
-          : 'Its rules were confirmed as not allowing it, or unclear.'}{' '}
+        AI help is off: you confirmed this scholarship's rules don't allow it.
         You can still write, save versions and check names and numbers.
       </p>
     )
@@ -43,14 +41,24 @@ export function WritingHelp({ scholarshipId, packet, item }: Props) {
       </summary>
       <div className="mt-3 space-y-5 text-sm">
         <p className="text-muted-foreground">
-          The AI only sees this question and what you choose to share below. It
-          never invents experiences: anything it can't trace to your facts or
-          stories is removed.
+          Coaching helps you think and gives feedback; it doesn't write your
+          answer. The AI only sees this question and what you type or share.
         </p>
         <BreakdownTool item={item} />
         <InterviewTool item={item} />
         <FeedbackTool item={item} />
-        <DraftTool scholarshipId={scholarshipId} item={item} />
+        {packet.ai_writing_allowed ? (
+          <DraftTool scholarshipId={scholarshipId} item={item} />
+        ) : (
+          <p className="rounded-md border border-dashed p-3 text-muted-foreground">
+            AI drafting is off.{' '}
+            {packet.rules_status === 'unchecked'
+              ? 'Check the AI-use rules above first:'
+              : 'The rules were confirmed as unclear:'}{' '}
+            drafting turns on only when you confirm, with the sponsor's own
+            words, that AI help is allowed.
+          </p>
+        )}
       </div>
     </details>
   )

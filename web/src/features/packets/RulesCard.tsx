@@ -62,9 +62,9 @@ export function RulesCard({
           AI-use rules
         </CardTitle>
         <CardDescription>
-          Some scholarships don't allow AI help with essays. Coaching and
-          drafting stay off unless you confirm, with the sponsor's own words,
-          that AI help is allowed.
+          Some scholarships don't allow AI help with essays. AI drafting stays
+          off unless you confirm, with the sponsor's own words, that AI help is
+          allowed. Coaching is off only if the rules prohibit AI help.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

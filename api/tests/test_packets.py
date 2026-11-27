@@ -48,6 +48,7 @@ def test_packet_is_created_once_per_cycle(
     assert again["id"] == packet["id"]
     assert packet["rules_status"] == "unchecked"
     assert packet["ai_writing_allowed"] is False  # nothing checked yet
+    assert packet["ai_coaching_allowed"] is True  # coaching is the default
     assert packet["progress"] == {
         "finished": 0,
         "required": 0,

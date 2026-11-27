@@ -67,38 +67,59 @@ def fixture_item(client: TestClient, scholarship_id: int) -> dict[str, Any]:
     return make_item(client, scholarship_id, allow=True)
 
 
-def test_every_kind_of_help_is_refused_until_rules_allow_it(
-    client: TestClient, scholarship_id: int
-) -> None:
-    item = make_item(client, scholarship_id, allow=False)
-    provider = ScriptedProvider()
-    use(client, provider)
-    base = f"{V1}/packet-items/{item['id']}"
+def set_rules(client: TestClient, scholarship_id: int, status: str) -> None:
+    packet = client.get(f"{V1}/scholarships/{scholarship_id}/packet").json()
+    client.put(f"{V1}/packets/{packet['id']}/rules", json={"status": status})
 
-    responses = [
-        client.post(f"{base}/coach/breakdown"),
-        client.post(f"{base}/coach/questions"),
-        client.post(f"{base}/coach/outline", json={"answers": []}),
-        client.post(f"{base}/coach/feedback", json={"version_id": 1}),
-        client.post(f"{base}/draft", json={"story_ids": []}),
+
+def coaching_calls(client: TestClient, item_id: int) -> list[int]:
+    base = f"{V1}/packet-items/{item_id}/coach"
+    return [
+        client.post(f"{base}/breakdown").status_code,
+        client.post(f"{base}/questions").status_code,
+        client.post(f"{base}/outline", json={"answers": []}).status_code,
+        client.post(f"{base}/feedback", json={"version_id": 1}).status_code,
     ]
 
-    assert [r.status_code for r in responses] == [403] * 5
-    assert "Unclear rules count as not allowed" in responses[0].json()["detail"]
-    assert not provider.prompts  # nothing was sent anywhere
+
+@pytest.mark.parametrize("rules", [None, "unclear"])
+def test_coaching_is_on_but_drafting_off_until_rules_allow_it(
+    client: TestClient, scholarship_id: int, rules: str | None
+) -> None:
+    """Owner decision: coaching never writes the answer, so it's the default."""
+    item = make_item(client, scholarship_id, allow=False)
+    if rules:
+        set_rules(client, scholarship_id, rules)
+    provider = ScriptedProvider({"questions": ["Who did you help?"]})
+    use(client, provider)
+
+    questions = client.post(f"{V1}/packet-items/{item['id']}/coach/questions")
+    drafted = client.post(
+        f"{V1}/packet-items/{item['id']}/draft", json={"fact_keys": ["gpa"]}
+    )
+
+    assert questions.status_code == 200
+    assert drafted.status_code == 403
+    assert "Unclear rules count as not allowed" in drafted.json()["detail"]
+    assert len(provider.prompts) == 1  # the draft request never reached the AI
+    packet = client.get(f"{V1}/scholarships/{scholarship_id}/packet").json()
+    assert packet["ai_coaching_allowed"] is True
+    assert packet["ai_writing_allowed"] is False
 
 
-def test_unclear_rules_also_keep_help_off(
+def test_prohibited_rules_turn_every_kind_of_help_off(
     client: TestClient, scholarship_id: int
 ) -> None:
     item = make_item(client, scholarship_id, allow=False)
-    packet = client.get(f"{V1}/scholarships/{scholarship_id}/packet").json()
-    client.put(f"{V1}/packets/{packet['id']}/rules", json={"status": "unclear"})
-    use(client, ScriptedProvider())
+    set_rules(client, scholarship_id, "prohibited")
+    provider = ScriptedProvider()
+    use(client, provider)
 
-    response = client.post(f"{V1}/packet-items/{item['id']}/coach/questions")
+    statuses = coaching_calls(client, item["id"])
+    drafted = client.post(f"{V1}/packet-items/{item['id']}/draft", json={})
 
-    assert response.status_code == 403
+    assert statuses == [403] * 4 and drafted.status_code == 403
+    assert not provider.prompts  # nothing was sent anywhere
 
 
 def test_breakdown_keeps_only_parts_quoted_from_the_prompt(

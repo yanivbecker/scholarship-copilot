@@ -1746,6 +1746,10 @@
       "PacketOut": {
         "description": "The whole packet for one scholarship cycle.",
         "properties": {
+          "ai_coaching_allowed": {
+            "title": "Ai Coaching Allowed",
+            "type": "boolean"
+          },
           "ai_writing_allowed": {
             "title": "Ai Writing Allowed",
             "type": "boolean"
@@ -1831,6 +1835,7 @@
           "rules_source_url",
           "rules_confirmed_at",
           "ai_writing_allowed",
+          "ai_coaching_allowed",
           "approved_at",
           "progress",
           "items"

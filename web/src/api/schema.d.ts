@@ -1532,6 +1532,8 @@ export interface components {
          * @description The whole packet for one scholarship cycle.
          */
         PacketOut: {
+            /** Ai Coaching Allowed */
+            ai_coaching_allowed: boolean;
             /** Ai Writing Allowed */
             ai_writing_allowed: boolean;
             /** Approved At */

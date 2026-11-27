@@ -1,9 +1,12 @@
 """AI writing help: coaching (FR-A3) and drafting (FR-A4).
 
-Every function here starts with `require_ai_help`: nothing is sent to an AI
-unless the student confirmed this scholarship's rules allow AI help, backed by
-the sponsor's own words (rules.py). Coaching counts as AI help too
-(conservative overnight decision, see ARCHITECTURE.md).
+Two gates (rules.py, owner decision 2026-11-27):
+
+* Coaching (`require_coaching`) helps the student think and gives feedback;
+  it never writes their answer. It's on unless the rules prohibit AI help.
+* Drafting (`require_drafting`) writes text, so it needs rules the student
+  confirmed as allowing AI help, backed by the sponsor's own words. Unclear
+  or unchecked rules count as no AI writing (CLAUDE.md).
 
 Rules the code enforces, whatever the model says:
 
@@ -37,7 +40,7 @@ from app.modules.packets.provenance import (
     gather_material,
     unsupported_claims,
 )
-from app.modules.packets.rules import ai_writing_allowed
+from app.modules.packets.rules import ai_coaching_allowed, ai_writing_allowed
 from app.modules.packets.service import (
     WRITING_KINDS,
     PacketError,
@@ -56,11 +59,21 @@ class AIHelpBlockedError(PermissionError):
     """AI help isn't allowed for this packet. The message is user-facing."""
 
 
-def require_ai_help(packet: Packet) -> None:
+def require_coaching(packet: Packet) -> None:
+    if ai_coaching_allowed(packet):
+        return
+    raise AIHelpBlockedError(
+        "You confirmed this scholarship's rules don't allow AI help, so "
+        "coaching is off. You can still write, save versions and check names "
+        "and numbers."
+    )
+
+
+def require_drafting(packet: Packet) -> None:
     if ai_writing_allowed(packet):
         return
     raise AIHelpBlockedError(
-        "AI help is off for this scholarship. It turns on only after you "
+        "AI drafting is off for this scholarship. It turns on only after you "
         "check its rules and confirm, with the sponsor's own words, that AI "
         "help is allowed. Unclear rules count as not allowed."
     )
@@ -126,7 +139,7 @@ class Breakdown(BaseModel):
 
 def breakdown(provider: AIProvider, packet: Packet, item: PacketItem) -> Breakdown:
     """What the prompt is really asking, part by part (each part quoted)."""
-    require_ai_help(packet)
+    require_coaching(packet)
     _writing_item(item)
     result = ask_structured(
         provider,
@@ -156,7 +169,7 @@ def interview_questions(
     provider: AIProvider, packet: Packet, item: PacketItem
 ) -> Questions:
     """Questions that help the student find their own material."""
-    require_ai_help(packet)
+    require_coaching(packet)
     _writing_item(item)
     return ask_structured(
         provider,
@@ -207,7 +220,7 @@ def outline(  # pylint: disable=too-many-arguments
     story_ids: list[int],
 ) -> Outline:
     """An outline built only from the student's answers and chosen stories."""
-    require_ai_help(packet)
+    require_coaching(packet)
     _writing_item(item)
     answers = [a for a in answers if a.answer.strip()]
     if not answers and not story_ids:
@@ -272,7 +285,7 @@ def feedback(
     provider: AIProvider, packet: Packet, item: PacketItem, version_id: int
 ) -> tuple[Feedback, str | None]:
     """Rubric feedback on one version, plus a length note from code."""
-    require_ai_help(packet)
+    require_coaching(packet)
     _writing_item(item)
     version = next((v for v in item.versions if v.id == version_id), None)
     if version is None:
@@ -382,7 +395,7 @@ def draft(  # pylint: disable=too-many-arguments,too-many-locals
     story_ids: list[int],
 ) -> DraftResult:
     """A first draft from chosen facts and stories, saved as a new version."""
-    require_ai_help(packet)
+    require_drafting(packet)
     _writing_item(item)
     if not story_ids and not fact_keys:
         raise PacketError("Choose at least one story or fact to draft from.")

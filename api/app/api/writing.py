@@ -1,7 +1,8 @@
 """AI writing help (FR-A3, FR-A4) and the claim check (FR-A5).
 
-Coaching and drafting are refused (403) unless the packet's AI-use rules
-were confirmed as allowed. The claim check uses no AI, so it's always on.
+Drafting is refused (403) unless the packet's AI-use rules were confirmed
+as allowed; coaching only when they were confirmed as prohibited. The claim
+check uses no AI, so it's always on.
 """
 
 from typing import Annotated

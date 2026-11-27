@@ -34,22 +34,36 @@ const render = () =>
   )
 
 describe('PacketPage', () => {
-  it('starts empty, with AI help off until the rules are checked', async () => {
+  it('offers coaching before the rules are checked, but not drafting', async () => {
+    mockApi({ ...base, [PACKET]: packet({ items: [packetItem()] }) })
+    const user = userEvent.setup()
+    render()
+
+    await user.click(await screen.findByText('Writing help (AI)'))
+
+    expect(screen.getByText('Not checked')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Ask me questions' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/AI drafting is off/)).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Draft a new version' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('turns all AI help off when the rules prohibit it', async () => {
     mockApi({
       ...base,
-      [PACKET]: packet({ items: [packetItem()] }),
+      [PACKET]: packet({
+        rules_status: 'prohibited',
+        ai_coaching_allowed: false,
+        items: [packetItem()],
+      }),
     })
     render()
 
     expect(
-      await screen.findByRole('heading', { name: 'Application packet' }),
-    ).toBeInTheDocument()
-    expect(screen.getByText('Not checked')).toBeInTheDocument()
-    expect(
-      screen.getByText(/AI help is off for this scholarship/),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(/Check its AI-use rules above first/),
+      await screen.findByText(/AI help is off: you confirmed/),
     ).toBeInTheDocument()
     expect(screen.queryByText('Writing help (AI)')).not.toBeInTheDocument()
   })

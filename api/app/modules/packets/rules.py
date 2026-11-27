@@ -8,8 +8,9 @@ no AI writing." So:
    (allowed / prohibited / unclear) from their wording. No mention = unclear.
 2. The student reads those sentences and confirms the result (FR-A2).
 3. "Allowed" needs evidence: a quote that appears verbatim in the source.
-4. AI writing help (coaching or drafting) is on only when the confirmed
-   result is ALLOWED. Everything else, including "not checked", means off.
+4. AI drafting is on only when the confirmed result is ALLOWED; anything
+   else, including "not checked", means off. Coaching (which never writes
+   the answer) is off only when the rules are confirmed as PROHIBITED.
 """
 
 import re
@@ -61,7 +62,13 @@ class RulesError(ValueError):
     """The rules confirmation isn't valid. The message is user-facing."""
 
 
+def ai_coaching_allowed(packet: Packet) -> bool:
+    """Coaching never writes the answer, so only a confirmed ban turns it off."""
+    return packet.rules_status is not RulesStatus.PROHIBITED
+
+
 def ai_writing_allowed(packet: Packet) -> bool:
+    """Drafting writes text: only with rules confirmed as allowing it."""
     return (
         packet.rules_status is RulesStatus.ALLOWED
         and packet.rules_confirmed_at is not None

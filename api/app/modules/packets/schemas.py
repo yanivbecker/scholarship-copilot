@@ -61,6 +61,7 @@ class PacketOut(BaseModel):
     rules_source_url: str | None
     rules_confirmed_at: datetime | None
     ai_writing_allowed: bool
+    ai_coaching_allowed: bool
     approved_at: datetime | None
     progress: ProgressOut
     items: list[ItemOut]
