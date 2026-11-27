@@ -69,6 +69,26 @@ repos:
         language: system
         files: ^web/.*\.(ts|tsx)$
         pass_filenames: false
+      # --- Browser extension (extension/) ---
+      - id: prettier-extension
+        name: prettier (extension)
+        entry: extension/node_modules/.bin/prettier --write --ignore-unknown
+        language: system
+        files: ^extension/
+        types: [text]
+        exclude: ^extension/package-lock\.json$
+      - id: oxlint-extension
+        name: oxlint (extension)
+        entry: npm --prefix extension run --silent lint
+        language: system
+        files: ^extension/
+        pass_filenames: false
+      - id: tsc-extension
+        name: tsc (extension)
+        entry: npm --prefix extension run --silent typecheck
+        language: system
+        files: ^extension/.*\.ts$
+        pass_filenames: false
       # Same check as CI's api-contract job: backend changes must ship with
       # regenerated frontend types. On failure the files are already
       # regenerated: review them, `git add` them and commit again.

@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Scholarship Copilot autofill",
+  "version": "0.1.0",
+  "description": "Fills a scholarship form from your approved packet when you ask. Never submits.",
+  "minimum_chrome_version": "120",
+  "action": {
+    "default_title": "Fill from my approved packet",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["http://127.0.0.1:8000/*"]
+}
