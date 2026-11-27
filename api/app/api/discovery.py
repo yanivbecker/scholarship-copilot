@@ -5,7 +5,8 @@ from fastapi import APIRouter
 from app.api.deps import CurrentUser, SessionDep
 from app.api.scholarships import AIDep
 from app.api.sources import FetcherDep
-from app.modules.jobs.discovery import latest_run, run_discovery
+from app.modules.jobs.daily import run_daily
+from app.modules.jobs.discovery import latest_run
 from app.modules.jobs.schemas import JobRunOut
 
 router = APIRouter(prefix="/discovery", tags=["discovery"])
@@ -15,11 +16,15 @@ router = APIRouter(prefix="/discovery", tags=["discovery"])
 def run_now(
     session: SessionDep, user: CurrentUser, fetcher: FetcherDep, ai: AIDep
 ) -> JobRunOut:
-    """Check every source and extract what changed. Can take a while: each
-    site is contacted at most once per second, and AI extraction is slow."""
-    run = run_discovery(
+    """Run the daily job now (FR-N2 "Run now": works even with background
+    running off). Can take a while: each site is contacted at most once per
+    second, and AI extraction is slow."""
+    result = run_daily(
         session, user_id=user.id, fetcher=fetcher, provider=ai, trigger="api"
     )
+    run = result.run or latest_run(session, user.id)
+    if run is None:  # pragma: no cover - run_discovery always records a run
+        raise RuntimeError("The run was not recorded.")
     return JobRunOut.model_validate(run)
 
 

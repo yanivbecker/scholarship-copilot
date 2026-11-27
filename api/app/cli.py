@@ -17,7 +17,9 @@ from app.core.config import get_settings
 from app.core.db import get_session_factory
 from app.core.storage import FileStorage, get_storage
 from app.modules.fetcher.fetcher import PoliteFetcher
+from app.modules.jobs.daily import SCHEDULE, run_daily
 from app.modules.jobs.discovery import run_discovery
+from app.modules.jobs.models import JobRun
 from app.modules.privacy.service import DeletionReport, delete_all_personal_data
 from app.modules.users.service import get_or_create_owner
 
@@ -64,6 +66,22 @@ def cmd_delete_my_data(  # pylint: disable=too-many-arguments
     return 0
 
 
+def _print_run(job: JobRun, provider: AIProvider, out: TextIO) -> None:
+    summary = job.summary
+    for item in summary.get("sources", []):
+        extra = f", extraction: {item['extraction']}" if item.get("extraction") else ""
+        print(f"  {item['check']:<18} {item['url']}{extra}", file=out)
+        if item.get("message"):
+            print(f"  {'':<18} {item['message']}", file=out)
+    print(
+        f"Run {job.status}: {len(summary.get('sources', []))} sources checked, "
+        f"{summary.get('scholarships_created', 0)} new and "
+        f"{summary.get('scholarships_updated', 0)} updated scholarships"
+        f" (AI provider: {provider.name}).",
+        file=out,
+    )
+
+
 def cmd_discover(
     *,
     session_factory: Callable[[], Session],
@@ -78,22 +96,38 @@ def cmd_discover(
         job = run_discovery(
             session, user_id=owner.id, fetcher=fetcher, provider=provider, trigger="cli"
         )
-        summary = job.summary
-        for item in summary.get("sources", []):
-            extra = (
-                f", extraction: {item['extraction']}" if item.get("extraction") else ""
-            )
-            print(f"  {item['check']:<18} {item['url']}{extra}", file=out)
-            if item.get("message"):
-                print(f"  {'':<18} {item['message']}", file=out)
-        print(
-            f"Run {job.status}: {len(summary.get('sources', []))} sources checked, "
-            f"{summary.get('scholarships_created', 0)} new and "
-            f"{summary.get('scholarships_updated', 0)} updated scholarships"
-            f" (AI provider: {provider.name}).",
-            file=out,
-        )
+        _print_run(job, provider, out)
         return 0 if job.status == "succeeded" else 1
+
+
+def cmd_daily(  # pylint: disable=too-many-arguments
+    *,
+    scheduled: bool,
+    session_factory: Callable[[], Session],
+    fetcher: PoliteFetcher,
+    provider: AIProvider,
+    out: TextIO,
+) -> int:
+    """FR-N1: discovery, then notifications. Scheduled runs obey the switch."""
+    with session_factory() as session:
+        owner = get_or_create_owner(session)
+        session.commit()
+        result = run_daily(
+            session,
+            user_id=owner.id,
+            fetcher=fetcher,
+            provider=provider,
+            trigger=SCHEDULE if scheduled else "cli",
+        )
+        if result.skipped:
+            print(result.skipped, file=out)
+            return 0
+        if result.run is not None:
+            _print_run(result.run, provider, out)
+        else:
+            print("Discovery failed; see the app's Today screen.", file=out)
+        print(f"{result.notifications} new notification(s).", file=out)
+        return 0 if result.ok else 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -113,6 +147,16 @@ def build_parser() -> argparse.ArgumentParser:
         "discover",
         help="Check every approved source and extract scholarships from "
         "pages that changed.",
+    )
+    daily = commands.add_parser(
+        "daily",
+        help="The daily job: check sources, then create notifications.",
+    )
+    daily.add_argument(
+        "--scheduled",
+        action="store_true",
+        help="Run as the background job: does nothing while background "
+        "running is switched off (used by launchd).",
     )
     return parser
 
@@ -143,6 +187,20 @@ def run(  # pylint: disable=too-many-arguments  # every dependency is injectable
         fetcher = fetcher or PoliteFetcher()
         try:
             return cmd_discover(
+                session_factory=session_factory or get_session_factory(),
+                fetcher=fetcher,
+                provider=provider or build_ai_provider(get_settings()),
+                out=out,
+            )
+        finally:
+            if own_fetcher:
+                fetcher.close()
+    if args.command == "daily":
+        own_fetcher = fetcher is None
+        fetcher = fetcher or PoliteFetcher()
+        try:
+            return cmd_daily(
+                scheduled=args.scheduled,
                 session_factory=session_factory or get_session_factory(),
                 fetcher=fetcher,
                 provider=provider or build_ai_provider(get_settings()),

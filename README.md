@@ -37,6 +37,8 @@ npm run dev                          # app on http://127.0.0.1:5173, proxies /ap
 
 # Discovery: check every approved source and extract changed pages (from api/)
 uv run scholar discover
+# The daily job: discovery, then notifications (what the 07:00 schedule runs)
+uv run scholar daily
 
 # Git hooks (once, from api/)
 uv run pre-commit install

@@ -56,7 +56,7 @@
 
 ## Phase 8 checklist
 - [x] 8.1 Notifications with change detection (FR-N4, FR-N5): a saved "watch state" per scholarship (deadline, amount, verdict, requirements) so only material changes are announced, each once; new matches (not for ineligible or closed listings); deadline reminders at 14 and 3 days, keyed so each fires once; master switch plus per-kind switches that never cause a flood when turned back on; finished applications left alone. Notifications and settings API; search-query suggestions from an allowlist of facts. 12 tests, deliberate breaks caught. Migration `83986679184c` round-trips; delete-my-data covers the new tables.
-- [ ] 8.2 `scholar daily` job (FR-N1, FR-N2)
+- [x] 8.2 `scholar daily` job (FR-N1, FR-N2): discovery then notifications, recorded on the job run; `--scheduled` (used by launchd) does nothing while background running is off, manual runs and the app's "Run now" always work; a discovery failure doesn't stop deadline reminders. 5 tests, deliberate breaks caught.
 - [ ] 8.3 Background switch: launchd template, `scholar background on/off/status` (FR-N2)
 - [ ] 8.4 Weekly source search with saved queries (FR-N3, FR-D1)
 - [ ] 8.5 UI: notifications, Settings page, suggested sources
