@@ -64,7 +64,7 @@
 
 ## Phase 9 checklist
 - [x] 9.1 Fill sheet backend (FR-X1, FR-A7): form-field items now hold answers that are versioned and approved like essays (they can't just be ticked off); "Add common form fields from my profile" copies name, email, phone, birth date, city, state, school, major, GPA and graduation year as *unapproved* values (never sensitive facts); a read-only `/autofill` API that only returns an approved packet's approved text; each fill is audited with counts and the site's host only. 6 tests, deliberate breaks caught. Packet page updated (form fields get the editor; no AI writing help for them).
-- [ ] 9.2 Extension core: find, match and fill fields (FR-X1, FR-X2)
+- [x] 9.2 Extension core (FR-X1, FR-X2), `extension/src`: finds fields with the label a person sees; never offers password, hidden, disabled, read-only, file or CAPTCHA fields; deterministic matching (exact, a small synonym table, word overlap; essays only into text areas; ties and weak matches left for the student and highlighted); fills like a person typing (`input`/`change` only), never overwrites typed text, never cuts an answer short to fit `maxlength`, and re-checks that each field is still the one previewed. 23 tests in jsdom, including a never-submits check of the source itself and a trap proving a password's value is never read; deliberate breaks caught. Tooling reuses web/'s exact versions, no new packages.
 - [ ] 9.3 Extension shell: manifest, popup, build, CI
 - [ ] 9.4 Settings instructions, docs, browser check
 
