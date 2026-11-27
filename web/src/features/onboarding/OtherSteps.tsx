@@ -13,23 +13,26 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { MODES } from '@/features/profile/modes'
+import { ResumeImport } from '@/features/resume/ResumeImport'
 import { queryKeys } from '@/features/profile/queries'
 
 import { onboardingKeys, useSources } from './queries'
 
 type StepProps = { onDone: (progress: Onboarding) => Promise<void> }
 
-/** Placeholder until resume import lands (milestone 4.5). */
+/** Optional resume import (FR-P2), then on to the next step. */
 export function ResumeStep({ onDone }: StepProps) {
   const [busy, setBusy] = useState(false)
+  const [imported, setImported] = useState(false)
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <p className="text-muted-foreground">
-        Resume import is coming in the next update. It will suggest profile
-        facts from your resume and you'll confirm each one before it's saved.
-        You can skip this step for now.
+        Upload your resume and the app will suggest profile facts from it.
+        You'll check each one before anything is saved. This step is optional.
       </p>
+      <ResumeImport onSaved={() => setImported(true)} />
       <Button
+        variant={imported ? 'default' : 'outline'}
         disabled={busy}
         onClick={async () => {
           setBusy(true)
@@ -40,7 +43,7 @@ export function ResumeStep({ onDone }: StepProps) {
           }
         }}
       >
-        Skip for now
+        {imported ? 'Continue' : 'Skip for now'}
       </Button>
     </div>
   )
@@ -134,7 +137,7 @@ export function SourcesStep({ onDone }: StepProps) {
   const refresh = () =>
     queryClient.invalidateQueries({ queryKey: onboardingKeys.sources })
 
-  async function add(event: React.FormEvent) {
+  async function add(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(undefined)
     setBusy(true)

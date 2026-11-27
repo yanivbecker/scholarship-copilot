@@ -154,6 +154,40 @@ describe('ProfilePage', () => {
     ).toBe(true)
   })
 
+  it('keeps element ids unique with a resume review open', async () => {
+    mockApi({
+      ...baseRoutes,
+      'GET /api/v1/facts': [],
+      'POST /api/v1/resume': {
+        document_id: 1,
+        filename: 'cv.pdf',
+        suggestions: [
+          {
+            key: 'gpa',
+            label: 'GPA',
+            value: 3.7,
+            evidence: 'GPA 3.7',
+            current_value: null,
+          },
+        ],
+      },
+    })
+    const user = userEvent.setup()
+    await renderPage()
+
+    await user.upload(
+      screen.getByLabelText('Resume file'),
+      new File(['%PDF-'], 'cv.pdf', { type: 'application/pdf' }),
+    )
+    await user.click(screen.getByRole('button', { name: 'Read resume' }))
+    await screen.findByText(/Nothing is saved until you confirm/)
+
+    const ids = Array.from(document.querySelectorAll('[id]'), (el) => el.id)
+    expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([])
+    // Each GPA label points at exactly one input.
+    expect(screen.getAllByLabelText('GPA')).toHaveLength(2)
+  })
+
   it('changes the operating mode', async () => {
     const calls = mockApi({
       ...baseRoutes,

@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "Body_upload_resume": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_resume",
+        "type": "object"
+      },
       "CatalogOut": {
         "description": "The whole fact catalog, grouped by section.",
         "properties": {
@@ -503,6 +517,50 @@
         "title": "ProfileUpdate",
         "type": "object"
       },
+      "ResumeConfirmIn": {
+        "description": "The suggestions the student accepted, with any edits they made.",
+        "properties": {
+          "facts": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FactValueIn"
+            },
+            "title": "Facts",
+            "type": "object"
+          }
+        },
+        "required": [
+          "facts"
+        ],
+        "title": "ResumeConfirmIn",
+        "type": "object"
+      },
+      "ResumeUploadOut": {
+        "description": "The stored resume and the facts suggested from it. Nothing is saved yet.",
+        "properties": {
+          "document_id": {
+            "title": "Document Id",
+            "type": "integer"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestionOut"
+            },
+            "title": "Suggestions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "document_id",
+          "filename",
+          "suggestions"
+        ],
+        "title": "ResumeUploadOut",
+        "type": "object"
+      },
       "SectionOut": {
         "description": "A group of facts, in display order.",
         "properties": {
@@ -679,6 +737,45 @@
           "updated_at"
         ],
         "title": "StoryOut",
+        "type": "object"
+      },
+      "SuggestionOut": {
+        "description": "A suggested fact, the resume line it came from, and what's on file now.",
+        "properties": {
+          "current_value": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FactValueOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/FactValueOut"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "value",
+          "evidence",
+          "current_value"
+        ],
+        "title": "SuggestionOut",
         "type": "object"
       },
       "ThemesOut": {
@@ -1074,6 +1171,138 @@
         "summary": "Update Profile",
         "tags": [
           "profile"
+        ]
+      }
+    },
+    "/api/v1/resume": {
+      "post": {
+        "operationId": "upload_resume",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_resume"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeUploadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Resume",
+        "tags": [
+          "resume"
+        ]
+      }
+    },
+    "/api/v1/resume/{document_id}": {
+      "delete": {
+        "operationId": "delete_resume",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Resume",
+        "tags": [
+          "resume"
+        ]
+      }
+    },
+    "/api/v1/resume/{document_id}/confirm": {
+      "post": {
+        "operationId": "confirm_resume_facts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResumeConfirmIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FactOut"
+                  },
+                  "title": "Response Confirm Resume Facts",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Resume Facts",
+        "tags": [
+          "resume"
         ]
       }
     },

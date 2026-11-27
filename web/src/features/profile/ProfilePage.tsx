@@ -17,6 +17,8 @@ import {
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 
+import { ResumeImport } from '@/features/resume/ResumeImport'
+
 import { MODES } from './modes'
 import { ProfileSectionForm } from './ProfileSectionForm'
 import { queryKeys, useCatalog, useFacts, useProfile } from './queries'
@@ -49,6 +51,19 @@ export function ProfilePage() {
         </p>
       </div>
       <ModeCard />
+      <Card>
+        <CardHeader>
+          <CardTitle role="heading" aria-level={2}>
+            Import from a resume
+          </CardTitle>
+          <CardDescription>
+            Suggests facts from a PDF or Word resume. You confirm each one.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResumeImport />
+        </CardContent>
+      </Card>
       {catalog.data.sections.map((section) => (
         <ProfileSectionForm
           key={section.key}

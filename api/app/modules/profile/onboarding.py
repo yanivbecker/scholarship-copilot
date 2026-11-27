@@ -12,12 +12,7 @@ from datetime import UTC, datetime
 from sqlalchemy.orm import Session
 
 from app.modules.profile import service
-from app.modules.profile.catalog import (
-    CATALOG,
-    FactValidationError,
-    get_definition,
-    validate_value,
-)
+from app.modules.profile.catalog import CATALOG, FieldErrorsError, validate_facts
 from app.modules.profile.models import FactOrigin, Profile
 
 
@@ -70,12 +65,8 @@ if any(k not in CATALOG for s in STEPS for k in s.fact_keys):  # pragma: no cove
     raise RuntimeError("An onboarding step uses a fact key missing from CATALOG")
 
 
-class OnboardingError(ValueError):
+class OnboardingError(FieldErrorsError):
     """Bad step or bad answers. `field_errors` maps fact keys to messages."""
-
-    def __init__(self, message: str, field_errors: dict[str, str] | None = None):
-        super().__init__(message)
-        self.field_errors = field_errors or {}
 
 
 @dataclass(frozen=True)
@@ -117,16 +108,11 @@ def submit_step(
     ):
         raise OnboardingError("Finish the earlier steps first.")
 
-    errors: dict[str, str] = {}
-    clean: dict[str, object] = {}
-    for key, raw in facts.items():
-        if key not in step.fact_keys:
-            errors[key] = f"{key!r} isn't part of the {step.label} step."
-            continue
-        try:
-            clean[key] = validate_value(get_definition(key), raw)
-        except FactValidationError as exc:
-            errors[key] = str(exc)
+    clean, errors = validate_facts(
+        facts,
+        is_allowed=lambda key: key in step.fact_keys,
+        not_allowed_message=lambda key: f"{key!r} isn't part of the {step.label} step.",
+    )
     if errors:
         raise OnboardingError("Some answers need fixing.", errors)
 

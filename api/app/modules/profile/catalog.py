@@ -13,7 +13,7 @@ data uses them; rename by migrating data, never by editing the key in place.
 
 import datetime as dt
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import assert_never
@@ -278,6 +278,38 @@ _DEFINITIONS: Sequence[FactDefinition] = (
 CATALOG: dict[str, FactDefinition] = {d.key: d for d in _DEFINITIONS}
 if len(CATALOG) != len(_DEFINITIONS):  # pragma: no cover - guards edits above
     raise RuntimeError("Duplicate key in the fact catalog")
+
+
+class FieldErrorsError(ValueError):
+    """Several facts failed at once. `field_errors` maps keys to messages."""
+
+    def __init__(self, message: str, field_errors: dict[str, str] | None = None):
+        super().__init__(message)
+        self.field_errors = field_errors or {}
+
+
+def validate_facts(
+    facts: Mapping[str, object],
+    *,
+    is_allowed: Callable[[str], bool],
+    not_allowed_message: Callable[[str], str],
+) -> tuple[dict[str, FactValue], dict[str, str]]:
+    """Validate a batch of answers. Returns (clean values, errors by key).
+
+    Collects *every* problem instead of stopping at the first, so a form can
+    show all of them at once.
+    """
+    clean: dict[str, FactValue] = {}
+    errors: dict[str, str] = {}
+    for key, raw in facts.items():
+        if not is_allowed(key):
+            errors[key] = not_allowed_message(key)
+            continue
+        try:
+            clean[key] = validate_value(get_definition(key), raw)
+        except FactValidationError as exc:
+            errors[key] = str(exc)
+    return clean, errors
 
 
 def get_definition(key: str) -> FactDefinition:

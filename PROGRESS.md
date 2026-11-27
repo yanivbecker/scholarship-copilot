@@ -1,12 +1,13 @@
 # Progress
 
 ## Current status
-**Phase 4: Profile** in progress (started 2026-11-26). Phase 3 complete; Checkpoint 3 approved 2026-11-26.
+**Phase 4: Profile** complete (2026-11-26). Awaiting the owner's review and approval before Phase 5.
 
 ## Completed
 - 2026-11-26: Phase 1 (requirements/clarification) and Phase 2 (architecture). Checkpoints 1 and 2 approved.
 - 2026-11-26: Repository created. PROJECT_PLAN, REQUIREMENTS, ARCHITECTURE, PROGRESS, README, CLAUDE.md written.
 - 2026-11-26: Phase 3 (project setup) complete. Checkpoint 3 approved.
+- 2026-11-26: Phase 4 (profile) milestones 4.1-4.5 complete.
 
 ## Phase 3 checklist
 - [x] Local git repository + planning docs
@@ -26,14 +27,16 @@
 - [x] 4.2 Profile API (FR-P3-P7): `GET/PATCH /profile`, `GET /facts/catalog`, `GET /facts`, `PUT/DELETE /facts/{key}`, `GET /facts/missing`, `GET/POST /stories`, `PUT/DELETE /stories/{id}`, `GET /stories/themes`. Strict request types (no coercion); API can only set `manual`/`questionnaire` origins; service errors mapped to readable 422/404 in `app/api/errors.py`; `get_current_user` dependency (single owner; the only thing that changes with real auth); short OpenAPI operation ids. Frontend types regenerated. **Tested:** 93 pytest tests pass (17 new API tests); mypy, pylint, ruff, pyright, frontend typecheck + Vitest clean.
 - [x] 4.3 Frontend shell + profile pages (FR-P3, FR-P5, FR-P6, FR-P7, NFR-11): React Router 8 layout with skip link and `aria-current` nav; profile editor generated from `/facts/catalog` (one form per section, sensitive sections marked optional, origin shown per fact, cleared field = delete); operating-mode selector; custom-answers list; story bank (create/edit/two-step delete, theme picker, theme filter, body sent and shown verbatim). Pure form logic in `factForm.ts` (form strings <-> typed values, zod rules mirroring the backend, change planning). Choice labels now come from the backend catalog. **Tested:** 37 Vitest tests (31 new, incl. user-event page tests with a fake API); 96 pytest; deliberate breaks (numbers sent as text, trimmed story body, stale "Saved.") each failed the matching tests. Verified in a browser against the real API on a scratch DB: typed values stored, validation messages, verbatim story body, phone width. Found and fixed a stale "Saved." message during browser testing.
 - [x] 4.4 Onboarding wizard (FR-P1, FR-P4, FR-P6, FR-P7, FR-D1, FR-D3, NFR-4): 5 steps (basics, resume placeholder, questionnaire, mode + in-app notifications, first sources); progress saved per step and resumed on reload; no skipping ahead; fact steps ask only for missing facts (`/facts/missing`), validate all answers before saving any (per-field `field_errors`), origin `questionnaire`. New `sources` module: URL normalization + safety checks (http(s) only, no credentials, no aggregators, no private/loopback/link-local IPs incl. `127.1`/hex/decimal/octal/IPv4-mapped forms, no `.local`/`localhost`); manual sources start approved. `profiles.notifications_enabled`. Migration `a770e1c8c607` (portable boolean default). **Tested:** 159 pytest (63 new), 46 Vitest (9 new); deliberate breaks (numeric-IP check, partial saves, sending unanswered facts, step skipping) each failed the matching tests. Full wizard run in a browser on a scratch DB, including reload-resume and a blocked private IP. Found and fixed: sensitive-field hint ran into the label for screen readers.
-- [ ] 4.5 Resume import: PDF/DOCX, rule-based extraction, confirm each fact (FR-P2)
+- [x] 4.5 Resume import (FR-P2, FR-P3, NFR-1, NFR-8): `POST /resume` (multipart) checks the file by its bytes (PDF/DOCX), caps size (5 MB), pages (20), text length and unzipped DOCX size (zip bomb), rejects encrypted/damaged/scanned files with clear messages; file stored under a random name in `<data dir>/files` (0600, folder 0700) behind a `FileStorage` interface. Rule-based suggestions (name, email, phone, GPA + scale, graduation year, school, major, education level) each with the exact resume line as evidence, validated by the catalog. Confirm re-reads the stored file and re-extracts on the server: unchanged values get origin `resume`, edited ones `manual` ("edited from <file>"), facts not in the resume are refused; all or nothing. Delete removes the file, keeps confirmed facts. UI on the profile page and in onboarding step 2: review each suggestion (evidence, "replaces" note, unchanged ones unticked), edit, untick, confirm, then optionally delete the file. Migration `66d046b406b6` (`documents`). **Tested:** 214 pytest (55 new), 54 Vitest (8 new); deliberate breaks (always-`resume` origin, claiming facts not in the resume, saving unticked rows) each failed the matching tests. Browser run with real PDF and DOCX on a scratch DB and data dir. Found and fixed: duplicate element ids when the resume review and profile forms show the same fact; evidence was a whitespace-tidied line instead of the original.
 
 ## Known issues
+- NFR-12 (delete all personal data) has no command yet. Deleting the user cascades every DB row, but uploaded files in `<data dir>/files` would stay. Build the deletion command (DB + files) before real use beyond testing.
 - SQLite drops timezone info, so datetimes (e.g. `onboarding_completed_at`) come back without an offset. Harmless now; fix with a UTC-aware column type before any time-based logic (Phase 6 deadlines).
 - Resolved 2026-11-26: linter decision. Owner chose oxlint over ESLint (see ARCHITECTURE.md decision log).
 - Resolved 2026-11-26: Starlette's TestClient deprecated `httpx`; switched the dev dependency to `httpx2` 2.16.2 (owner-approved; verified same maintainer, pydantic/httpx2).
 
 ## Next steps
 - Owner: run `uv run alembic upgrade head` in `api/` to create the real database (not done by Claude: it writes to the personal data dir).
-- Phase 4 milestones 4.1–4.5, then the end-of-Phase-4 review and approval before Phase 5.
+- Owner: run `uv run alembic upgrade head` in `api/` (new migrations since your last upgrade).
+- Owner review of Phase 4, then approval to start Phase 5 (discovery + eligibility).
 - Later hardening (Phase 10): Dependabot for actions and dependencies.

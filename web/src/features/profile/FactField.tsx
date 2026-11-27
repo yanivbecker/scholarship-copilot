@@ -13,6 +13,8 @@ type Props = {
   register: UseFormRegister<SectionFormValues>
   control: Control<SectionFormValues>
   error: string | undefined
+  /** Makes ids unique when the same fact appears twice on one page. */
+  idPrefix?: string
 }
 
 const ORIGIN_LABELS: Record<Fact['origin'], string> = {
@@ -29,8 +31,9 @@ export function FactField({
   register,
   control,
   error,
+  idPrefix = 'fact',
 }: Props) {
-  const id = `fact-${d.key}`
+  const id = `${idPrefix}-${d.key}`
   const helpId = `${id}-help`
   const errorId = `${id}-error`
   const describedBy =

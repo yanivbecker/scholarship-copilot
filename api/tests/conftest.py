@@ -12,6 +12,7 @@ from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
 from app.core.db import get_session, make_engine
+from app.core.storage import LocalFileStorage, get_storage
 from app.main import create_app
 from app.modules.users.models import User
 from app.modules.users.service import get_or_create_owner
@@ -53,9 +54,15 @@ def fixture_owner(session: Session) -> User:
     return user
 
 
+@pytest.fixture(name="storage")
+def fixture_storage(tmp_path: Path) -> LocalFileStorage:
+    """File storage in this test's temporary folder (never the real data dir)."""
+    return LocalFileStorage(tmp_path / "files")
+
+
 @pytest.fixture(name="client")
-def fixture_client(engine: Engine) -> Iterator[TestClient]:
-    """An API client whose requests use this test's throwaway database."""
+def fixture_client(engine: Engine, storage: LocalFileStorage) -> Iterator[TestClient]:
+    """An API client using this test's throwaway database and file storage."""
 
     def test_session() -> Iterator[Session]:
         with Session(engine) as session:
@@ -63,5 +70,6 @@ def fixture_client(engine: Engine) -> Iterator[TestClient]:
 
     app = create_app()
     app.dependency_overrides[get_session] = test_session
+    app.dependency_overrides[get_storage] = lambda: storage
     with TestClient(app) as client:
         yield client

@@ -9,9 +9,10 @@ from collections.abc import Awaitable, Callable
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.modules.profile.catalog import FactValidationError
-from app.modules.profile.onboarding import OnboardingError
+from app.modules.profile.catalog import FactValidationError, FieldErrorsError
 from app.modules.profile.service import NotFoundError, StoryValidationError
+from app.modules.resume.files import ResumeFileError
+from app.modules.resume.service import ResumeNotFoundError
 from app.modules.sources.service import DuplicateSourceError, SourceNotFoundError
 from app.modules.sources.url_safety import UnsafeURLError
 
@@ -26,8 +27,8 @@ def _detail(status_code: int) -> Handler:
     return handler
 
 
-async def _onboarding_error(_request: Request, exc: Exception) -> JSONResponse:
-    field_errors = exc.field_errors if isinstance(exc, OnboardingError) else {}
+async def _field_errors(_request: Request, exc: Exception) -> JSONResponse:
+    field_errors = getattr(exc, "field_errors", {})
     return JSONResponse(
         status_code=422,
         content={"detail": str(exc), "field_errors": field_errors},
@@ -38,14 +39,16 @@ _STATUS_BY_ERROR: dict[type[Exception], int] = {
     FactValidationError: 422,
     StoryValidationError: 422,
     UnsafeURLError: 422,
+    ResumeFileError: 422,
     DuplicateSourceError: 409,
     NotFoundError: 404,
     SourceNotFoundError: 404,
+    ResumeNotFoundError: 404,
 }
 
 
 def register_error_handlers(app: FastAPI) -> None:
     for error, status_code in _STATUS_BY_ERROR.items():
         app.add_exception_handler(error, _detail(status_code))
-    # Onboarding also reports which fields failed.
-    app.add_exception_handler(OnboardingError, _onboarding_error)
+    # Onboarding and resume confirm also report which fields failed.
+    app.add_exception_handler(FieldErrorsError, _field_errors)

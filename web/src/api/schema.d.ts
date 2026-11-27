@@ -142,6 +142,57 @@ export interface paths {
         patch: operations["update_profile"];
         trace?: never;
     };
+    "/api/v1/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Resume */
+        post: operations["upload_resume"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resume/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Resume */
+        delete: operations["delete_resume"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resume/{document_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Resume Facts */
+        post: operations["confirm_resume_facts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources": {
         parameters: {
             query?: never;
@@ -234,6 +285,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Body_upload_resume */
+        Body_upload_resume: {
+            /** File */
+            file: string;
+        };
         /**
          * CatalogOut
          * @description The whole fact catalog, grouped by section.
@@ -426,6 +482,28 @@ export interface components {
             operating_mode?: components["schemas"]["OperatingMode"] | null;
         };
         /**
+         * ResumeConfirmIn
+         * @description The suggestions the student accepted, with any edits they made.
+         */
+        ResumeConfirmIn: {
+            /** Facts */
+            facts: {
+                [key: string]: components["schemas"]["FactValueIn"];
+            };
+        };
+        /**
+         * ResumeUploadOut
+         * @description The stored resume and the facts suggested from it. Nothing is saved yet.
+         */
+        ResumeUploadOut: {
+            /** Document Id */
+            document_id: number;
+            /** Filename */
+            filename: string;
+            /** Suggestions */
+            suggestions: components["schemas"]["SuggestionOut"][];
+        };
+        /**
          * SectionOut
          * @description A group of facts, in display order.
          */
@@ -510,6 +588,20 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /**
+         * SuggestionOut
+         * @description A suggested fact, the resume line it came from, and what's on file now.
+         */
+        SuggestionOut: {
+            current_value: components["schemas"]["FactValueOut"] | null;
+            /** Evidence */
+            evidence: string;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            value: components["schemas"]["FactValueOut"];
         };
         /**
          * ThemesOut
@@ -791,6 +883,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_resume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_resume"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResumeUploadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_resume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_resume_facts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResumeConfirmIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FactOut"][];
                 };
             };
             /** @description Validation Error */

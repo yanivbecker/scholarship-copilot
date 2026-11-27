@@ -26,7 +26,7 @@ export function mockApi(routes: Record<string, Reply>) {
         method,
         path: url.pathname,
         search: url.search,
-        body: init?.body ? JSON.parse(String(init.body)) : undefined,
+        body: readBody(init?.body),
       }
       calls.push(call)
       const route = `${method} ${url.pathname}`
@@ -41,4 +41,13 @@ export function mockApi(routes: Record<string, Reply>) {
     }),
   )
   return calls
+}
+
+/** JSON bodies are parsed; file uploads are recorded as { file: name }. */
+function readBody(body: BodyInit | null | undefined): unknown {
+  if (body instanceof FormData) {
+    const file = body.get('file')
+    return { file: file instanceof File ? file.name : file }
+  }
+  return body ? JSON.parse(String(body)) : undefined
 }

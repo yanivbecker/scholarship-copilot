@@ -106,6 +106,19 @@ export async function request<T>(
   return (await response.json()) as T
 }
 
+/** POST a file as multipart form data (the browser sets the boundary). */
+export async function uploadFile<T>(path: string, file: File): Promise<T> {
+  const form = new FormData()
+  form.append('file', file)
+  const response = await fetch(path, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: form,
+  })
+  if (!response.ok) throw await toApiError(response)
+  return (await response.json()) as T
+}
+
 /** GET a JSON endpoint, typed from the path alone. */
 export function apiGet<P extends keyof paths>(
   path: P,

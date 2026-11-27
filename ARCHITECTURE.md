@@ -98,3 +98,5 @@ scholarship-copilot/
 | 2026-11-26 | Phase 4 resume import is rule-based | Owner-approved. AI extraction joins the same confirm-each-fact flow in Phase 5. Works with AI provider = none (NFR-6). |
 | 2026-11-26 | python-multipart added for uploads | Owner-approved. FastAPI's documented dependency for file uploads (resume import). |
 | 2026-11-26 | Native `<select>` (shadcn native-select) instead of Radix Select | Accessible by default (keyboard, screen readers, mobile pickers) and testable in jsdom. Enough for every choice field so far. |
+| 2026-11-26 | Resume provenance is decided by the server | Confirm re-runs the deterministic extraction on the stored file: unchanged = `resume`, edited = `manual`. The browser can't label a value "from your resume" that isn't in it. |
+| 2026-11-26 | Uploaded files: random names, 0600, behind `FileStorage` | Hostile file names can't choose paths; files stay in the data dir (NFR-1); swappable for cloud storage (NFR-8). |
